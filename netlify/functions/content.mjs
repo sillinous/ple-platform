@@ -149,7 +149,6 @@ async function createContent(sql, body, user) {
   // Handle tags
   if (tags.length > 0) {
     for (const tagName of tags) {
-      const tagResult = await sql`
       const tagSlug = tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const tagResult = await sql`
         INSERT INTO tags (name, slug) VALUES (${tagName}, ${tagSlug})
