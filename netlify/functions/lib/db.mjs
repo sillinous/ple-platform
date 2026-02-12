@@ -9,7 +9,7 @@ const sql = neon();
 
 // Migration status tracking (per-instance, runs once per cold start)
 let migrationChecked = false;
-const SEED_VERSION = 6; // Increment to force re-seed
+const SEED_VERSION = 7; // Increment to force re-seed
 
 /**
  * Ensure database is initialized before any query
@@ -591,10 +591,11 @@ async function seedArchitecture() {
   }
 
   // ── Seed Content ── (clean slate approach)
-  await sql`DELETE FROM content_tags`;
-  await sql`DELETE FROM content_versions`;
-  await sql`DELETE FROM comments WHERE entity_type = 'content'`;
-  await sql`DELETE FROM content_items`;
+  try {
+    await sql`DELETE FROM content_tags`;
+    await sql`DELETE FROM content_versions`;
+    await sql`DELETE FROM comments WHERE entity_type = 'content'`;
+    await sql`DELETE FROM content_items`;
 
   const contentItems = [
     {
@@ -666,9 +667,9 @@ async function seedArchitecture() {
   ];
 
   for (const item of contentItems) {
-    await sql`INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, author_id, version, published_at, created_at)
-      VALUES (${item.id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${systemUserId}, 1,
-        ${item.status === 'published' ? sql`CURRENT_TIMESTAMP` : null}, CURRENT_TIMESTAMP)
+    const pubAt = item.status === 'published' ? new Date().toISOString() : null;
+    await sql`INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, author_id, version, published_at)
+      VALUES (${item.id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${systemUserId}, 1, ${pubAt})
       ON CONFLICT (slug) DO NOTHING`;
 
     // Seed tags
@@ -682,6 +683,9 @@ async function seedArchitecture() {
   }
 
   console.log(`✅ Seeded ${contentItems.length} content items with tags`);
+  } catch (contentErr) {
+    console.error('⚠️ Content seed error:', contentErr.message);
+  }
 }
 
 /**
