@@ -9,7 +9,7 @@ const sql = neon();
 
 // Migration status tracking (per-instance, runs once per cold start)
 let migrationChecked = false;
-const SEED_VERSION = 2; // Increment to force re-seed
+const SEED_VERSION = 3; // Increment to force re-seed
 
 /**
  * Ensure database is initialized before any query
@@ -589,6 +589,98 @@ async function seedArchitecture() {
     await sql`INSERT INTO architecture_elements (element_type, code, title, description, status) 
               VALUES (${type}, ${code}, ${title}, ${desc}, ${status}) ON CONFLICT (code) DO NOTHING`;
   }
+
+  // ── Seed Content ──
+  await sql`DELETE FROM content_tags WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${SYSTEM_USER_ID})`;
+  await sql`DELETE FROM content_versions WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${SYSTEM_USER_ID})`;
+  await sql`DELETE FROM content_items WHERE author_id = ${SYSTEM_USER_ID}`;
+
+  const contentItems = [
+    {
+      id: '20000000-0000-0000-0000-000000000001',
+      title: 'What Is Post-Labor Economics?',
+      slug: 'what-is-post-labor-economics',
+      content_type: 'article',
+      status: 'published',
+      visibility: 'public',
+      excerpt: 'An introduction to the emerging field studying how societies can thrive when human labor is no longer the primary driver of economic production.',
+      body: `# What Is Post-Labor Economics?\n\nPost-Labor Economics (PLE) is an emerging interdisciplinary field that examines how societies can maintain and expand prosperity as automation, artificial intelligence, and other technologies progressively reduce the need for human labor in economic production.\n\n## Beyond Job Displacement\n\nUnlike traditional discussions of "technological unemployment," PLE reframes the conversation. The question is not *how do we save jobs?* but rather *how do we build systems of prosperity that don't depend on jobs?*\n\nThis distinction matters. When we anchor our thinking in job preservation, we limit ourselves to defensive strategies — retraining programs, make-work schemes, regulatory barriers to automation. When we think in terms of prosperity systems, we open up genuinely new possibilities.\n\n## Core Questions\n\nPLE researchers and practitioners engage with several fundamental questions:\n\n- **Distribution**: How should the economic surplus from automated production be distributed? What mechanisms (UBI, data dividends, automation taxes, sovereign wealth funds) are most effective and equitable?\n- **Purpose**: If work no longer defines identity and structures daily life, what frameworks help people find meaning, community, and purpose?\n- **Governance**: How should decisions about automation deployment be made? Who has a voice, and how do we prevent concentration of power?\n- **Transition**: How do we navigate the decades-long transition period where some sectors automate rapidly while others remain labor-intensive?\n\n## Why Now?\n\nThe convergence of large language models, robotics, and autonomous systems has compressed the timeline. What economists once projected for 2050 is increasingly plausible by 2030. The window for proactive policy design is narrowing.\n\nPLE argues that this is not a crisis to be feared but a transition to be designed — with intention, evidence, and broad participation.\n\n## Get Involved\n\nThis platform exists to build the intellectual infrastructure for that transition. Explore our research, join working groups, and contribute to the policy frameworks that will shape a post-labor world.`,
+      tags: ['introduction', 'post-labor', 'economics', 'automation']
+    },
+    {
+      id: '20000000-0000-0000-0000-000000000002',
+      title: 'The Case for Universal Basic Income in an Automated Economy',
+      slug: 'case-for-ubi-automated-economy',
+      content_type: 'policy_brief',
+      status: 'published',
+      visibility: 'public',
+      excerpt: 'Why UBI becomes not just desirable but structurally necessary as automation reshapes labor markets — and how to fund it sustainably.',
+      body: `# The Case for Universal Basic Income in an Automated Economy\n\nUniversal Basic Income (UBI) has moved from academic curiosity to serious policy discussion. In a post-labor context, it transforms from a "nice to have" into a structural necessity.\n\n## The Demand-Side Problem\n\nAutomation creates a paradox: it increases productive capacity while simultaneously reducing the purchasing power of displaced workers. Without intervention, this creates a demand crisis — factories can produce goods, but fewer people can afford to buy them.\n\nUBI resolves this by ensuring baseline purchasing power independent of employment status. It keeps the economic engine running even as the nature of productive contribution changes.\n\n## Funding Mechanisms\n\nSeveral funding approaches have been modeled:\n\n- **Automation Tax**: A levy on automated production proportional to the labor it displaces. Alaska's Permanent Fund provides a small-scale precedent.\n- **Data Dividends**: Citizens receive payment for the collective data that trains AI systems. This recognizes data as a form of labor.\n- **Sovereign Wealth Funds**: Government stakes in automated industries, with dividends distributed to citizens.\n- **Carbon-Automation Combined Tax**: Pricing both environmental and labor externalities simultaneously.\n\n## Evidence from Pilots\n\nRecent UBI pilot programs in Finland, Kenya, Stockton (CA), and elsewhere consistently show:\n\n- Reduced poverty and food insecurity\n- Improved mental health outcomes\n- No significant reduction in work effort (contrary to common objections)\n- Increased entrepreneurship and education enrollment\n- Better outcomes for children in recipient households\n\n## Implementation Considerations\n\nA post-labor UBI would need to be significantly higher than most current proposals — sufficient to cover basic needs without employment income. This requires phased implementation aligned with the pace of automation.\n\n## Recommendation\n\nWe recommend a phased UBI implementation beginning at $500/month, indexed to automation displacement metrics, with automatic escalation as labor market participation declines below defined thresholds.`,
+      tags: ['UBI', 'policy', 'automation-tax', 'universal-basic-income']
+    },
+    {
+      id: '20000000-0000-0000-0000-000000000003',
+      title: 'Automation Tax Policy: A Comparative Analysis',
+      slug: 'automation-tax-comparative-analysis',
+      content_type: 'report',
+      status: 'published',
+      visibility: 'public',
+      excerpt: 'Comparing automation tax proposals across jurisdictions, examining effectiveness, economic impact, and implementation challenges.',
+      body: `# Automation Tax Policy: A Comparative Analysis\n\n## Executive Summary\n\nAs AI and robotics displace workers across sectors, governments worldwide are exploring taxation of automated production. This report compares proposals from the EU, South Korea, and several US states, evaluating their design, projected revenue, and economic impact.\n\n## Background\n\nTraditional tax systems rely heavily on labor income. As automation reduces the labor share of production, tax bases erode — creating fiscal pressure precisely when social safety net demands increase. Automation taxes attempt to address this structural gap.\n\n## Proposals Compared\n\n### South Korea (2017)\nSouth Korea became the first country to reduce tax incentives for automation investment. Rather than taxing robots directly, they reduced the tax deduction companies receive for automation capital expenditure. This indirect approach avoids definitional challenges.\n\n### EU Parliament Proposal (2017-2019)\nThe European Parliament debated a "robot tax" that would require companies to register autonomous systems and pay a social security equivalent. The proposal was ultimately rejected but influenced subsequent discussions.\n\n### US State-Level Proposals\nBills have been introduced in California, New Jersey, and Washington state proposing per-robot or per-automated-process levies. None have passed, but they represent growing legislative interest.\n\n## Key Design Challenges\n\n1. **Definition**: What counts as "automation"? A spreadsheet automates accounting tasks. Where do we draw the line?\n2. **Measurement**: How do we quantify labor displacement attributable to a specific technology?\n3. **Competitiveness**: Unilateral automation taxes may drive investment to other jurisdictions.\n4. **Innovation**: Over-taxation could slow beneficial automation in healthcare, safety, and environmental domains.\n\n## Recommendations\n\nWe propose a tiered approach based on net labor displacement rather than technology type, with revenue earmarked for transition support and UBI funding. International coordination through bodies like the OECD would mitigate competitiveness concerns.`,
+      tags: ['automation-tax', 'policy-analysis', 'comparative', 'taxation']
+    },
+    {
+      id: '20000000-0000-0000-0000-000000000004',
+      title: 'Data Dividends: Recognizing Collective Data as Economic Contribution',
+      slug: 'data-dividends-collective-contribution',
+      content_type: 'article',
+      status: 'published',
+      visibility: 'public',
+      excerpt: 'How the data we all generate trains the AI systems transforming our economy — and why we deserve compensation for it.',
+      body: `# Data Dividends: Recognizing Collective Data as Economic Contribution\n\nEvery search query, every photo, every purchase, every sensor reading — the data generated by billions of people is the raw material that trains the AI systems now reshaping the global economy. Yet the people who generate this data receive almost nothing for it.\n\n## Data as Labor\n\nComputer scientist Jaron Lanier and economist Glen Weyl have argued persuasively that data generation is a form of labor. When you label images by using CAPTCHA, you're training computer vision models. When you write emails, you're training language models. When you drive with GPS, you're training navigation systems.\n\nThis "data labor" is unpaid, unrecognized, and increasingly valuable.\n\n## The Scale of the Problem\n\nThe global data economy is estimated at over $270 billion annually. The AI systems trained on collective data are projected to add $13-15 trillion to the global economy by 2030. None of this flows back to the individuals whose data made it possible.\n\n## Data Dividend Models\n\n### Individual Micropayments\nPay individuals for each data interaction. Technically complex, potentially privacy-invasive, and the per-person amounts would be trivially small.\n\n### Collective Data Trusts\nPool data rights into democratically governed trusts that negotiate with companies on behalf of members. More promising — creates bargaining power and governance structure.\n\n### State-Level Data Dividends\nGovernments levy data extraction fees on companies operating in their jurisdiction, distributing revenue to residents. Similar to how Alaska distributes oil revenue.\n\n## Implementation Path\n\nWe recommend beginning with state or national data dividend programs modeled on the Alaska Permanent Fund. A 2% fee on data-derived revenue from companies operating above a $1B threshold could generate substantial per-citizen payments while avoiding harm to startups and small businesses.\n\n## Connection to PLE\n\nData dividends represent one piece of the post-labor income puzzle. Combined with automation taxes and sovereign wealth funds, they help build a diversified portfolio of non-labor income sources for citizens.`,
+      tags: ['data-dividends', 'data-economy', 'AI', 'collective-ownership']
+    },
+    {
+      id: '20000000-0000-0000-0000-000000000005',
+      title: 'Purpose Beyond Employment: Frameworks for Meaning in a Post-Labor World',
+      slug: 'purpose-beyond-employment',
+      content_type: 'article',
+      status: 'in_review',
+      visibility: 'public',
+      excerpt: 'Exploring how humans can find purpose, identity, and community when work is no longer the organizing principle of daily life.',
+      body: `# Purpose Beyond Employment\n\nPerhaps the most profound challenge of a post-labor transition is not economic but existential. For centuries, work has served as the primary source of identity, social connection, daily structure, and meaning for most adults. What happens when it's optional?\n\n## The Identity Crisis\n\n"What do you do?" is often the first question we ask when meeting someone. Our professions shape how we see ourselves and how others see us. Retirement research consistently shows that people who derive strong identity from work struggle most when it ends.\n\nA post-labor transition requires new frameworks for identity formation.\n\n## Historical Precedents\n\nWe've navigated similar transitions before:\n\n- The shift from agricultural to industrial labor (1800s-1900s)\n- The rise of the "leisure class" and associated cultural production\n- Religious and philosophical traditions that explicitly decouple purpose from productive labor\n- Indigenous cultures with different relationships between work, community, and meaning\n\n## Emerging Frameworks\n\n### Contribution-Based Identity\nShift from "what do you do for a living?" to "what do you contribute to your community?" This encompasses caregiving, volunteering, art, mentoring, civic participation — all currently undervalued by market economics.\n\n### Craft and Mastery\nHumans have an intrinsic drive toward mastery. Even without economic necessity, people pursue excellence in music, athletics, cooking, gardening, coding, writing. A post-labor economy could see a renaissance of craft.\n\n### Relational Identity\nDefine identity through relationships rather than roles: parent, friend, neighbor, community member, citizen.\n\n## Policy Implications\n\nGovernments should invest in:\n- Community infrastructure (third places, maker spaces, community centers)\n- Arts and cultural funding\n- Lifelong learning systems decoupled from employment training\n- Mental health support specifically designed for identity transitions\n- Civic engagement platforms and participatory governance`,
+      tags: ['purpose', 'meaning', 'identity', 'philosophy', 'wellbeing']
+    },
+    {
+      id: '20000000-0000-0000-0000-000000000006',
+      title: 'GATO Framework: Governance Architecture for Transition Operations',
+      slug: 'gato-framework-overview',
+      content_type: 'case_study',
+      status: 'draft',
+      visibility: 'internal',
+      excerpt: 'A detailed case study of how the PLE platform uses the GATO Framework to structure its own governance and decision-making.',
+      body: `# GATO Framework: A Case Study in Practice\n\nThe Governance Architecture for Transition Operations (GATO) framework is the PLE platform's approach to organizing complex, multi-stakeholder decision-making. This case study examines how we apply it internally.\n\n## What Is GATO?\n\nGATO provides a layered governance model designed for organizations navigating systemic transitions. It separates concerns into four layers:\n\n1. **Goals**: What are we trying to achieve? Defined through broad community input.\n2. **Architecture**: What structures support those goals? Designed by working groups.\n3. **Transitions**: How do we move from current state to desired state? Managed through proposals and votes.\n4. **Operations**: How do we execute day-to-day? Handled by project teams.\n\n## Application at PLE\n\n### Goals Layer\nOur goals are established through annual community surveys and quarterly town halls. Current top-level goals include: build the evidence base for post-labor policy, develop practical transition frameworks, and grow the community of practice.\n\n### Architecture Layer\nThe platform's architecture elements (principles, strategies, capabilities, goals) are defined collaboratively. Each element goes through a proposal process with community review.\n\n### Transitions Layer\nMajor changes — new working groups, policy positions, platform features — go through the proposal system. Members vote, and proposals require supermajority approval.\n\n### Operations Layer\nDay-to-day work happens in projects and working groups. Each has clear ownership, tasks, and milestones. Progress is transparent to all members.\n\n## Lessons Learned\n\n- Start with lightweight governance and add structure as needed\n- Transparency builds trust faster than any formal mechanism\n- Asynchronous decision-making is essential for global participation\n- The framework must evolve — we've revised GATO twice based on community feedback\n\n## Applicability\n\nWhile designed for PLE, GATO's layered approach is applicable to any organization navigating complex transitions: cooperatives, DAOs, civic institutions, or any group that needs structured but participatory governance.`,
+      tags: ['GATO', 'governance', 'case-study', 'framework', 'decision-making']
+    }
+  ];
+
+  for (const item of contentItems) {
+    await sql`INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, author_id, version, published_at, created_at)
+      VALUES (${item.id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${SYSTEM_USER_ID}, 1,
+        ${item.status === 'published' ? sql`CURRENT_TIMESTAMP` : null}, CURRENT_TIMESTAMP - interval '${sql.unsafe(String(Math.floor(Math.random()*30)+1))} days')
+      ON CONFLICT (slug) DO NOTHING`;
+
+    // Seed tags
+    for (const tagName of item.tags) {
+      const tagSlug = tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const tagResult = await sql`INSERT INTO tags (name, slug) VALUES (${tagName}, ${tagSlug}) ON CONFLICT (name) DO UPDATE SET name = tags.name RETURNING id`;
+      if (tagResult.length > 0) {
+        await sql`INSERT INTO content_tags (content_id, tag_id) VALUES (${item.id}, ${tagResult[0].id}) ON CONFLICT DO NOTHING`;
+      }
+    }
+  }
+
+  console.log(`✅ Seeded ${contentItems.length} content items with tags`);
 }
 
 /**

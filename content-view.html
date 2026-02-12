@@ -307,6 +307,9 @@
     </div>
 
     <div id="content-body" class="content-body" style="display: none;">
+      <!-- Workflow Banner -->
+      <div id="workflow-banner" style="display:none; padding:1rem 1.25rem; border-radius:8px; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;"></div>
+
       <div id="content-html"></div>
       
       <div id="content-tags" class="content-tags" style="display: none;"></div>
@@ -316,6 +319,16 @@
           <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
           Edit
         </button>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="comments-section" style="margin-top:3rem; padding-top:2rem; border-top:1px solid var(--border-color);">
+        <h3 style="font-family:var(--font-display); margin-bottom:1.5rem;">Discussion</h3>
+        <div id="comment-form-area" style="display:none; margin-bottom:2rem;">
+          <textarea id="comment-body" rows="3" placeholder="Share your thoughts..." style="width:100%;padding:0.75rem 1rem;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:0.95rem;resize:vertical;background:var(--bg-secondary);"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:0.5rem;"><button class="btn btn-primary" onclick="postComment()">Post Comment</button></div>
+        </div>
+        <div id="comments-list"></div>
       </div>
     </div>
   </main>
@@ -341,159 +354,145 @@
   </footer>
 
   <script>
-    let currentContent = null;
-    let currentUser = null;
+    let currentContent = null, currentUser = null, contentComments = [];
+    const authH = () => { const h={'Content-Type':'application/json'}; const t=localStorage.getItem('ple_token'); if(t) h['Authorization']=`Bearer ${t}`; return h; };
+    function toast(msg,type='success'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:'+(type==='error'?'#991B1B':'#1B4D3E')+';color:white;padding:0.75rem 1.5rem;border-radius:8px;font-size:0.9rem;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:10000;transition:transform 0.3s';
+      t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.style.transform='translateX(-50%) translateY(0)',10);setTimeout(()=>{t.style.transform='translateX(-50%) translateY(100px)';setTimeout(()=>t.remove(),300)},3000);}
 
-    // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
-      lucide.createIcons();
-      await checkAuth();
-      await loadContent();
+      lucide.createIcons(); await checkAuth(); await loadContent();
     });
 
     async function checkAuth() {
-      try {
-        const token = localStorage.getItem('ple_token');
-        if (!token) return;
-        
-        const res = await fetch('/api/auth?action=me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          currentUser = data.user;
-          
-          // Show logged-in UI
-          document.querySelectorAll('[data-auth="logged-in"]').forEach(el => el.style.display = '');
-          document.querySelectorAll('[data-auth="logged-out"]').forEach(el => el.style.display = 'none');
+      try { const token=localStorage.getItem('ple_token'); if(!token) return;
+        const r=await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});
+        if(r.ok){currentUser=await r.json(); if(currentUser.user) currentUser=currentUser.user;
+          document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');
+          document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');
+          document.getElementById('comment-form-area').style.display='block';
         }
-      } catch (e) {
-        console.error('Auth check failed:', e);
-      }
+      }catch(e){console.error('Auth:',e);}
     }
 
     async function loadContent() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      
-      if (!id) {
-        showError();
-        return;
-      }
-
-      try {
-        const token = localStorage.getItem('ple_token');
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        
-        const res = await fetch(`/api/content?id=${id}`, { headers });
-        
-        if (!res.ok) {
-          showError();
-          return;
-        }
-
-        const data = await res.json();
-        
-        if (!data.content) {
-          showError();
-          return;
-        }
-
-        currentContent = data.content;
-        currentContent.tags = data.tags || [];
-        renderContent(currentContent);
-      } catch (e) {
-        console.error('Failed to load content:', e);
-        showError();
-      }
+      const id=new URLSearchParams(window.location.search).get('id');
+      if(!id){showError();return;}
+      try{const r=await fetch(`/api/content?id=${id}`,{headers:authH()});
+        if(!r.ok){showError();return;} const data=await r.json();
+        if(!data.content){showError();return;}
+        currentContent=data.content; currentContent.tags=data.tags||[];
+        currentContent.versionCount=data.versionCount||0;
+        contentComments=data.comments||[];
+        renderContent(currentContent); renderComments(contentComments);
+      }catch(e){console.error(e);showError();}
     }
 
     function renderContent(item) {
-      // Update page title
-      document.title = `${item.title} | Post-Labor Economics`;
-      
-      // Show header
-      document.getElementById('content-header').style.display = '';
-      
-      // Content type
-      const typeLabel = (item.contentType || 'article').replace('_', ' ');
-      document.getElementById('content-type-text').textContent = typeLabel;
-      document.getElementById('content-type-badge').textContent = typeLabel;
-      
-      // Title
-      document.getElementById('content-title').textContent = item.title;
-      
-      // Author
-      const authorName = item.author?.name || 'Unknown';
-      const initials = authorName.split(' ').map(n => n[0]).join('').toUpperCase();
-      document.getElementById('author-avatar').textContent = initials;
-      document.getElementById('author-name').textContent = authorName;
-      
-      // Date
-      const publishDate = item.publishedAt || item.createdAt;
-      if (publishDate) {
-        document.getElementById('publish-date').textContent = new Date(publishDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-      }
-      
-      // Read time (rough estimate: 200 words per minute)
-      const wordCount = (item.body || '').split(/\s+/).length;
-      const readTime = Math.max(1, Math.ceil(wordCount / 200));
-      document.getElementById('read-time').textContent = `${readTime} min read`;
-      
-      // Body content (render markdown)
-      const bodyHtml = marked.parse(item.body || '');
-      document.getElementById('content-html').innerHTML = bodyHtml;
-      
-      // Tags
-      if (item.tags && item.tags.length > 0) {
-        const tagsContainer = document.getElementById('content-tags');
-        tagsContainer.innerHTML = item.tags.map(tag => `
-          <span class="content-tag">
-            <i data-lucide="tag" style="width: 12px; height: 12px;"></i>
-            ${escapeHtml(tag)}
-          </span>
-        `).join('');
-        tagsContainer.style.display = '';
-        lucide.createIcons();
-      }
-      
-      // Show edit button if user can edit
-      if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'editor' || 
-          (item.author && item.author.id === currentUser.id))) {
-        document.getElementById('content-actions').style.display = '';
-      }
-      
-      // Hide loading, show content
-      document.getElementById('loading-state').style.display = 'none';
-      document.getElementById('content-body').style.display = '';
-      
-      // Re-init icons
+      document.title=`${item.title} | Post-Labor Economics`;
+      document.getElementById('content-header').style.display='';
+      const typeLabel=(item.contentType||'article').replace('_',' ');
+      document.getElementById('content-type-text').textContent=typeLabel;
+      document.getElementById('content-type-badge').textContent=typeLabel;
+      document.getElementById('content-title').textContent=item.title;
+      const authorName=item.author?.name||'Unknown';
+      document.getElementById('author-avatar').textContent=authorName.split(' ').map(n=>n[0]).join('').toUpperCase();
+      document.getElementById('author-name').textContent=authorName;
+      const pubDate=item.publishedAt||item.createdAt;
+      if(pubDate) document.getElementById('publish-date').textContent=new Date(pubDate).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+      const words=(item.body||'').split(/\s+/).length;
+      document.getElementById('read-time').textContent=`${Math.max(1,Math.ceil(words/200))} min read`;
+      document.getElementById('content-html').innerHTML=marked.parse(item.body||'');
+      if(item.tags?.length){const tc=document.getElementById('content-tags');
+        tc.innerHTML=item.tags.map(t=>`<span class="content-tag"><i data-lucide="tag" style="width:12px;height:12px"></i> ${escapeHtml(t)}</span>`).join('');
+        tc.style.display='';lucide.createIcons();}
+      const canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='editor'||(item.author&&item.author.id===currentUser.id));
+      if(canEdit) document.getElementById('content-actions').style.display='';
+
+      // Workflow banner
+      renderWorkflow(item,canEdit);
+
+      document.getElementById('loading-state').style.display='none';
+      document.getElementById('content-body').style.display='';
       lucide.createIcons();
     }
 
-    function showError() {
-      document.getElementById('loading-state').style.display = 'none';
-      document.getElementById('error-state').style.display = '';
+    function renderWorkflow(item, canEdit) {
+      const banner=document.getElementById('workflow-banner');
+      if(!currentUser||item.status==='published'){banner.style.display='none';return;}
+      banner.style.display='flex';
+      const isAuthor=item.author&&item.author.id===currentUser.id;
+      const isEditor=currentUser.role==='admin'||currentUser.role==='editor';
+      let bg='var(--color-gray-50)',msg='',buttons='';
+      if(item.status==='draft'){bg='#F3F4F6';msg='📝 This content is a <strong>draft</strong>.';
+        if(isAuthor)buttons=`<button class="btn btn-secondary" onclick="workflowAction('submit')">Submit for Review</button>`;}
+      else if(item.status==='in_review'){bg='#FEF3C7';msg='⏳ This content is <strong>awaiting review</strong>.';
+        if(isEditor)buttons=`<button class="btn btn-secondary" onclick="workflowAction('approve')">Approve</button><button class="btn btn-primary" onclick="workflowAction('publish')">Publish Now</button>`;}
+      else if(item.status==='approved'){bg='#D1FAE5';msg='✅ This content has been <strong>approved</strong>.';
+        if(isAuthor||isEditor)buttons=`<button class="btn btn-primary" onclick="workflowAction('publish')">Publish</button>`;}
+      banner.style.background=bg;
+      banner.innerHTML=`<span>${msg}${item.versionCount>0?` · v${item.version} (${item.versionCount} versions)`:''}</span><div style="display:flex;gap:0.5rem">${buttons}</div>`;
     }
 
-    function editContent() {
-      if (currentContent) {
-        // For now, redirect to content page with edit mode
-        // TODO: Implement content editor
-        alert('Content editing coming soon!');
-      }
+    async function workflowAction(action) {
+      const r=await fetch(`/api/content?action=${action}`,{method:'POST',headers:authH(),body:JSON.stringify({id:currentContent.id})});
+      if(r.ok){toast(action==='submit'?'Submitted for review':action==='approve'?'Approved':'Published!');loadContent();}
+      else{const e=await r.json();toast(e.error||'Failed','error');}
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    // Comments
+    function renderComments(comments) {
+      const list=document.getElementById('comments-list');
+      if(!comments.length){list.innerHTML='<p style="color:var(--text-muted);font-size:0.9rem">No comments yet. Be the first to share your thoughts.</p>';return;}
+      list.innerHTML=comments.map(c=>{
+        const name=c.author_name||'Anonymous';
+        const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase();
+        const date=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        const replies=(c.replies||[]).map(r=>{
+          const rn=r.author_name||'Anonymous';
+          return`<div style="margin-left:2.5rem;padding:0.75rem 0;border-top:1px solid var(--border-color)">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--color-sage);color:white;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:600">${rn.split(' ').map(n=>n[0]).join('').toUpperCase()}</div>
+              <strong style="font-size:0.85rem">${escapeHtml(rn)}</strong>
+              <span style="font-size:0.8rem;color:var(--text-muted)">${new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+            </div><div style="font-size:0.9rem;color:var(--text-secondary);line-height:1.6">${escapeHtml(r.body)}</div></div>`;
+        }).join('');
+        return`<div style="padding:1rem 0;border-bottom:1px solid var(--border-color)">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--color-horizon);color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600">${ini}</div>
+            <div><strong>${escapeHtml(name)}</strong><span style="font-size:0.8rem;color:var(--text-muted);margin-left:0.5rem">${date}</span></div>
+          </div><div style="font-size:0.95rem;color:var(--text-secondary);line-height:1.7;margin-left:2.5rem">${escapeHtml(c.body)}</div>
+          ${currentUser?`<div style="margin-left:2.5rem;margin-top:0.5rem"><button onclick="showReply('${c.id}')" style="background:none;border:none;color:var(--color-horizon);cursor:pointer;font-size:0.85rem;padding:0">Reply</button></div>
+          <div id="reply-${c.id}" style="display:none;margin-left:2.5rem;margin-top:0.5rem">
+            <textarea id="reply-body-${c.id}" rows="2" placeholder="Write a reply..." style="width:100%;padding:0.5rem 0.75rem;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:0.9rem;resize:vertical"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.35rem"><button class="btn btn-ghost" onclick="hideReply('${c.id}')" style="font-size:0.85rem;padding:0.3rem 0.6rem">Cancel</button><button class="btn btn-primary" onclick="postReply('${c.id}')" style="font-size:0.85rem;padding:0.3rem 0.6rem">Reply</button></div></div>`:''
+          }${replies}</div>`;
+      }).join('');
     }
+
+    function showReply(id){document.getElementById(`reply-${id}`).style.display='block';}
+    function hideReply(id){document.getElementById(`reply-${id}`).style.display='none';}
+
+    async function postComment() {
+      const body=document.getElementById('comment-body').value.trim();
+      if(!body){toast('Write something first','error');return;}
+      const r=await fetch('/api/comments',{method:'POST',headers:authH(),
+        body:JSON.stringify({entity_type:'content',entity_id:currentContent.id,body})});
+      if(r.ok){document.getElementById('comment-body').value='';toast('Comment posted');loadContent();}
+      else{const e=await r.json();toast(e.error||'Failed','error');}
+    }
+
+    async function postReply(parentId) {
+      const body=document.getElementById(`reply-body-${parentId}`).value.trim();
+      if(!body)return;
+      const r=await fetch('/api/comments',{method:'POST',headers:authH(),
+        body:JSON.stringify({entity_type:'content',entity_id:currentContent.id,body,parent_id:parentId})});
+      if(r.ok){toast('Reply posted');loadContent();}
+      else{const e=await r.json();toast(e.error||'Failed','error');}
+    }
+
+    function showError(){document.getElementById('loading-state').style.display='none';document.getElementById('error-state').style.display='';}
+    function editContent(){if(currentContent)window.location=`/content-editor.html?id=${currentContent.id}`;}
+    function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
   </script>
 </body>
 </html>

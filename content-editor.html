@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Editor | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    .editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 120px); }
+    .editor-panel { display: flex; flex-direction: column; }
+    .preview-panel { border-left: 1px solid var(--border-color); background: var(--bg-secondary); display: flex; flex-direction: column; }
+    .panel-header { padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: space-between; }
+    .editor-toolbar { display: flex; gap: 0.25rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; background: var(--bg-secondary); }
+    .toolbar-btn { background: none; border: 1px solid transparent; border-radius: 4px; padding: 0.35rem 0.5rem; cursor: pointer; font-size: 0.85rem; color: var(--text-secondary); transition: all 0.15s; font-family: monospace; }
+    .toolbar-btn:hover { background: var(--color-gray-100); border-color: var(--border-color); color: var(--text-primary); }
+    .toolbar-sep { width: 1px; background: var(--border-color); margin: 0 0.25rem; }
+    .editor-textarea { flex: 1; border: none; outline: none; resize: none; padding: 1.25rem; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9rem; line-height: 1.7; background: var(--bg-primary); color: var(--text-primary); tab-size: 2; }
+    .preview-content { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; }
+    .preview-content h1 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 1rem; }
+    .preview-content h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 2rem 0 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+    .preview-content h3 { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; }
+    .preview-content p { margin-bottom: 1rem; line-height: 1.8; color: var(--text-secondary); }
+    .preview-content ul, .preview-content ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    .preview-content li { margin-bottom: 0.5rem; line-height: 1.6; }
+    .preview-content blockquote { border-left: 3px solid var(--color-horizon); padding-left: 1rem; margin: 1rem 0; color: var(--text-muted); font-style: italic; }
+    .preview-content code { background: var(--color-gray-100); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.85em; }
+    .preview-content pre { background: var(--color-gray-50); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; overflow-x: auto; margin-bottom: 1rem; }
+    .preview-content strong { color: var(--text-primary); }
+
+    .meta-bar { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; background: var(--bg-secondary); }
+    .meta-field { display: flex; flex-direction: column; gap: 0.25rem; }
+    .meta-field label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .meta-field input, .meta-field select { padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; background: var(--bg-primary); }
+    .meta-field input:focus, .meta-field select:focus { outline: none; border-color: var(--color-horizon); }
+    .meta-title { flex: 1; min-width: 250px; }
+    .meta-title input { font-size: 1.1rem; font-weight: 600; padding: 0.5rem 0.75rem; }
+
+    .editor-actions { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary); }
+    .action-group { display: flex; gap: 0.5rem; align-items: center; }
+    .status-pill { padding: 0.3rem 0.75rem; border-radius: 100px; font-size: 0.8rem; font-weight: 500; }
+    .status-draft { background: var(--color-gray-100); color: var(--color-gray-600); }
+    .status-in_review { background: #FEF3C7; color: #92400E; }
+    .status-approved { background: #D1FAE5; color: #065F46; }
+    .status-published { background: rgba(42,157,143,0.15); color: #2a9d8f; }
+
+    .tags-row { padding: 0.5rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; background: var(--bg-secondary); }
+    .tag-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: var(--color-horizon); color: white; border-radius: 4px; font-size: 0.8rem; }
+    .tag-chip button { background: none; border: none; color: white; cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; }
+    .tag-input { border: none; outline: none; padding: 0.25rem; font-size: 0.85rem; flex: 1; min-width: 100px; background: transparent; }
+    .tag-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+    .word-count { font-size: 0.8rem; color: var(--text-muted); }
+    .toast { position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:#1B4D3E;color:white;padding:0.75rem 1.5rem;border-radius:8px;font-size:0.9rem;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:10000;transition:transform 0.3s;pointer-events:none; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast-error { background:#991B1B; }
+
+    @media (max-width: 768px) {
+      .editor-layout { grid-template-columns: 1fr; }
+      .preview-panel { display: none; }
+      .preview-panel.mobile-show { display: flex; position: fixed; inset: 0; z-index: 100; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+      <nav class="nav-menu">
+        <a href="content.html" class="nav-link active">Content</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+      </nav>
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Meta Bar -->
+  <div class="meta-bar">
+    <div class="meta-field meta-title"><label>Title</label><input type="text" id="ed-title" placeholder="Enter title..."></div>
+    <div class="meta-field"><label>Type</label><select id="ed-type"><option value="article">Article</option><option value="report">Report</option><option value="policy_brief">Policy Brief</option><option value="case_study">Case Study</option><option value="blog">Blog Post</option></select></div>
+    <div class="meta-field"><label>Visibility</label><select id="ed-vis"><option value="public">Public</option><option value="internal" selected>Internal</option><option value="private">Private</option></select></div>
+    <div class="meta-field"><label>Excerpt</label><input type="text" id="ed-excerpt" placeholder="Brief summary..." style="min-width:200px"></div>
+  </div>
+
+  <!-- Tags Row -->
+  <div class="tags-row">
+    <span class="tag-label">Tags:</span>
+    <div id="tag-chips"></div>
+    <input type="text" class="tag-input" id="tag-input" placeholder="Add tag + Enter" onkeydown="handleTag(event)">
+  </div>
+
+  <!-- Editor Layout -->
+  <div class="editor-layout">
+    <div class="editor-panel">
+      <div class="panel-header">
+        <span>Markdown Editor</span>
+        <span class="word-count" id="word-count">0 words</span>
+      </div>
+      <div class="editor-toolbar">
+        <button class="toolbar-btn" onclick="ins('**','**')" title="Bold"><b>B</b></button>
+        <button class="toolbar-btn" onclick="ins('*','*')" title="Italic"><i>I</i></button>
+        <button class="toolbar-btn" onclick="ins('~~','~~')" title="Strikethrough"><s>S</s></button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn" onclick="ins('# ','')" title="Heading 1">H1</button>
+        <button class="toolbar-btn" onclick="ins('## ','')" title="Heading 2">H2</button>
+        <button class="toolbar-btn" onclick="ins('### ','')" title="Heading 3">H3</button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn" onclick="ins('- ','')" title="Bullet List">•</button>
+        <button class="toolbar-btn" onclick="ins('1. ','')" title="Numbered List">1.</button>
+        <button class="toolbar-btn" onclick="ins('> ','')" title="Blockquote">❝</button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn" onclick="ins('[','](url)')" title="Link">🔗</button>
+        <button class="toolbar-btn" onclick="ins('`','`')" title="Inline Code">&lt;/&gt;</button>
+        <button class="toolbar-btn" onclick="ins('\n```\n','\n```\n')" title="Code Block">{ }</button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn" onclick="ins('---\n','')" title="Horizontal Rule">—</button>
+      </div>
+      <textarea class="editor-textarea" id="ed-body" placeholder="Write your content in Markdown..."></textarea>
+    </div>
+    <div class="preview-panel" id="preview-panel">
+      <div class="panel-header"><span>Preview</span></div>
+      <div class="preview-content" id="preview-content"><p style="color:var(--text-muted)">Start typing to see a live preview...</p></div>
+    </div>
+  </div>
+
+  <!-- Actions Bar -->
+  <div class="editor-actions">
+    <div class="action-group">
+      <span class="status-pill status-draft" id="status-pill">Draft</span>
+      <span class="word-count" id="version-info"></span>
+    </div>
+    <div class="action-group">
+      <button class="btn btn-ghost" onclick="saveDraft()" id="btn-save">Save Draft</button>
+      <button class="btn btn-secondary" onclick="submitReview()" id="btn-review" style="display:none">Submit for Review</button>
+      <button class="btn btn-secondary" onclick="approveContent()" id="btn-approve" style="display:none">Approve</button>
+      <button class="btn btn-primary" onclick="publishContent()" id="btn-publish" style="display:none">Publish</button>
+      <button class="btn btn-danger" onclick="deleteContent()" id="btn-delete" style="display:none">Delete</button>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null, contentId = null, contentData = null, tags = [];
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id');
+
+    const authH = () => { const h={'Content-Type':'application/json'}; const t=localStorage.getItem('ple_token'); if(t) h['Authorization']=`Bearer ${t}`; return h; };
+    function toast(msg,type='success'){const t=document.createElement('div');t.className=`toast toast-${type}`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000);}
+
+    // Auth
+    async function checkAuth() {
+      const token=localStorage.getItem('ple_token');
+      if(!token){window.location='/login.html';return;}
+      try{const r=await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});
+        if(r.ok){currentUser=await r.json();document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');}
+        else{window.location='/login.html';}
+      }catch{window.location='/login.html';}
+    }
+
+    // Load content for editing
+    async function loadContent() {
+      if(!editId)return;
+      try{const r=await fetch(`/api/content?id=${editId}`,{headers:authH()});
+        if(!r.ok)throw new Error('Not found');
+        const d=await r.json(); contentData=d.content; contentId=contentData.id;
+        document.getElementById('ed-title').value=contentData.title;
+        document.getElementById('ed-type').value=contentData.contentType||'article';
+        document.getElementById('ed-vis').value=contentData.visibility||'internal';
+        document.getElementById('ed-excerpt').value=contentData.excerpt||'';
+        document.getElementById('ed-body').value=contentData.body||'';
+        tags=d.tags||[]; renderTags(); updatePreview(); updateWordCount();
+        updateStatusUI(contentData.status);
+        document.getElementById('version-info').textContent=`v${contentData.version}${d.versionCount>0?` · ${d.versionCount} versions`:''}`;
+        document.title=`Edit: ${contentData.title} | PLE`;
+      }catch(e){toast('Failed to load content','error');console.error(e);}
+    }
+
+    function updateStatusUI(status) {
+      const pill=document.getElementById('status-pill');
+      pill.textContent=status==='in_review'?'In Review':status.charAt(0).toUpperCase()+status.slice(1);
+      pill.className=`status-pill status-${status}`;
+      // Show appropriate workflow buttons
+      const isAuthor=contentData&&contentData.author?.id===currentUser?.id;
+      const isEditor=currentUser&&(currentUser.role==='admin'||currentUser.role==='editor');
+      document.getElementById('btn-review').style.display=(status==='draft'&&isAuthor)?'':'none';
+      document.getElementById('btn-approve').style.display=(status==='in_review'&&isEditor)?'':'none';
+      document.getElementById('btn-publish').style.display=((status==='approved'&&(isAuthor||isEditor))||(isEditor&&status!=='published'))?'':'none';
+      document.getElementById('btn-delete').style.display=(contentId&&(isAuthor||isEditor))?'':'none';
+    }
+
+    // Markdown toolbar
+    function ins(before,after) {
+      const ta=document.getElementById('ed-body');
+      const start=ta.selectionStart,end=ta.selectionEnd;
+      const sel=ta.value.substring(start,end);
+      ta.value=ta.value.substring(0,start)+before+sel+after+ta.value.substring(end);
+      ta.focus();
+      ta.selectionStart=start+before.length;
+      ta.selectionEnd=start+before.length+sel.length;
+      updatePreview();
+    }
+
+    // Live preview
+    function updatePreview() {
+      const body=document.getElementById('ed-body').value;
+      document.getElementById('preview-content').innerHTML=body?marked.parse(body):'<p style="color:var(--text-muted)">Start typing to see a live preview...</p>';
+    }
+
+    function updateWordCount() {
+      const words=(document.getElementById('ed-body').value.match(/\S+/g)||[]).length;
+      document.getElementById('word-count').textContent=`${words} words · ~${Math.max(1,Math.ceil(words/200))} min read`;
+    }
+
+    document.getElementById('ed-body').addEventListener('input',()=>{updatePreview();updateWordCount();});
+
+    // Tags
+    function handleTag(e) {
+      if(e.key==='Enter'||e.key===','){e.preventDefault();const v=e.target.value.trim().replace(',','');
+        if(v&&!tags.includes(v)){tags.push(v);renderTags();}e.target.value='';}
+    }
+    function renderTags(){document.getElementById('tag-chips').innerHTML=tags.map((t,i)=>`<span class="tag-chip">${t}<button onclick="removeTag(${i})">&times;</button></span>`).join('');}
+    function removeTag(i){tags.splice(i,1);renderTags();}
+
+    // Save
+    async function saveDraft() {
+      const title=document.getElementById('ed-title').value.trim();
+      const body=document.getElementById('ed-body').value;
+      if(!title){toast('Title is required','error');return;}
+      if(!body){toast('Content body is required','error');return;}
+      const data={title,body,content_type:document.getElementById('ed-type').value,
+        visibility:document.getElementById('ed-vis').value,excerpt:document.getElementById('ed-excerpt').value,tags};
+      try{
+        if(contentId){data.id=contentId;
+          const r=await fetch('/api/content',{method:'PUT',headers:authH(),body:JSON.stringify(data)});
+          if(r.ok){toast('Saved');loadContent();}else{const e=await r.json();toast(e.error||'Failed','error');}
+        }else{
+          const r=await fetch('/api/content',{method:'POST',headers:authH(),body:JSON.stringify(data)});
+          if(r.ok){const d=await r.json();contentId=d.id;contentData={status:'draft',author:{id:currentUser.id}};
+            history.replaceState(null,'',`/content-editor.html?id=${contentId}`);
+            updateStatusUI('draft');toast('Created');loadContent();}
+          else{const e=await r.json();toast(e.error||'Failed','error');}
+        }
+      }catch(e){toast('Save failed','error');}
+    }
+
+    // Workflow actions
+    async function submitReview(){
+      if(!contentId){await saveDraft();}
+      if(!contentId)return;
+      const r=await fetch('/api/content?action=submit',{method:'POST',headers:authH(),body:JSON.stringify({id:contentId})});
+      if(r.ok){toast('Submitted for review');loadContent();}else{const e=await r.json();toast(e.error||'Failed','error');}
+    }
+    async function approveContent(){
+      const r=await fetch('/api/content?action=approve',{method:'POST',headers:authH(),body:JSON.stringify({id:contentId})});
+      if(r.ok){toast('Approved');loadContent();}else{const e=await r.json();toast(e.error||'Failed','error');}
+    }
+    async function publishContent(){
+      const r=await fetch('/api/content?action=publish',{method:'POST',headers:authH(),body:JSON.stringify({id:contentId})});
+      if(r.ok){toast('Published!');loadContent();}else{const e=await r.json();toast(e.error||'Failed','error');}
+    }
+    async function deleteContent(){
+      if(!confirm('Archive this content?'))return;
+      const r=await fetch(`/api/content?id=${contentId}`,{method:'DELETE',headers:authH()});
+      if(r.ok){toast('Archived');setTimeout(()=>window.location='/content.html',1500);}else toast('Failed','error');
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown',e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveDraft();}
+      if((e.ctrlKey||e.metaKey)&&e.key==='b'){e.preventDefault();ins('**','**');}
+      if((e.ctrlKey||e.metaKey)&&e.key==='i'){e.preventDefault();ins('*','*');}
+    });
+
+    // Init
+    checkAuth().then(()=>{if(editId)loadContent();else updateStatusUI('draft');});
+  </script>
+</body>
+</html>
