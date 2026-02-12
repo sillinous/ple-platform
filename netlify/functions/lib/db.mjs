@@ -26,12 +26,8 @@ export async function ensureDatabase() {
     
     const expectedTables = 8; // Number of key tables
     if (parseInt(check[0]?.count) >= expectedTables) {
-      // Tables exist — check if projects are seeded
-      const projectCheck = await sql`SELECT COUNT(*) as count FROM projects`;
-      if (parseInt(projectCheck[0]?.count) === 0) {
-        console.log('📦 Seeding project data...');
-        await seedProjects();
-      }
+      // Tables exist — ensure enriched seed data is applied
+      await seedProjects();
       migrationChecked = true;
       return;
     }
