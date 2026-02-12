@@ -25,6 +25,12 @@ export async function ensureDatabase() {
     
     const expectedTables = 8; // Number of key tables
     if (parseInt(check[0]?.count) >= expectedTables) {
+      // Tables exist — check if projects are seeded
+      const projectCheck = await sql`SELECT COUNT(*) as count FROM projects`;
+      if (parseInt(projectCheck[0]?.count) === 0) {
+        console.log('📦 Seeding project data...');
+        await seedProjects();
+      }
       migrationChecked = true;
       return;
     }
@@ -326,6 +332,177 @@ async function runMigrations() {
 
   // Seed architecture data
   await seedArchitecture();
+  
+  // Seed projects
+  await seedProjects();
+}
+
+async function seedProjects() {
+  // Check if already seeded
+  const existing = await sql`SELECT COUNT(*) as count FROM projects`;
+  if (existing[0]?.count > 0) return;
+
+  // Create a system user for seeded content
+  const systemUserId = '00000000-0000-0000-0000-000000000001';
+  await sql`INSERT INTO users (id, email, password_hash, display_name, role, bio)
+    VALUES (${systemUserId}, 'system@postlaboreconomics.com', 'SYSTEM_NO_LOGIN', 'PLE Platform', 'admin',
+      'System account for seeded content and platform operations.')
+    ON CONFLICT (email) DO NOTHING`;
+
+  // ── Project 1: GATO Framework Implementation ──
+  const gatoId = '10000000-0000-0000-0000-000000000001';
+  await sql`INSERT INTO projects (id, title, slug, description, project_type, status, visibility, priority, owner_id, start_date, target_end_date, progress)
+    VALUES (${gatoId}, 'GATO Framework Implementation', 'gato-framework-implementation',
+      'Build and deploy the Global Alignment Taxonomy Omnibus (GATO) framework as a living governance layer for AI agent alignment. Encompasses THE PRIME heuristic imperatives, the Pyramid of Power institutional reform model, and the Pyramid of Prosperity economic architecture. The goal is a production-ready alignment framework that AI developers can integrate into training pipelines and runtime decision systems.',
+      'initiative', 'active', 'public', 'high', ${systemUserId}, '2025-06-01', '2026-06-30', 35)
+    ON CONFLICT (slug) DO NOTHING`;
+
+  const gatoM1 = '20000000-0000-0000-0000-000000000001';
+  const gatoM2 = '20000000-0000-0000-0000-000000000002';
+  const gatoM3 = '20000000-0000-0000-0000-000000000003';
+  await sql`INSERT INTO milestones (id, project_id, title, description, target_date, status, order_index) VALUES
+    (${gatoM1}, ${gatoId}, 'THE PRIME v1.0 Specification', 'Finalize the heuristic imperatives specification with formal proofs, thermodynamic analogies, and five-dimensional analysis. Publish as machine-readable schema.', '2025-09-30', 'completed', 1),
+    (${gatoM2}, ${gatoId}, 'API & Integration Layer', 'Build the /api/gato endpoints for programmatic access. Create SDKs for Python and JavaScript. Document integration patterns for model training pipelines.', '2026-01-31', 'in_progress', 2),
+    (${gatoM3}, ${gatoId}, 'Multi-Agent Coordination Protocol', 'Design and test the coordination layer that enables GATO-aligned agents to establish trust, share context, and resolve conflicts using THE PRIME as shared foundation.', '2026-06-30', 'upcoming', 3)
+    ON CONFLICT DO NOTHING`;
+
+  await sql`INSERT INTO tasks (project_id, milestone_id, title, description, status, priority, order_index) VALUES
+    (${gatoId}, ${gatoM1}, 'Draft formal specification for all three imperatives', 'Write the rigorous specification covering deontological, teleological, operational, alignment, and coordination dimensions.', 'done', 'high', 1),
+    (${gatoId}, ${gatoM1}, 'Peer review with alignment researchers', 'Submit spec to external AI safety researchers for adversarial review and feedback.', 'done', 'high', 2),
+    (${gatoId}, ${gatoM1}, 'Publish machine-readable PRIME schema (JSON-LD)', 'Create JSON-LD and OpenAPI schema so agents can programmatically parse and reference THE PRIME.', 'done', 'medium', 3),
+    (${gatoId}, ${gatoM2}, 'Build /api/gato REST endpoints', 'Implement GET endpoints for prime, layers, and full framework content with versioning.', 'in_progress', 'high', 1),
+    (${gatoId}, ${gatoM2}, 'Python SDK for GATO integration', 'Create pip-installable SDK: gato-align. Includes PRIME loader, value-check middleware, and agent scaffolding.', 'in_progress', 'high', 2),
+    (${gatoId}, ${gatoM2}, 'JavaScript/TypeScript SDK', 'Create npm package @ple/gato for Node.js and browser environments.', 'todo', 'medium', 3),
+    (${gatoId}, ${gatoM2}, 'Integration guide for model training pipelines', 'Document how to weight THE PRIME in RLHF, DPO, and constitutional AI training loops.', 'todo', 'medium', 4),
+    (${gatoId}, ${gatoM3}, 'Design Byzantine-fault-tolerant trust protocol', 'Specify how agents verify each other''s PRIME alignment without central authority.', 'backlog', 'high', 1),
+    (${gatoId}, ${gatoM3}, 'Prototype multi-agent negotiation sandbox', 'Build simulation environment where GATO-aligned agents negotiate resource allocation.', 'backlog', 'medium', 2),
+    (${gatoId}, ${gatoM3}, 'Publish coordination protocol whitepaper', 'Write and publish the formal protocol specification for multi-agent coordination.', 'backlog', 'medium', 3)
+    ON CONFLICT DO NOTHING`;
+
+  // ── Project 2: Universal Basic Income Research Hub ──
+  const ubiId = '10000000-0000-0000-0000-000000000002';
+  await sql`INSERT INTO projects (id, title, slug, description, project_type, status, visibility, priority, owner_id, start_date, target_end_date, progress)
+    VALUES (${ubiId}, 'UBI Research & Evidence Hub', 'ubi-research-evidence-hub',
+      'Curate and synthesize the global body of evidence on Universal Basic Income—pilot programs, randomized controlled trials, economic modeling, and behavioral research. Produce accessible summaries and policy briefs that translate academic findings into actionable frameworks for advocates, policymakers, and journalists.',
+      'research', 'active', 'public', 'high', ${systemUserId}, '2025-07-01', '2026-03-31', 22)
+    ON CONFLICT (slug) DO NOTHING`;
+
+  const ubiM1 = '20000000-0000-0000-0000-000000000004';
+  const ubiM2 = '20000000-0000-0000-0000-000000000005';
+  await sql`INSERT INTO milestones (id, project_id, title, description, target_date, status, order_index) VALUES
+    (${ubiM1}, ${ubiId}, 'Global Pilot Database', 'Compile comprehensive database of every UBI and cash-transfer pilot worldwide with standardized outcomes, methodology ratings, and population data.', '2025-12-31', 'in_progress', 1),
+    (${ubiM2}, ${ubiId}, 'Policy Brief Series', 'Publish 6 policy briefs: fiscal modeling, labor market effects, health outcomes, child development, entrepreneurship, and political feasibility.', '2026-03-31', 'upcoming', 2)
+    ON CONFLICT DO NOTHING`;
+
+  await sql`INSERT INTO tasks (project_id, milestone_id, title, description, status, priority, order_index) VALUES
+    (${ubiId}, ${ubiM1}, 'Catalog all completed UBI/cash-transfer pilots (2010–present)', 'Systematic review of GiveDirectly, Stockton SEED, Finland KELA, Kenya, India, and 40+ others.', 'in_progress', 'high', 1),
+    (${ubiId}, ${ubiM1}, 'Standardize outcome metrics across pilots', 'Create unified schema: employment, health, education, well-being, entrepreneurship, spending.', 'in_progress', 'medium', 2),
+    (${ubiId}, ${ubiM1}, 'Build searchable database interface', 'Web UI with filters by country, duration, sample size, payment amount, and outcome category.', 'todo', 'medium', 3),
+    (${ubiId}, ${ubiM2}, 'Draft fiscal modeling brief', 'Model UBI costs and funding mechanisms (automation tax, data dividends, sovereign wealth) for the US.', 'backlog', 'high', 1),
+    (${ubiId}, ${ubiM2}, 'Draft labor market effects brief', 'Synthesize evidence on labor supply, job transitions, and entrepreneurship rates.', 'backlog', 'high', 2),
+    (${ubiId}, ${ubiM2}, 'Commission peer review for all briefs', 'Engage 3 economists per brief for independent review before publication.', 'backlog', 'medium', 3)
+    ON CONFLICT DO NOTHING`;
+
+  // ── Project 3: Automation Tax Framework ──
+  const autoTaxId = '10000000-0000-0000-0000-000000000003';
+  await sql`INSERT INTO projects (id, title, slug, description, project_type, status, visibility, priority, owner_id, start_date, target_end_date, progress)
+    VALUES (${autoTaxId}, 'Automation Tax Policy Framework', 'automation-tax-framework',
+      'Develop a rigorous, implementable policy framework for taxing automated labor. Addresses the core challenge: as AI and robotics replace human workers, tax revenue (which depends on payroll) erodes while corporate profits concentrate. This project designs mechanisms—robot taxes, compute levies, AI licensing fees—that fund universal programs without stifling innovation.',
+      'policy', 'active', 'public', 'urgent', ${systemUserId}, '2025-08-01', '2026-04-30', 15)
+    ON CONFLICT (slug) DO NOTHING`;
+
+  const atM1 = '20000000-0000-0000-0000-000000000006';
+  const atM2 = '20000000-0000-0000-0000-000000000007';
+  await sql`INSERT INTO milestones (id, project_id, title, description, target_date, status, order_index) VALUES
+    (${atM1}, ${autoTaxId}, 'Comparative Analysis', 'Analyze existing automation tax proposals (Gates robot tax, EU proposals, South Korea deductions) and model their projected revenue and innovation impact.', '2025-12-31', 'in_progress', 1),
+    (${atM2}, ${autoTaxId}, 'Draft Model Legislation', 'Write model legislation adaptable to US federal, state, and EU contexts. Include compliance mechanisms and revenue allocation formulas.', '2026-04-30', 'upcoming', 2)
+    ON CONFLICT DO NOTHING`;
+
+  await sql`INSERT INTO tasks (project_id, milestone_id, title, description, status, priority, order_index) VALUES
+    (${autoTaxId}, ${atM1}, 'Map global automation tax proposals', 'Comprehensive inventory of every proposed or enacted automation/robot tax worldwide.', 'in_progress', 'high', 1),
+    (${autoTaxId}, ${atM1}, 'Economic impact modeling', 'Build models projecting revenue, employment effects, and innovation metrics for 3 tax designs.', 'todo', 'high', 2),
+    (${autoTaxId}, ${atM1}, 'Industry impact assessment', 'Analyze sector-by-sector effects on manufacturing, logistics, service, and knowledge work.', 'todo', 'medium', 3),
+    (${autoTaxId}, ${atM2}, 'Draft federal model bill', 'Write a US federal bill template with compute-based levy, compliance mechanisms, and UBI fund allocation.', 'backlog', 'high', 1),
+    (${autoTaxId}, ${atM2}, 'Draft EU-compatible framework', 'Adapt the model to EU regulatory context including GDPR, AI Act, and existing social frameworks.', 'backlog', 'medium', 2)
+    ON CONFLICT DO NOTHING`;
+
+  // ── Project 4: Data Dividends Pilot Design ──
+  const dataId = '10000000-0000-0000-0000-000000000004';
+  await sql`INSERT INTO projects (id, title, slug, description, project_type, status, visibility, priority, owner_id, start_date, target_end_date, progress)
+    VALUES (${dataId}, 'Data Dividends Pilot Design', 'data-dividends-pilot',
+      'Design a pilot program for data dividends—direct payments to individuals from the value generated by their personal data. Inspired by the Alaska Permanent Fund model but applied to the data economy. The pilot will test payment mechanisms, valuation models, and user experience in a controlled setting before scaling.',
+      'pilot', 'planning', 'public', 'medium', ${systemUserId}, '2025-10-01', '2026-09-30', 8)
+    ON CONFLICT (slug) DO NOTHING`;
+
+  const ddM1 = '20000000-0000-0000-0000-000000000008';
+  await sql`INSERT INTO milestones (id, project_id, title, description, target_date, status, order_index) VALUES
+    (${ddM1}, ${dataId}, 'Pilot Design Document', 'Complete pilot design specifying: participant selection, data valuation methodology, payment frequency, measurement framework, and IRB approval pathway.', '2026-03-31', 'upcoming', 1)
+    ON CONFLICT DO NOTHING`;
+
+  await sql`INSERT INTO tasks (project_id, milestone_id, title, description, status, priority, order_index) VALUES
+    (${dataId}, ${ddM1}, 'Literature review on data valuation methodologies', 'Survey academic work on individual data valuation: Posner/Weyl radical markets, Lanier dignity models, EU data portability.', 'in_progress', 'high', 1),
+    (${dataId}, ${ddM1}, 'Design payment mechanism', 'Evaluate direct deposit, crypto/stablecoin, and prepaid card options for distributing data dividends.', 'todo', 'medium', 2),
+    (${dataId}, ${ddM1}, 'Define pilot population criteria', 'Determine sample size, demographics, geographic scope, and recruitment strategy.', 'todo', 'medium', 3),
+    (${dataId}, ${ddM1}, 'Draft IRB application', 'Prepare institutional review board application for human subjects research.', 'backlog', 'high', 4)
+    ON CONFLICT DO NOTHING`;
+
+  // ── Project 5: Post-Labor Economics Platform ──
+  const platId = '10000000-0000-0000-0000-000000000005';
+  await sql`INSERT INTO projects (id, title, slug, description, project_type, status, visibility, priority, owner_id, start_date, target_end_date, progress)
+    VALUES (${platId}, 'PLE Platform Development', 'ple-platform-development',
+      'Build and iterate on this platform—the community''s digital home for governance, research, content, and coordination. Features include enterprise architecture management, proposal/voting system, project management with Kanban boards, content publishing pipeline, and community discussion forums. Dogfooding the tools we build for the movement.',
+      'technical', 'active', 'public', 'high', ${systemUserId}, '2025-05-01', '2026-12-31', 42)
+    ON CONFLICT (slug) DO NOTHING`;
+
+  const plM1 = '20000000-0000-0000-0000-000000000009';
+  const plM2 = '20000000-0000-0000-0000-000000000010';
+  const plM3 = '20000000-0000-0000-0000-000000000011';
+  await sql`INSERT INTO milestones (id, project_id, title, description, target_date, status, order_index) VALUES
+    (${plM1}, ${platId}, 'Core Platform v1.0', 'Auth, architecture explorer, proposals, discussions, and basic dashboard. Deployed on Netlify with auto-provisioned Postgres.', '2025-10-31', 'completed', 1),
+    (${plM2}, ${platId}, 'Projects & Content v2.0', 'Full project management (Kanban, milestones, working groups), content CMS with publishing workflow, and GATO integration.', '2026-03-31', 'in_progress', 2),
+    (${plM3}, ${platId}, 'Community & Analytics v3.0', 'Member profiles, reputation system, activity feeds, analytics dashboard, and notification system.', '2026-09-30', 'upcoming', 3)
+    ON CONFLICT DO NOTHING`;
+
+  await sql`INSERT INTO tasks (project_id, milestone_id, title, description, status, priority, order_index) VALUES
+    (${platId}, ${plM1}, 'Authentication system (register, login, sessions)', NULL, 'done', 'high', 1),
+    (${platId}, ${plM1}, 'Architecture explorer with element relationships', NULL, 'done', 'high', 2),
+    (${platId}, ${plM1}, 'Proposal system with voting', NULL, 'done', 'high', 3),
+    (${platId}, ${plM1}, 'Discussion forums', NULL, 'done', 'medium', 4),
+    (${platId}, ${plM2}, 'Project management with Kanban boards', NULL, 'done', 'high', 1),
+    (${platId}, ${plM2}, 'Milestones and task dependencies', NULL, 'in_progress', 'high', 2),
+    (${platId}, ${plM2}, 'Content CMS with version history', NULL, 'in_progress', 'high', 3),
+    (${platId}, ${plM2}, 'GATO Framework interactive pages', NULL, 'done', 'medium', 4),
+    (${platId}, ${plM2}, 'Brand system (Structured Optimism) integration', NULL, 'done', 'medium', 5),
+    (${platId}, ${plM3}, 'Member profiles and reputation scoring', NULL, 'backlog', 'high', 1),
+    (${platId}, ${plM3}, 'Activity feed and notifications', NULL, 'backlog', 'medium', 2),
+    (${platId}, ${plM3}, 'Analytics dashboard for project health', NULL, 'backlog', 'medium', 3)
+    ON CONFLICT DO NOTHING`;
+
+  // ── Project 6: Stakeholder Coalition ──
+  const coalId = '10000000-0000-0000-0000-000000000006';
+  await sql`INSERT INTO projects (id, title, slug, description, project_type, status, visibility, priority, owner_id, start_date, target_end_date, progress)
+    VALUES (${coalId}, 'Post-Labor Stakeholder Coalition', 'stakeholder-coalition',
+      'Build a broad coalition of organizations, researchers, policymakers, and community leaders aligned around post-labor economics principles. Coordinate across labor unions, tech ethics orgs, UBI advocacy groups, think tanks, and academic institutions to create a unified voice for structural economic reform.',
+      'initiative', 'planning', 'public', 'medium', ${systemUserId}, '2025-11-01', '2026-08-31', 5)
+    ON CONFLICT (slug) DO NOTHING`;
+
+  await sql`INSERT INTO tasks (project_id, title, description, status, priority, order_index) VALUES
+    (${coalId}, 'Map potential coalition partners', 'Identify and categorize 50+ organizations by sector, alignment, and engagement readiness.', 'in_progress', 'high', 1),
+    (${coalId}, 'Draft coalition charter', 'Write shared principles document that potential partners can endorse without compromising their own missions.', 'todo', 'high', 2),
+    (${coalId}, 'Design outreach strategy', 'Create tiered engagement plan: awareness → endorsement → active participation → leadership.', 'todo', 'medium', 3),
+    (${coalId}, 'Plan inaugural coalition summit', 'Design a virtual summit bringing together founding coalition members for alignment and planning.', 'backlog', 'medium', 4)
+    ON CONFLICT DO NOTHING`;
+
+  // ── Working Groups ──
+  await sql`INSERT INTO working_groups (name, slug, description, project_id, lead_id, status) VALUES
+    ('AI Alignment Research', 'ai-alignment-research', 'Researchers and engineers working on GATO framework specification and agent integration.', ${gatoId}, ${systemUserId}, 'active'),
+    ('Policy Analysis Team', 'policy-analysis', 'Economists and policy analysts developing automation tax and UBI frameworks.', ${autoTaxId}, ${systemUserId}, 'active'),
+    ('Platform Engineering', 'platform-engineering', 'Developers building and maintaining the PLE platform.', ${platId}, ${systemUserId}, 'active'),
+    ('Content & Communications', 'content-comms', 'Writers, editors, and media producers creating public-facing content.', ${ubiId}, ${systemUserId}, 'forming'),
+    ('Community Organizing', 'community-organizing', 'Coordinators building the stakeholder coalition and community engagement.', ${coalId}, ${systemUserId}, 'forming')
+    ON CONFLICT (slug) DO NOTHING`;
+
+  console.log('✅ Seeded 6 projects with milestones, tasks, and working groups');
 }
 
 async function seedArchitecture() {

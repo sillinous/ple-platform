@@ -88,6 +88,18 @@
       width: 100px;
       height: 100px;
       margin: 0 auto 0.5rem;
+      position: relative;
+    }
+
+    .progress-percent-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: white;
     }
 
     .progress-percent {
@@ -362,6 +374,172 @@
       text-transform: capitalize;
     }
 
+    /* Quick Stats */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* Milestone Timeline */
+    .milestone-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      position: relative;
+    }
+
+    .timeline-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 24px;
+    }
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-gray-300);
+      border: 2px solid var(--bg-secondary);
+      z-index: 1;
+    }
+
+    .timeline-dot.completed { background: #2a9d8f; }
+    .timeline-dot.in_progress { background: var(--color-dawn); }
+    .timeline-dot.upcoming { background: var(--color-gray-300); }
+
+    .timeline-line {
+      width: 2px;
+      flex: 1;
+      background: var(--color-gray-200);
+      margin-top: 4px;
+    }
+
+    .timeline-item:last-child .timeline-line { display: none; }
+
+    .timeline-content {
+      flex: 1;
+      padding-bottom: 0.5rem;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-meta {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .timeline-status {
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .timeline-status.completed { background: rgba(42,157,143,0.1); color: #2a9d8f; }
+    .timeline-status.in_progress { background: rgba(244,162,97,0.15); color: #e76f51; }
+    .timeline-status.upcoming { background: var(--color-gray-100); color: var(--color-gray-600); }
+
+    /* Task Breakdown */
+    .task-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .breakdown-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      width: 90px;
+      flex-shrink: 0;
+    }
+
+    .breakdown-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: var(--color-gray-100);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .breakdown-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .breakdown-bar-fill.done { background: #2a9d8f; }
+    .breakdown-bar-fill.in_progress { background: var(--color-dawn); }
+    .breakdown-bar-fill.todo { background: #6c63ff; }
+    .breakdown-bar-fill.review { background: #e76f51; }
+    .breakdown-bar-fill.backlog { background: var(--color-gray-400); }
+
+    .breakdown-count {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      width: 24px;
+      text-align: right;
+    }
+
     /* Overview */
     .overview-grid {
       display: grid;
@@ -527,7 +705,15 @@
         </div>
       </div>
       <div class="project-progress-hero">
-        <div class="progress-percent" id="progress-percent">0%</div>
+        <div class="progress-circle" id="progress-circle">
+          <svg viewBox="0 0 100 100" width="100" height="100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="8"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" 
+              transform="rotate(-90 50 50)" id="progress-ring"/>
+          </svg>
+          <div class="progress-percent-overlay" id="progress-percent">0%</div>
+        </div>
         <div class="progress-label">Complete</div>
       </div>
     </div>
@@ -545,11 +731,59 @@
 
       <!-- Overview Tab -->
       <div class="tab-content active" id="tab-overview">
+        <!-- Quick Stats -->
+        <div class="quick-stats" id="quick-stats">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(27,77,62,0.1); color: var(--color-horizon);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-total-tasks">—</div>
+              <div class="stat-label">Total Tasks</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(42,157,143,0.1); color: #2a9d8f;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-done-tasks">—</div>
+              <div class="stat-label">Completed</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(244,162,97,0.1); color: var(--color-dawn);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-in-progress">—</div>
+              <div class="stat-label">In Progress</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(108,99,255,0.1); color: #6c63ff;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-teams">—</div>
+              <div class="stat-label">Working Groups</div>
+            </div>
+          </div>
+        </div>
+
         <div class="overview-grid">
           <div>
             <div class="overview-section">
               <h3>Description</h3>
               <div class="overview-description" id="project-description">Loading...</div>
+            </div>
+
+            <!-- Milestone Timeline -->
+            <div class="overview-section" id="milestone-timeline-section">
+              <h3>Milestone Timeline</h3>
+              <div class="milestone-timeline" id="milestone-timeline">
+                <div class="loading">Loading...</div>
+              </div>
             </div>
 
             <div class="overview-section" id="linked-elements-section" style="display: none;">
@@ -559,6 +793,12 @@
           </div>
 
           <div>
+            <!-- Task Breakdown -->
+            <div class="overview-section" id="task-breakdown-section">
+              <h3>Task Breakdown</h3>
+              <div class="task-breakdown" id="task-breakdown"></div>
+            </div>
+
             <div class="overview-section">
               <h3>Recent Activity</h3>
               <div class="activity-list" id="recent-activity">
@@ -735,7 +975,16 @@
       const ownerName = project.owner?.name || project.owner_name || 'Unknown';
       document.getElementById('project-owner').querySelector('span').textContent = ownerName;
       document.getElementById('project-description').textContent = project.description || 'No description provided.';
-      document.getElementById('progress-percent').textContent = `${project.progress || 0}%`;
+      const progress = project.progress || 0;
+      document.getElementById('progress-percent').textContent = `${progress}%`;
+      
+      // Animate progress ring
+      const ring = document.getElementById('progress-ring');
+      if (ring) {
+        const circumference = 264; // 2 * π * 42
+        const offset = circumference - (progress / 100) * circumference;
+        setTimeout(() => { ring.style.transition = 'stroke-dashoffset 0.8s ease'; ring.style.strokeDashoffset = offset; }, 100);
+      }
 
       // Dates
       const dates = [];
@@ -759,13 +1008,86 @@
       // Milestones count
       document.getElementById('milestone-count').textContent = project.milestones?.length || 0;
       renderMilestones(project.milestones || []);
+      renderMilestoneTimeline(project.milestones || []);
 
       // Team count
-      document.getElementById('team-count').textContent = project.workingGroups?.reduce((sum, g) => sum + 1, 0) || 0;
+      const teamCount = project.workingGroups?.length || 0;
+      document.getElementById('team-count').textContent = teamCount;
       renderTeam(project.workingGroups || []);
+
+      // Task stats
+      const taskStats = project.taskStats || {};
+      const totalTasks = Object.values(taskStats).reduce((s, v) => s + v, 0);
+      const doneTasks = taskStats.done || 0;
+      const inProgressTasks = taskStats.in_progress || 0;
+
+      document.getElementById('stat-total-tasks').textContent = totalTasks;
+      document.getElementById('stat-done-tasks').textContent = doneTasks;
+      document.getElementById('stat-in-progress').textContent = inProgressTasks;
+      document.getElementById('stat-teams').textContent = teamCount;
+
+      renderTaskBreakdown(taskStats, totalTasks);
 
       // Activity
       renderActivity(project.activity || []);
+    }
+
+    function renderMilestoneTimeline(milestones) {
+      const container = document.getElementById('milestone-timeline');
+      if (!milestones.length) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No milestones defined yet.</p>';
+        return;
+      }
+
+      container.innerHTML = milestones.map(m => `
+        <div class="timeline-item">
+          <div class="timeline-marker">
+            <div class="timeline-dot ${m.status}"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-title">${escapeHtml(m.title)}</div>
+            <div class="timeline-meta">
+              <span class="timeline-status ${m.status}">${m.status === 'in_progress' ? 'In Progress' : capitalizeFirst(m.status)}</span>
+              ${m.target_date ? `<span>${formatDate(m.target_date)}</span>` : ''}
+              ${m.task_count > 0 ? `<span>${m.completed_tasks || 0}/${m.task_count} tasks</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderTaskBreakdown(stats, total) {
+      const container = document.getElementById('task-breakdown');
+      if (total === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No tasks yet.</p>';
+        return;
+      }
+
+      const statuses = [
+        { key: 'done', label: 'Done' },
+        { key: 'in_progress', label: 'In Progress' },
+        { key: 'review', label: 'Review' },
+        { key: 'todo', label: 'To Do' },
+        { key: 'backlog', label: 'Backlog' }
+      ];
+
+      container.innerHTML = statuses
+        .filter(s => (stats[s.key] || 0) > 0)
+        .map(s => {
+          const count = stats[s.key] || 0;
+          const pct = Math.round((count / total) * 100);
+          return `
+            <div class="breakdown-row">
+              <span class="breakdown-label">${s.label}</span>
+              <div class="breakdown-bar-bg">
+                <div class="breakdown-bar-fill ${s.key}" style="width: ${pct}%"></div>
+              </div>
+              <span class="breakdown-count">${count}</span>
+            </div>
+          `;
+        }).join('');
+    }
     }
 
     // Load tasks
@@ -774,7 +1096,7 @@
         const token = localStorage.getItem('ple_token');
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-        const res = await fetch(`/api/tasks?project_id=${projectId}&view=kanban`, { headers });
+        const res = await fetch(`/api/tasks?projectId=${projectId}&view=kanban`, { headers });
         const data = await res.json();
 
         if (data.view === 'kanban') {

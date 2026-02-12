@@ -102,6 +102,8 @@
     .type-research { background: var(--color-strategy-bg); color: var(--color-strategy); }
     .type-policy { background: var(--color-capability-bg); color: var(--color-capability); }
     .type-campaign { background: var(--color-principle-bg); color: var(--color-principle); }
+    .type-pilot { background: rgba(108,99,255,0.1); color: #6c63ff; }
+    .type-technical { background: rgba(42,157,143,0.1); color: #2a9d8f; }
     .type-internal { background: var(--color-gray-100); color: var(--color-gray-600); }
 
     .project-status {
@@ -421,7 +423,8 @@
           <button class="filter-btn" data-type="initiative">Initiative</button>
           <button class="filter-btn" data-type="research">Research</button>
           <button class="filter-btn" data-type="policy">Policy</button>
-          <button class="filter-btn" data-type="campaign">Campaign</button>
+          <button class="filter-btn" data-type="pilot">Pilot</button>
+          <button class="filter-btn" data-type="technical">Technical</button>
         </div>
       </div>
 
@@ -462,6 +465,8 @@
                 <option value="initiative">Initiative</option>
                 <option value="research">Research</option>
                 <option value="policy">Policy Development</option>
+                <option value="pilot">Pilot Program</option>
+                <option value="technical">Technical</option>
                 <option value="campaign">Campaign</option>
                 <option value="internal">Internal</option>
               </select>
@@ -611,7 +616,7 @@
                   <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
                   <path d="M16 3.13a4 4 0 010 7.75"></path>
                 </svg>
-                ${project.team_count || 0}
+                ${project.teamCount || 0}
               </span>
             </div>
           </div>
