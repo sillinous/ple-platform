@@ -22,11 +22,11 @@ export default async (req, context) => {
         return await handleLogin(sql, body);
       } else if (action === 'logout') {
         return await handleLogout(sql, req);
+      } else if (action === 'update-profile') {
+        return await handleUpdateProfile(sql, req, body);
       }
     } else if (req.method === 'GET' && action === 'me') {
       return await handleGetCurrentUser(sql, req);
-    } else if (req.method === 'POST' && action === 'update-profile') {
-      return await handleUpdateProfile(sql, req);
     }
     
     return jsonResponse({ error: 'Invalid action' }, 400);
@@ -163,11 +163,11 @@ async function createSession(sql, userId) {
   return { token, expiresAt };
 }
 
-async function handleUpdateProfile(sql, req) {
+async function handleUpdateProfile(sql, req, body) {
   const user = await getCurrentUser(req);
   if (!user) return jsonResponse({ error: 'Authentication required' }, 401);
   
-  const { displayName, bio } = await req.json();
+  const { displayName, bio } = body || {};
   if (!displayName?.trim()) return jsonResponse({ error: 'Display name is required' }, 400);
   
   await sql`UPDATE users SET display_name = ${displayName.trim()}, bio = ${(bio||'').trim()}, updated_at = CURRENT_TIMESTAMP WHERE id = ${user.id}`;
