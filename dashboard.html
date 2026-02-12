@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | Post-Labor Economics</title>
-  
   <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,16 +11,84 @@
   <link rel="stylesheet" href="src/styles/brand.css">
   <link rel="stylesheet" href="src/styles/app.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .dash-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .dash-hero { margin-bottom: 2rem; }
+    .dash-hero h1 { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; margin: 0; }
+    .dash-hero p { color: var(--text-muted); margin: 0.25rem 0 0; font-size: 0.95rem; }
+    .create-bar { display: flex; gap: 0.75rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+    .create-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; border-radius: 8px; border: 1px dashed var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.9rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .create-btn:hover { border-color: var(--color-horizon); background: rgba(27,77,62,0.04); color: var(--color-horizon); }
+    .create-btn svg { width: 16px; height: 16px; opacity: 0.6; }
+    .create-btn:hover svg { opacity: 1; }
+    .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; }
+    .work-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-color); margin-bottom: 1.25rem; }
+    .work-tab { padding: 0.6rem 1rem; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+    .work-tab:hover { color: var(--text-primary); }
+    .work-tab.active { color: var(--color-horizon); border-bottom-color: var(--color-horizon); }
+    .tab-count { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--color-gray-100); color: var(--text-muted); font-size: 0.7rem; font-weight: 600; margin-left: 0.35rem; }
+    .work-tab.active .tab-count { background: rgba(27,77,62,0.12); color: var(--color-horizon); }
+    .work-panel { display: none; }
+    .work-panel.active { display: block; }
+    .item-card { display: block; padding: 1rem; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 0.65rem; text-decoration: none; color: inherit; transition: all 0.15s; background: var(--bg-primary); }
+    .item-card:hover { border-color: var(--color-horizon); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .item-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .item-title { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); margin: 0; line-height: 1.4; }
+    .item-meta { display: flex; gap: 0.75rem; margin-top: 0.35rem; font-size: 0.8rem; color: var(--text-muted); align-items: center; flex-wrap: wrap; }
+    .item-badge { padding: 0.15rem 0.5rem; border-radius: 100px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+    .badge-draft { background: var(--color-gray-100); color: var(--color-gray-600); }
+    .badge-in_review { background: #FEF3C7; color: #92400E; }
+    .badge-approved { background: #D1FAE5; color: #065F46; }
+    .badge-published { background: rgba(42,157,143,0.12); color: #2a9d8f; }
+    .badge-active { background: rgba(27,77,62,0.1); color: var(--color-horizon); }
+    .badge-planning { background: #EFF6FF; color: #1E40AF; }
+    .badge-completed { background: #D1FAE5; color: #065F46; }
+    .badge-on_hold { background: #FEF3C7; color: #92400E; }
+    .badge-todo { background: #EFF6FF; color: #1E40AF; }
+    .badge-in_progress { background: #FEF3C7; color: #92400E; }
+    .badge-done { background: #D1FAE5; color: #065F46; }
+    .badge-review { background: #F3E8FF; color: #6B21A8; }
+    .badge-backlog { background: var(--color-gray-100); color: var(--color-gray-500); }
+    .badge-voting { background: #F3E8FF; color: #6B21A8; }
+    .badge-open { background: rgba(27,77,62,0.1); color: var(--color-horizon); }
+    .item-type { font-size: 0.75rem; color: var(--text-muted); }
+    .progress-micro { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+    .progress-micro-bar { width: 60px; height: 4px; background: var(--color-gray-100); border-radius: 2px; overflow: hidden; }
+    .progress-micro-fill { height: 100%; background: var(--color-horizon); border-radius: 2px; }
+    .empty-work { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); }
+    .empty-work svg { width: 40px; height: 40px; margin-bottom: 0.75rem; opacity: 0.3; }
+    .empty-work p { font-size: 0.9rem; margin: 0 0 1rem; }
+    .empty-work a { font-size: 0.9rem; color: var(--color-horizon); text-decoration: none; font-weight: 500; }
+    .empty-work a:hover { text-decoration: underline; }
+    .sidebar-card { border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; background: var(--bg-primary); }
+    .sidebar-card h4 { font-family: var(--font-display); font-size: 1rem; margin: 0 0 0.75rem; }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .stat-mini { text-align: center; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; }
+    .stat-mini-value { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--color-horizon); }
+    .stat-mini-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .activity-item-mini { display: flex; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--color-gray-50); }
+    .activity-item-mini:last-child { border-bottom: none; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-horizon); margin-top: 0.4rem; flex-shrink: 0; }
+    .activity-dot.dot-content { background: #2a9d8f; }
+    .activity-dot.dot-project { background: #F4A261; }
+    .activity-dot.dot-proposal { background: #6B21A8; }
+    .activity-dot.dot-user { background: var(--color-gray-400); }
+    .activity-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4; }
+    .activity-time-mini { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .review-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--color-gray-50); gap: 0.5rem; }
+    .review-item:last-child { border-bottom: none; }
+    .review-title { font-size: 0.85rem; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .review-action { font-size: 0.8rem; color: var(--color-horizon); text-decoration: none; white-space: nowrap; }
+    .review-action:hover { text-decoration: underline; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .create-bar { flex-direction: column; } .stats-row { grid-template-columns: 1fr 1fr; } }
+  </style>
 </head>
 <body>
-  <!-- Header -->
   <header class="header">
     <div class="header-container">
-      <a href="index.html" class="logo">
-        <span class="logo-symbol">L/0</span>
-        <span class="logo-text">Post-Labor Economics</span>
-      </a>
-      
+      <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
       <nav class="nav-menu">
         <a href="index.html" class="nav-link">Home</a>
         <a href="architecture.html" class="nav-link">Architecture</a>
@@ -30,7 +97,6 @@
         <a href="proposals.html" class="nav-link">Proposals</a>
         <a href="discussions.html" class="nav-link">Discussions</a>
       </nav>
-      
       <div class="header-actions">
         <span class="nav-link" data-user-name></span>
         <button class="btn btn-ghost" id="logout-btn">Sign Out</button>
@@ -38,264 +104,274 @@
     </div>
   </header>
 
-  <main class="main-content">
-    <div class="container">
-      <!-- Dashboard Header -->
-      <div class="dashboard-header">
-        <h1 class="dashboard-welcome">Welcome back, <span data-user-name>Member</span>!</h1>
-        <p class="dashboard-subtitle">Here's what's happening in the community</p>
+  <main>
+    <div class="dash-container">
+      <div class="dash-hero">
+        <h1>Welcome back, <span data-user-name>Member</span></h1>
+        <p>Here's your workspace</p>
       </div>
 
-      <!-- Stats Grid -->
-      <div class="dashboard-grid">
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="file-text"></i>
-            </div>
-          </div>
-          <div class="stat-card-value" id="proposals-count">-</div>
-          <div class="stat-card-label">Active Proposals</div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="vote"></i>
-            </div>
-          </div>
-          <div class="stat-card-value" id="votes-count">-</div>
-          <div class="stat-card-label">Your Votes</div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="message-square"></i>
-            </div>
-          </div>
-          <div class="stat-card-value" id="discussions-count">-</div>
-          <div class="stat-card-label">Discussions</div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="layers"></i>
-            </div>
-          </div>
-          <div class="stat-card-value" id="elements-count">-</div>
-          <div class="stat-card-label">Architecture Elements</div>
-        </div>
+      <div class="create-bar">
+        <a href="content-editor.html" class="create-btn"><i data-lucide="pen-line"></i> Write Content</a>
+        <a href="#" class="create-btn" id="new-project-btn"><i data-lucide="folder-plus"></i> New Project</a>
+        <a href="proposal-create.html" class="create-btn"><i data-lucide="file-plus-2"></i> Create Proposal</a>
+        <a href="discussions.html" class="create-btn"><i data-lucide="message-square-plus"></i> Start Discussion</a>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="section-header" style="margin-top: 2rem;">
-        <h2 class="section-title">Quick Actions</h2>
-      </div>
-      
-      <div class="dashboard-grid">
-        <a href="proposal-create.html" class="stat-card" style="text-decoration: none;">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="plus"></i>
-            </div>
-          </div>
-          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">Create Proposal</div>
-          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-            Submit a new proposal for community review
-          </p>
-        </a>
-        
-        <a href="proposals.html?status=voting" class="stat-card" style="text-decoration: none;">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="vote"></i>
-            </div>
-          </div>
-          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">Vote on Proposals</div>
-          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-            Review and vote on active proposals
-          </p>
-        </a>
-        
-        <a href="architecture.html" class="stat-card" style="text-decoration: none;">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="git-branch"></i>
-            </div>
-          </div>
-          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">Explore Architecture</div>
-          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-            Browse goals, strategies, and capabilities
-          </p>
-        </a>
-        
-        <a href="projects.html" class="stat-card" style="text-decoration: none;">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="folder-kanban"></i>
-            </div>
-          </div>
-          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">View Projects</div>
-          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-            Track initiatives and manage work
-          </p>
-        </a>
-        
-        <a href="content.html" class="stat-card" style="text-decoration: none;">
-          <div class="stat-card-header">
-            <div class="stat-card-icon">
-              <i data-lucide="book-open"></i>
-            </div>
-          </div>
-          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">Browse Content</div>
-          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-            Articles, reports, and publications
-          </p>
-        </a>
-      </div>
-
-      <!-- Recent Activity -->
-      <div class="two-column-grid" style="margin-top: 2rem;">
+      <div class="dash-grid">
         <div>
-          <h3 class="subsection-title">Your Recent Proposals</h3>
-          <div id="my-proposals">
-            <div class="loading">
-              <div class="loading-spinner"></div>
-            </div>
+          <div class="work-tabs">
+            <button class="work-tab active" data-panel="content-panel">Content <span class="tab-count" id="cnt-content">0</span></button>
+            <button class="work-tab" data-panel="projects-panel">Projects <span class="tab-count" id="cnt-projects">0</span></button>
+            <button class="work-tab" data-panel="tasks-panel">My Tasks <span class="tab-count" id="cnt-tasks">0</span></button>
+            <button class="work-tab" data-panel="proposals-panel">Proposals <span class="tab-count" id="cnt-proposals">0</span></button>
           </div>
+          <div class="work-panel active" id="content-panel"><div id="content-list"><div class="empty-work"><p>Loading...</p></div></div></div>
+          <div class="work-panel" id="projects-panel"><div id="projects-list"><div class="empty-work"><p>Loading...</p></div></div></div>
+          <div class="work-panel" id="tasks-panel"><div id="tasks-list"><div class="empty-work"><p>Loading...</p></div></div></div>
+          <div class="work-panel" id="proposals-panel"><div id="proposals-list"><div class="empty-work"><p>Loading...</p></div></div></div>
         </div>
-        
+
         <div>
-          <h3 class="subsection-title">Platform Activity</h3>
-          <div class="activity-feed" id="activity-feed">
-            <div class="activity-feed-header">Latest Updates</div>
-            <div class="loading">
-              <div class="loading-spinner"></div>
-            </div>
+          <div class="stats-row">
+            <div class="stat-mini"><div class="stat-mini-value" id="s-content">-</div><div class="stat-mini-label">Content</div></div>
+            <div class="stat-mini"><div class="stat-mini-value" id="s-projects">-</div><div class="stat-mini-label">Projects</div></div>
+            <div class="stat-mini"><div class="stat-mini-value" id="s-proposals">-</div><div class="stat-mini-label">Proposals</div></div>
+            <div class="stat-mini"><div class="stat-mini-value" id="s-discussions">-</div><div class="stat-mini-label">Discussions</div></div>
+          </div>
+          <div class="sidebar-card" id="attention-card" style="display:none">
+            <h4>⚡ Needs Attention</h4>
+            <div id="attention-list"></div>
+          </div>
+          <div class="sidebar-card">
+            <div class="section-head"><h4>Recent Activity</h4></div>
+            <div id="activity-feed"><p style="font-size:0.85rem;color:var(--text-muted)">Loading...</p></div>
           </div>
         </div>
       </div>
     </div>
   </main>
 
+  <!-- Project Create Modal -->
+  <div id="project-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all 0.3s;">
+    <div style="background:var(--bg-secondary,#fff);border-radius:16px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid var(--border-color);">
+        <h2 style="font-family:var(--font-display);font-size:1.5rem;margin:0;">New Project</h2>
+        <button id="close-modal-btn" style="background:none;border:none;cursor:pointer;padding:0.5rem;color:var(--text-muted);font-size:1.5rem;">&times;</button>
+      </div>
+      <form id="project-form">
+        <div style="padding:1.5rem;">
+          <div style="margin-bottom:1.25rem;"><label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.9rem;">Title *</label><input type="text" name="title" required placeholder="Project title" style="width:100%;padding:0.75rem 1rem;border:1px solid var(--border-color);border-radius:8px;font-size:1rem;font-family:inherit;"></div>
+          <div style="margin-bottom:1.25rem;"><label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.9rem;">Description</label><textarea name="description" rows="3" placeholder="What is this project about?" style="width:100%;padding:0.75rem 1rem;border:1px solid var(--border-color);border-radius:8px;font-size:1rem;font-family:inherit;resize:vertical;"></textarea></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div><label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.9rem;">Type</label><select name="project_type" style="width:100%;padding:0.75rem 1rem;border:1px solid var(--border-color);border-radius:8px;font-size:1rem;"><option value="initiative">Initiative</option><option value="research">Research</option><option value="policy">Policy</option><option value="technical">Technical</option><option value="pilot">Pilot</option><option value="community">Community</option></select></div>
+            <div><label style="display:block;margin-bottom:0.5rem;font-weight:500;font-size:0.9rem;">Priority</label><select name="priority" style="width:100%;padding:0.75rem 1rem;border:1px solid var(--border-color);border-radius:8px;font-size:1rem;"><option value="medium">Medium</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:1rem;padding:1.5rem;border-top:1px solid var(--border-color);">
+          <button type="button" id="cancel-modal-btn" class="btn btn-ghost">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script type="module">
-    import { auth, proposals, architecture, activity, formatDate, initPage, updateAuthUI } from './src/scripts/api.js';
-    
-    // Check auth
+    import { auth, proposals, activity, formatDate, updateAuthUI } from './src/scripts/api.js';
+
+    let currentUser = null;
+    const authH = () => { const h={'Content-Type':'application/json'}; const t=localStorage.getItem('ple_token'); if(t) h['Authorization']=`Bearer ${t}`; return h; };
+    const esc = s => { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; };
+    const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' ') : '';
+    function fmtRel(d) { if(!d)return ''; const ms=Date.now()-new Date(d).getTime(); if(ms<60000)return 'just now'; if(ms<3600000)return Math.floor(ms/60000)+'m ago'; if(ms<86400000)return Math.floor(ms/3600000)+'h ago'; if(ms<604800000)return Math.floor(ms/86400000)+'d ago'; return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+
+    // Auth
     async function checkAuth() {
       const user = await auth.getCurrentUser();
-      if (!user) {
-        window.location.href = 'login.html?redirect=dashboard.html';
-        return;
-      }
-      updateAuthUI();
-      loadDashboard();
+      if (!user) { window.location.href='login.html?redirect=dashboard.html'; return; }
+      currentUser = user; updateAuthUI(); loadAll();
     }
-    
-    // Logout handler
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-      await auth.logout();
-      window.location.href = 'index.html';
+    document.getElementById('logout-btn').addEventListener('click', async () => { await auth.logout(); window.location.href='index.html'; });
+
+    // Tabs
+    document.querySelectorAll('.work-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.work-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.work-panel').forEach(p=>p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.panel).classList.add('active');
+      });
     });
-    
-    // Load dashboard data
-    async function loadDashboard() {
-      // Load stats
-      try {
-        const [proposalsData, archData] = await Promise.all([
-          proposals.list({ limit: 1 }),
-          architecture.list()
-        ]);
-        
-        document.getElementById('proposals-count').textContent = proposalsData.total || 0;
-        document.getElementById('elements-count').textContent = archData.total || 0;
-        document.getElementById('votes-count').textContent = '-';
-        document.getElementById('discussions-count').textContent = '-';
-      } catch (e) {
-        console.error('Failed to load stats:', e);
-      }
-      
-      // Load user's proposals
-      try {
-        const user = auth.getUser();
-        const data = await proposals.list({ limit: 5 });
-        const myProposals = data.proposals.filter(p => p.author?.id === user?.id);
-        
-        const container = document.getElementById('my-proposals');
-        
-        if (myProposals.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <i data-lucide="file-text" class="empty-state-icon"></i>
-              <h4 class="empty-state-title">No Proposals Yet</h4>
-              <p class="empty-state-description">You haven't submitted any proposals yet.</p>
-              <a href="proposal-create.html" class="btn btn-primary">Create Your First</a>
-            </div>
-          `;
-        } else {
-          container.innerHTML = myProposals.map(p => `
-            <div class="proposal-card">
-              <span class="proposal-type-badge ${p.proposalType}">${p.proposalType.replace('_', ' ')}</span>
-              <h4 class="proposal-title">
-                <a href="proposal-view.html?id=${p.id}">${p.title}</a>
-              </h4>
-              <div class="proposal-meta">
-                <span class="proposal-meta-item">
-                  <i data-lucide="clock"></i>
-                  ${formatDate(p.createdAt)}
-                </span>
-                <span class="proposal-meta-item">
-                  Status: ${p.status}
-                </span>
-              </div>
-            </div>
-          `).join('');
-        }
-        lucide.createIcons();
-      } catch (e) {
-        document.getElementById('my-proposals').innerHTML = `
-          <div class="empty-state">
-            <p>Unable to load proposals.</p>
-          </div>
-        `;
-      }
-      
-      // Load activity
-      try {
-        const data = await activity.list({ limit: 5 });
-        const container = document.getElementById('activity-feed');
-        
-        if (data.activities.length === 0) {
-          container.innerHTML = `
-            <div class="activity-feed-header">Latest Updates</div>
-            <div class="empty-state">
-              <p>No recent activity.</p>
-            </div>
-          `;
-        } else {
-          container.innerHTML = `
-            <div class="activity-feed-header">Latest Updates</div>
-            ${data.activities.map(a => `
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <i data-lucide="activity"></i>
-                </div>
-                <div class="activity-content">
-                  <div class="activity-description">${a.description}</div>
-                  <div class="activity-time">${formatDate(a.createdAt)}</div>
-                </div>
-              </div>
-            `).join('')}
-          `;
-        }
-        lucide.createIcons();
-      } catch (e) {
-        console.error('Failed to load activity:', e);
-      }
+
+    async function loadAll() {
+      await Promise.allSettled([loadContent(), loadProjects(), loadTasks(), loadProposals(), loadStats(), loadActivity()]);
     }
-    
+
+    // My Content
+    async function loadContent() {
+      try {
+        const r = await fetch('/api/content?limit=50', { headers: authH() });
+        const d = await r.json();
+        const myItems = d.content.filter(c => c.author?.id === currentUser.id);
+        document.getElementById('cnt-content').textContent = myItems.length;
+        document.getElementById('s-content').textContent = d.total;
+        const el = document.getElementById('content-list');
+        if (myItems.length === 0) {
+          el.innerHTML = `<div class="empty-work"><i data-lucide="pen-line"></i><p>You haven't written any content yet</p><a href="content-editor.html">Write your first article →</a></div>`;
+          lucide.createIcons(); checkAttention(d.content); return;
+        }
+        el.innerHTML = myItems.map(c => `
+          <a href="content-view.html?id=${c.id}" class="item-card">
+            <div class="item-row"><div style="flex:1">
+              <div class="item-title">${esc(c.title)}</div>
+              <div class="item-meta">
+                <span class="item-badge badge-${c.status}">${cap(c.status)}</span>
+                <span class="item-type">${cap(c.contentType)}</span>
+                <span>${fmtRel(c.updatedAt)}</span>
+              </div>
+            </div>
+            ${c.status==='draft'?`<span style="font-size:0.8rem;color:var(--color-horizon);">Edit →</span>`:''}</div>
+          </a>`).join('');
+        checkAttention(d.content);
+      } catch(e) { console.error('Content:',e); document.getElementById('content-list').innerHTML='<div class="empty-work"><p>Unable to load content</p></div>'; }
+    }
+
+    // My Projects
+    async function loadProjects() {
+      try {
+        const r = await fetch('/api/projects?limit=20', { headers: authH() });
+        const d = await r.json();
+        const all = d.projects||[];
+        document.getElementById('cnt-projects').textContent = all.length;
+        document.getElementById('s-projects').textContent = d.total;
+        const el = document.getElementById('projects-list');
+        if (all.length===0) {
+          el.innerHTML = `<div class="empty-work"><i data-lucide="folder-kanban"></i><p>No projects yet</p><a href="#" id="empty-proj-link">Create your first project →</a></div>`;
+          document.getElementById('empty-proj-link')?.addEventListener('click', e=>{e.preventDefault();openModal();});
+          lucide.createIcons(); return;
+        }
+        el.innerHTML = all.map(p => `
+          <a href="project-view.html?id=${p.id}" class="item-card">
+            <div class="item-row"><div style="flex:1">
+              <div class="item-title">${esc(p.title)}</div>
+              <div class="item-meta">
+                <span class="item-badge badge-${p.status}">${cap(p.status)}</span>
+                <span class="item-type">${cap(p.projectType||'')}</span>
+                <span>${p.taskCount||0} tasks</span>
+              </div>
+            </div>
+            <div class="progress-micro"><div class="progress-micro-bar"><div class="progress-micro-fill" style="width:${p.progress||0}%"></div></div><span>${p.progress||0}%</span></div></div>
+          </a>`).join('');
+      } catch(e) { console.error('Projects:',e); document.getElementById('projects-list').innerHTML='<div class="empty-work"><p>Unable to load projects</p></div>'; }
+    }
+
+    // My Tasks
+    async function loadTasks() {
+      try {
+        const r = await fetch('/api/tasks?assigned=me&limit=30', { headers: authH() });
+        const d = await r.json();
+        const tasks = d.tasks||[];
+        const active = tasks.filter(t=>t.status!=='done');
+        const done = tasks.filter(t=>t.status==='done').slice(0,3);
+        document.getElementById('cnt-tasks').textContent = active.length;
+        const el = document.getElementById('tasks-list');
+        const display = [...active,...done];
+        if (display.length===0) {
+          el.innerHTML = `<div class="empty-work"><i data-lucide="check-square"></i><p>No tasks assigned to you</p><a href="projects.html">Browse projects to find work →</a></div>`;
+          lucide.createIcons(); return;
+        }
+        el.innerHTML = display.map(t => `
+          <a href="project-view.html?id=${t.projectId}" class="item-card" ${t.status==='done'?'style="opacity:0.55"':''}>
+            <div class="item-row"><div style="flex:1">
+              <div class="item-title">${esc(t.title)}</div>
+              <div class="item-meta">
+                <span class="item-badge badge-${t.status}">${cap(t.status)}</span>
+                ${t.priority?`<span class="item-type">${cap(t.priority)}</span>`:''}
+                ${t.dueDate?`<span${new Date(t.dueDate)<new Date()&&t.status!=='done'?' style="color:#DC2626;font-weight:500"':''}>${new Date(t.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
+              </div>
+            </div></div>
+          </a>`).join('');
+      } catch(e) { console.error('Tasks:',e); document.getElementById('tasks-list').innerHTML='<div class="empty-work"><p>Unable to load tasks</p></div>'; }
+    }
+
+    // My Proposals
+    async function loadProposals() {
+      try {
+        const data = await proposals.list({ limit: 20 });
+        const all = data.proposals||[];
+        const mine = all.filter(p=>p.author?.id===currentUser.id);
+        document.getElementById('cnt-proposals').textContent = mine.length;
+        document.getElementById('s-proposals').textContent = data.total;
+        const el = document.getElementById('proposals-list');
+        if (mine.length===0) {
+          el.innerHTML = `<div class="empty-work"><i data-lucide="file-text"></i><p>You haven't created any proposals</p><a href="proposal-create.html">Create your first proposal →</a></div>`;
+          lucide.createIcons(); return;
+        }
+        el.innerHTML = mine.map(p => `
+          <a href="proposal-view.html?id=${p.id}" class="item-card">
+            <div class="item-row"><div style="flex:1">
+              <div class="item-title">${esc(p.title)}</div>
+              <div class="item-meta">
+                <span class="item-badge badge-${p.status}">${cap(p.status)}</span>
+                <span class="item-type">${cap((p.proposalType||'').replace('_',' '))}</span>
+                <span>${fmtRel(p.createdAt)}</span>
+              </div>
+            </div></div>
+          </a>`).join('');
+      } catch(e) { console.error('Proposals:',e); document.getElementById('proposals-list').innerHTML='<div class="empty-work"><p>Unable to load proposals</p></div>'; }
+    }
+
+    // Stats
+    async function loadStats() {
+      try { const r=await fetch('/api/discussions?limit=1',{headers:authH()}); const d=await r.json(); document.getElementById('s-discussions').textContent=d.total||0; } catch(e) {}
+    }
+
+    // Attention: drafts, items in review (for editors)
+    function checkAttention(allContent) {
+      const isEditor = currentUser.role==='admin'||currentUser.role==='editor';
+      const items = [];
+      if (isEditor) {
+        allContent.filter(c=>c.status==='in_review').forEach(c=>items.push({label:c.title, href:`content-view.html?id=${c.id}`, action:'Review'}));
+      }
+      allContent.filter(c=>c.author?.id===currentUser.id&&c.status==='draft').forEach(c=>items.push({label:c.title, href:`content-editor.html?id=${c.id}`, action:'Continue'}));
+      const card=document.getElementById('attention-card');
+      if(!items.length){card.style.display='none';return;}
+      card.style.display='';
+      document.getElementById('attention-list').innerHTML=items.map(i=>`<div class="review-item"><span class="review-title">${esc(i.label)}</span><a href="${i.href}" class="review-action">${i.action} →</a></div>`).join('');
+    }
+
+    // Activity
+    async function loadActivity() {
+      try {
+        const data = await activity.list({ limit: 10 });
+        const el=document.getElementById('activity-feed');
+        if(!data.activities?.length){el.innerHTML='<p style="font-size:0.85rem;color:var(--text-muted)">No recent activity</p>';return;}
+        el.innerHTML=data.activities.map(a=>{
+          let dc='dot-user';
+          if(a.entityType==='content')dc='dot-content';
+          else if(a.entityType==='project'||a.entityType==='task')dc='dot-project';
+          else if(a.entityType==='proposal')dc='dot-proposal';
+          return `<div class="activity-item-mini"><div class="activity-dot ${dc}"></div><div><div class="activity-text">${esc(a.description)}</div><div class="activity-time-mini">${fmtRel(a.createdAt)}</div></div></div>`;
+        }).join('');
+      } catch(e) { document.getElementById('activity-feed').innerHTML='<p style="font-size:0.85rem;color:var(--text-muted)">Unable to load activity</p>'; }
+    }
+
+    // Project Modal
+    function openModal() { const m=document.getElementById('project-modal'); m.style.opacity='1'; m.style.visibility='visible'; }
+    function closeModal() { const m=document.getElementById('project-modal'); m.style.opacity='0'; m.style.visibility='hidden'; }
+    document.getElementById('new-project-btn').addEventListener('click', e=>{e.preventDefault();openModal();});
+    document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+    document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
+    document.getElementById('project-form').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const fd=new FormData(e.target); const data=Object.fromEntries(fd);
+      try{const r=await fetch('/api/projects',{method:'POST',headers:authH(),body:JSON.stringify(data)});
+        if(r.ok){const d=await r.json();closeModal();window.location=`project-view.html?id=${d.id}`;}
+        else{const err=await r.json();alert(err.error||'Failed');}
+      }catch(e){alert('Failed to create project');}
+    });
+
+    // Init
     checkAuth();
     lucide.createIcons();
   </script>
