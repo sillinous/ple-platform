@@ -40,9 +40,9 @@ export default async (req, context) => {
 async function listProjects(sql, params, user) {
   const status = params.get('status') || null;
   const type = params.get('type') || null;
-  const owner = params.get('owner') || null;
   const limit = Math.min(parseInt(params.get('limit') || '50'), 100);
   const offset = parseInt(params.get('offset') || '0');
+  const isLoggedIn = !!user;
 
   const projects = await sql`
     SELECT p.*, 
@@ -56,8 +56,7 @@ async function listProjects(sql, params, user) {
     LEFT JOIN users u ON p.owner_id = u.id
     WHERE (${status}::text IS NULL OR p.status = ${status})
       AND (${type}::text IS NULL OR p.project_type = ${type})
-      AND (${owner}::uuid IS NULL OR p.owner_id = ${owner}::uuid)
-      AND (p.visibility = 'public' OR ${user?.id}::uuid IS NOT NULL)
+      AND (p.visibility = 'public' OR ${isLoggedIn})
     ORDER BY 
       CASE p.priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 WHEN 'low' THEN 4 END,
       p.updated_at DESC
@@ -68,7 +67,7 @@ async function listProjects(sql, params, user) {
     SELECT COUNT(*) as total FROM projects p
     WHERE (${status}::text IS NULL OR p.status = ${status})
       AND (${type}::text IS NULL OR p.project_type = ${type})
-      AND (p.visibility = 'public' OR ${user?.id}::uuid IS NOT NULL)
+      AND (p.visibility = 'public' OR ${isLoggedIn})
   `;
 
   return jsonResponse({
@@ -79,17 +78,35 @@ async function listProjects(sql, params, user) {
 }
 
 async function getProject(sql, id, user) {
-  const projects = await sql`
-    SELECT p.*, 
-           u.display_name as owner_name,
-           u.email as owner_email,
-           u.avatar_url as owner_avatar,
-           prop.title as linked_proposal_title
-    FROM projects p
-    LEFT JOIN users u ON p.owner_id = u.id
-    LEFT JOIN proposals prop ON p.linked_proposal_id = prop.id
-    WHERE p.id = ${id}::uuid OR p.slug = ${id}
-  `;
+  // Determine if id looks like a UUID
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  
+  let projects;
+  if (isUuid) {
+    projects = await sql`
+      SELECT p.*, 
+             u.display_name as owner_name,
+             u.email as owner_email,
+             u.avatar_url as owner_avatar,
+             prop.title as linked_proposal_title
+      FROM projects p
+      LEFT JOIN users u ON p.owner_id = u.id
+      LEFT JOIN proposals prop ON p.linked_proposal_id = prop.id
+      WHERE p.id = ${id}::uuid
+    `;
+  } else {
+    projects = await sql`
+      SELECT p.*, 
+             u.display_name as owner_name,
+             u.email as owner_email,
+             u.avatar_url as owner_avatar,
+             prop.title as linked_proposal_title
+      FROM projects p
+      LEFT JOIN users u ON p.owner_id = u.id
+      LEFT JOIN proposals prop ON p.linked_proposal_id = prop.id
+      WHERE p.slug = ${id}
+    `;
+  }
 
   if (projects.length === 0) {
     return jsonResponse({ error: 'Project not found' }, 404);
