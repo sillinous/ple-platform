@@ -18,23 +18,23 @@ export async function ensureDatabase() {
   if (migrationChecked) return;
   
   try {
-    // Quick check - if users table exists, we're good
-    const check = await sql`SELECT EXISTS (
-      SELECT FROM information_schema.tables 
-      WHERE table_name = 'users'
-    )`;
+    // Check if ALL required tables exist (including new ones)
+    const check = await sql`SELECT COUNT(*) as count FROM information_schema.tables 
+      WHERE table_name IN ('users', 'projects', 'tasks', 'content_items', 'milestones', 'working_groups', 'comments', 'tags')
+        AND table_schema = 'public'`;
     
-    if (check[0]?.exists) {
+    const expectedTables = 8; // Number of key tables
+    if (parseInt(check[0]?.count) >= expectedTables) {
       migrationChecked = true;
       return;
     }
     
-    // Run migrations
-    console.log('🚀 Running database initialization...');
+    // Run migrations - some tables missing
+    console.log('🚀 Running database migration (some tables missing)...');
     await runMigrations();
     
     migrationChecked = true;
-    console.log('✅ Database initialized successfully');
+    console.log('✅ Database migration complete');
   } catch (error) {
     console.error('Database initialization error:', error);
     migrationChecked = true;
