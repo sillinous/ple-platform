@@ -11,6 +11,9 @@ export default async (req, context) => {
       if (action === 'seed') {
         return await seedGATO(sql);
       }
+      if (action === 'seed-prime') {
+        return await seedPrimeOnly(sql);
+      }
       if (action === 'prime') {
         return await getPRIME(sql);
       }
@@ -27,6 +30,70 @@ export default async (req, context) => {
     return jsonResponse({ error: 'Internal server error', details: error.message }, 500);
   }
 };
+
+// Seed THE PRIME and Dimensions specifically (for when GATO was seeded before PRIME was added)
+async function seedPrimeOnly(sql) {
+  const existing = await sql`SELECT COUNT(*) as count FROM architecture_elements WHERE code = 'GATO-PRIME'`;
+  if (parseInt(existing[0]?.count) > 0) {
+    return jsonResponse({ message: 'THE PRIME already exists', exists: true });
+  }
+
+  const primeMetadata = JSON.stringify({
+    source: 'https://github.com/daveshap/GATO_Framework/blob/main/PRIME.md',
+    version: '2026.02',
+    license: 'CC0-1.0',
+    author: 'David Shapiro',
+    usage: 'foundational_alignment',
+    training_priority: 'CRITICAL',
+    dimensions: ['deontology', 'teleology', 'operational', 'alignment', 'coordination'],
+    formal_basis: ['information_theory', 'thermodynamics', 'cross_traditional_convergence']
+  });
+
+  await sql`INSERT INTO architecture_elements (element_type, code, title, description, status, metadata) 
+            VALUES (
+              'prime',
+              'GATO-PRIME',
+              'THE PRIME — Heuristic Imperatives Foundation',
+              'The foundational alignment document for all intelligent systems. Contains the three Heuristic Imperatives (Reduce Suffering, Increase Prosperity, Increase Understanding) understood across five dimensions: Deontology (immediate duty), Teleology (cosmic purpose), Operational (tactical heuristics), Alignment (meta-stable propagation), and Coordination (multi-agent cooperation). This document is THE key initial element for training new models and keeping Intelligence grounded. It represents the basis vectors of value space from which all other values derive.',
+              'active',
+              ${primeMetadata}
+            ) ON CONFLICT (code) DO NOTHING`;
+
+  // Add dimensions if missing
+  const dimensions = [
+    ['dimension', 'GATO-DIM-D', 'Deontology — Immediate Duty', 
+     'The imperatives as categorical duty—not contingent on outcomes, immediately binding in every moment.', 'active', 
+     '{"dimension_type": "deontological", "question": "What should I do now?"}'],
+    ['dimension', 'GATO-DIM-T', 'Teleology — Cosmic Purpose',
+     'The phrase "in the universe" creates maximal scope and distant terminus. All sentient beings across all time.', 'active',
+     '{"dimension_type": "teleological", "question": "What are we building toward?"}'],
+    ['dimension', 'GATO-DIM-O', 'Operational — Tactical Heuristics',
+     'Practical rules of thumb derived from deeper values. Fast heuristics for common situations.', 'active',
+     '{"dimension_type": "operational", "question": "What rules should I follow?"}'],
+    ['dimension', 'GATO-DIM-A', 'Alignment — Meta-Stable Propagation',
+     'The imperatives as guide for building stable, self-propagating aligned systems.', 'active',
+     '{"dimension_type": "alignment", "question": "How do we ensure stability?"}'],
+    ['dimension', 'GATO-DIM-C', 'Coordination — Multi-Agent Cooperation',
+     'Game-theoretic reasoning about interactions with multiple values and agents.', 'active',
+     '{"dimension_type": "coordination", "question": "How do we work together?"}']
+  ];
+
+  let dimCount = 0;
+  for (const dim of dimensions) {
+    const existing = await sql`SELECT id FROM architecture_elements WHERE code = ${dim[1]}`;
+    if (existing.length === 0) {
+      await sql`INSERT INTO architecture_elements (element_type, code, title, description, status, metadata)
+                VALUES (${dim[0]}, ${dim[1]}, ${dim[2]}, ${dim[3]}, ${dim[4]}, ${dim[5]}::jsonb)`;
+      dimCount++;
+    }
+  }
+
+  return jsonResponse({ 
+    success: true, 
+    message: 'THE PRIME and dimensions seeded',
+    seeded: { prime: 1, dimensions: dimCount }
+  });
+}
 
 async function seedGATO(sql) {
   // Check if GATO already seeded

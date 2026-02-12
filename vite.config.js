@@ -20,6 +20,9 @@ export default defineConfig({
         architecture: 'architecture.html',
         gato: 'gato.html',
         prime: 'prime.html',
+        projects: 'projects.html',
+        'project-view': 'project-view.html',
+        content: 'content.html',
       }
     }
   }
