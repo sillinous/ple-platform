@@ -9,6 +9,7 @@ const sql = neon();
 
 // Migration status tracking (per-instance, runs once per cold start)
 let migrationChecked = false;
+const SEED_VERSION = 2; // Increment to force re-seed
 
 /**
  * Ensure database is initialized before any query
@@ -338,9 +339,15 @@ async function runMigrations() {
 }
 
 async function seedProjects() {
-  // Check if already seeded
-  const existing = await sql`SELECT COUNT(*) as count FROM projects`;
-  if (existing[0]?.count > 0) return;
+  // Check if enriched seed has already been applied (look for system user)
+  const systemCheck = await sql`SELECT COUNT(*) as count FROM users WHERE email = 'system@postlaboreconomics.com'`;
+  if (parseInt(systemCheck[0]?.count) > 0) return;
+
+  // Remove old placeholder projects (no owner, no tasks) and replace with enriched versions
+  await sql`DELETE FROM tasks WHERE project_id IN (SELECT id FROM projects WHERE owner_id IS NULL)`;
+  await sql`DELETE FROM milestones WHERE project_id IN (SELECT id FROM projects WHERE owner_id IS NULL)`;
+  await sql`DELETE FROM working_groups WHERE project_id IN (SELECT id FROM projects WHERE owner_id IS NULL)`;
+  await sql`DELETE FROM projects WHERE owner_id IS NULL`;
 
   // Create a system user for seeded content
   const systemUserId = '00000000-0000-0000-0000-000000000001';
