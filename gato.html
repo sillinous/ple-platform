@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GATO Framework | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <span class="logo-symbol">L/0</span>
+        <span class="logo-text">Post-Labor Economics</span>
+      </a>
+      
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="gato.html" class="nav-link active">GATO</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+      </nav>
+      
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Page Header -->
+      <div class="section-header">
+        <div class="gato-badge">
+          <span class="badge-icon">🐱</span>
+          <span class="badge-text">Integrated Framework</span>
+        </div>
+        <h1 class="page-title">GATO Framework</h1>
+        <p class="page-description">
+          <strong>Global Alignment Taxonomy Omnibus</strong> — A comprehensive framework for AI alignment 
+          integrated with Post-Labor Economics. Together, we build pathways to a prosperous, 
+          aligned future where AI serves humanity's flourishing.
+        </p>
+        <div class="gato-source">
+          <a href="https://github.com/daveshap/GATO_Framework" target="_blank" rel="noopener" class="source-link">
+            <i data-lucide="github"></i>
+            <span>View on GitHub</span>
+          </a>
+          <a href="https://www.gatoframework.org/" target="_blank" rel="noopener" class="source-link">
+            <i data-lucide="external-link"></i>
+            <span>gatoframework.org</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Not Seeded Alert -->
+      <div id="seed-alert" class="alert alert-info" style="display: none;">
+        <i data-lucide="database"></i>
+        <div>
+          <strong>GATO Framework not yet initialized</strong>
+          <p>Click the button below to seed the GATO framework data into the architecture.</p>
+        </div>
+        <button id="seed-btn" class="btn btn-primary">Initialize GATO</button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading-state" class="loading">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Main Content (hidden until loaded) -->
+      <div id="main-content" style="display: none;">
+        
+        <!-- Heuristic Imperatives -->
+        <section class="gato-section">
+          <div class="section-intro">
+            <h2 class="section-title">
+              <i data-lucide="compass"></i>
+              Heuristic Imperatives
+            </h2>
+            <p>Universal principles guiding AI behavior toward beneficial outcomes. These form the ethical foundation of aligned AI systems.</p>
+          </div>
+          
+          <div class="imperatives-grid" id="imperatives-container">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Seven Layers -->
+        <section class="gato-section">
+          <div class="section-intro">
+            <h2 class="section-title">
+              <i data-lucide="layers"></i>
+              The Seven Layers
+            </h2>
+            <p>A structured, hierarchical approach to global AI alignment—from model training to worldwide consensus.</p>
+          </div>
+          
+          <div class="layers-stack" id="layers-container">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- PLE-GATO Alignment -->
+        <section class="gato-section alignment-section">
+          <div class="section-intro">
+            <h2 class="section-title">
+              <i data-lucide="git-merge"></i>
+              PLE × GATO Alignment
+            </h2>
+            <p>How Post-Labor Economics and the GATO Framework reinforce each other toward shared goals.</p>
+          </div>
+          
+          <div class="alignment-grid" id="alignment-container">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Traditions -->
+        <section class="gato-section">
+          <div class="section-intro">
+            <h2 class="section-title">
+              <i data-lucide="flame"></i>
+              The Ten Traditions
+            </h2>
+            <p>Guiding principles for action during the journey to axiomatic alignment. Individual behaviors that aggregate to collective impact.</p>
+          </div>
+          
+          <div class="traditions-grid" id="traditions-container">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Attractor States -->
+        <section class="gato-section">
+          <div class="section-intro">
+            <h2 class="section-title">
+              <i data-lucide="target"></i>
+              Attractor States
+            </h2>
+            <p>Potential large-scale outcomes toward which our systems tend to evolve. We work to pull humanity toward Utopia.</p>
+          </div>
+          
+          <div class="attractors-grid" id="attractors-container">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="gato-cta">
+          <div class="cta-content">
+            <h2>Join the Alignment Movement</h2>
+            <p>Whether you're a developer, policymaker, educator, or citizen—there's a role for you in building an aligned future.</p>
+            <div class="cta-actions">
+              <a href="register.html" class="btn btn-primary btn-lg">Get Involved</a>
+              <a href="proposals.html" class="btn btn-secondary btn-lg">View Proposals</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    .gato-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+      color: var(--color-bg-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    
+    .gato-source {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    
+    .source-link:hover {
+      color: var(--color-accent);
+    }
+    
+    .source-link svg {
+      width: 1rem;
+      height: 1rem;
+    }
+    
+    .alert {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    
+    .alert-info {
+      background: rgba(244, 162, 97, 0.1);
+      border: 1px solid var(--color-accent);
+    }
+    
+    .alert svg {
+      flex-shrink: 0;
+      color: var(--color-accent);
+    }
+    
+    .alert p {
+      margin: 0.25rem 0 0;
+      font-size: 0.875rem;
+      opacity: 0.8;
+    }
+    
+    .gato-section {
+      margin: 4rem 0;
+    }
+    
+    .section-intro {
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      color: var(--color-text-primary);
+      margin-bottom: 0.75rem;
+    }
+    
+    .section-title svg {
+      color: var(--color-accent);
+    }
+    
+    .section-intro p {
+      color: var(--color-text-secondary);
+      font-size: 1.1rem;
+      max-width: 800px;
+    }
+    
+    /* Imperatives */
+    .imperatives-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    
+    @media (max-width: 900px) {
+      .imperatives-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .imperative-card {
+      background: var(--color-bg-secondary);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s;
+    }
+    
+    .imperative-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-4px);
+    }
+    
+    .imperative-card.reduce { --accent: #e76f51; }
+    .imperative-card.prosperity { --accent: #2a9d8f; }
+    .imperative-card.understanding { --accent: #e9c46a; }
+    
+    .imperative-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, white));
+    }
+    
+    .imperative-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .imperative-desc {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    /* Layers */
+    .layers-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .layer-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      background: var(--color-bg-secondary);
+      border-radius: 0.75rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.2s;
+    }
+    
+    .layer-card:hover {
+      border-color: var(--color-primary);
+      background: var(--color-bg-tertiary);
+    }
+    
+    .layer-number {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+    
+    .layer-content h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .layer-content p {
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    
+    /* Alignment Grid */
+    .alignment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .alignment-card {
+      background: var(--color-bg-secondary);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      border: 1px solid var(--color-border);
+    }
+    
+    .alignment-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .alignment-arrow {
+      color: var(--color-accent);
+    }
+    
+    .alignment-source, .alignment-target {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+    
+    .alignment-source {
+      background: rgba(244, 162, 97, 0.2);
+      color: var(--color-accent);
+    }
+    
+    .alignment-target {
+      background: rgba(27, 77, 62, 0.2);
+      color: var(--color-primary);
+    }
+    
+    .alignment-desc {
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+    }
+    
+    /* Traditions */
+    .traditions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    
+    .tradition-card {
+      display: flex;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: var(--color-bg-secondary);
+      border-radius: 0.75rem;
+      border: 1px solid var(--color-border);
+    }
+    
+    .tradition-num {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--color-accent);
+      color: var(--color-bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+    
+    .tradition-content h4 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .tradition-content p {
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+      margin: 0;
+    }
+    
+    /* Attractors */
+    .attractors-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+      .attractors-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .attractor-card {
+      padding: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+    }
+    
+    .attractor-card.utopia {
+      background: linear-gradient(135deg, rgba(42, 157, 143, 0.2), rgba(42, 157, 143, 0.05));
+      border: 2px solid #2a9d8f;
+    }
+    
+    .attractor-card.dystopia {
+      background: linear-gradient(135deg, rgba(231, 111, 81, 0.2), rgba(231, 111, 81, 0.05));
+      border: 2px solid #e76f51;
+    }
+    
+    .attractor-card.extinction {
+      background: linear-gradient(135deg, rgba(100, 100, 100, 0.2), rgba(100, 100, 100, 0.05));
+      border: 2px solid #666;
+    }
+    
+    .attractor-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .attractor-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .attractor-desc {
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    /* CTA */
+    .gato-cta {
+      margin: 4rem 0 2rem;
+      padding: 3rem;
+      background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 80%, black));
+      border-radius: 1.5rem;
+      text-align: center;
+    }
+    
+    .gato-cta h2 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: white;
+      margin-bottom: 0.75rem;
+    }
+    
+    .gato-cta p {
+      color: rgba(255,255,255,0.85);
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .cta-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn-lg {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.25);
+    }
+  </style>
+
+  <script type="module">
+    import { auth, initPage, updateAuthUI } from './src/scripts/api.js';
+    
+    // Initialize page
+    await initPage();
+    lucide.createIcons();
+    
+    // Load GATO data
+    loadGATO();
+    
+    async function loadGATO() {
+      try {
+        const response = await fetch('/api/gato');
+        const data = await response.json();
+        
+        document.getElementById('loading-state').style.display = 'none';
+        
+        if (!data.seeded) {
+          document.getElementById('seed-alert').style.display = 'flex';
+          document.getElementById('seed-btn').addEventListener('click', seedGATO);
+        } else {
+          document.getElementById('main-content').style.display = 'block';
+          renderGATO(data);
+        }
+      } catch (error) {
+        console.error('Failed to load GATO:', error);
+        document.getElementById('loading-state').innerHTML = '<p class="error">Failed to load GATO Framework</p>';
+      }
+    }
+    
+    async function seedGATO() {
+      const btn = document.getElementById('seed-btn');
+      btn.disabled = true;
+      btn.textContent = 'Initializing...';
+      
+      try {
+        const response = await fetch('/api/gato?action=seed');
+        const data = await response.json();
+        
+        if (data.success) {
+          location.reload();
+        } else {
+          alert('Failed to seed GATO: ' + (data.message || 'Unknown error'));
+          btn.disabled = false;
+          btn.textContent = 'Initialize GATO';
+        }
+      } catch (error) {
+        alert('Failed to seed GATO: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Initialize GATO';
+      }
+    }
+    
+    function renderGATO(data) {
+      // Render Imperatives
+      const imperativesHtml = data.imperatives.map(imp => {
+        const iconMap = {
+          'GATO-HI-001': { icon: '💔', class: 'reduce' },
+          'GATO-HI-002': { icon: '🌱', class: 'prosperity' },
+          'GATO-HI-003': { icon: '💡', class: 'understanding' }
+        };
+        const config = iconMap[imp.code] || { icon: '⭐', class: '' };
+        return `
+          <div class="imperative-card ${config.class}">
+            <div class="imperative-icon">${config.icon}</div>
+            <h3 class="imperative-title">${imp.title.replace('Reduce Suffering', 'Reduce Suffering').replace('Increase Prosperity', 'Increase Prosperity').replace('Increase Understanding', 'Increase Understanding')}</h3>
+            <p class="imperative-desc">${imp.description}</p>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('imperatives-container').innerHTML = imperativesHtml;
+      
+      // Render Layers
+      const layersHtml = data.layers.map((layer, i) => `
+        <div class="layer-card">
+          <div class="layer-number">${i + 1}</div>
+          <div class="layer-content">
+            <h3>${layer.title}</h3>
+            <p>${layer.description}</p>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('layers-container').innerHTML = layersHtml;
+      
+      // Render Relationships (PLE-GATO Alignment)
+      const alignmentHtml = data.relationships.map(rel => `
+        <div class="alignment-card">
+          <div class="alignment-header">
+            <span class="alignment-source">${rel.source.code}</span>
+            <i data-lucide="arrow-right" class="alignment-arrow"></i>
+            <span class="alignment-target">${rel.target.code}</span>
+          </div>
+          <p class="alignment-desc">${rel.description}</p>
+        </div>
+      `).join('');
+      document.getElementById('alignment-container').innerHTML = alignmentHtml || '<p class="empty-state">No relationships mapped yet.</p>';
+      
+      // Render Traditions
+      const traditionsHtml = data.traditions.map((trad, i) => `
+        <div class="tradition-card">
+          <div class="tradition-num">${i + 1}</div>
+          <div class="tradition-content">
+            <h4>${trad.title}</h4>
+            <p>${trad.description}</p>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('traditions-container').innerHTML = traditionsHtml;
+      
+      // Render Attractors
+      const attractorIcons = {
+        'GATO-AS-U': { icon: '🌅', class: 'utopia' },
+        'GATO-AS-D': { icon: '⛓️', class: 'dystopia' },
+        'GATO-AS-E': { icon: '💀', class: 'extinction' }
+      };
+      const attractorsHtml = data.attractors.map(att => {
+        const config = attractorIcons[att.code] || { icon: '❓', class: '' };
+        return `
+          <div class="attractor-card ${config.class}">
+            <div class="attractor-icon">${config.icon}</div>
+            <h3 class="attractor-title">${att.title.replace(' Attractor', '')}</h3>
+            <p class="attractor-desc">${att.description}</p>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('attractors-container').innerHTML = attractorsHtml;
+      
+      // Re-initialize icons
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

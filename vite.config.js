@@ -18,6 +18,7 @@ export default defineConfig({
         'proposal-view': 'proposal-view.html',
         discussions: 'discussions.html',
         architecture: 'architecture.html',
+        gato: 'gato.html',
       }
     }
   }
