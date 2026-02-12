@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discussion | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .disc-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .back-link:hover { color: var(--color-horizon); }
+    .disc-header { margin-bottom: 2rem; }
+    .disc-title { font-family: var(--font-display); font-size: 2rem; font-weight: 600; margin: 0 0 0.75rem; line-height: 1.3; }
+    .disc-meta { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; font-size: 0.9rem; color: var(--text-muted); }
+    .disc-meta-item { display: flex; align-items: center; gap: 0.35rem; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--color-horizon); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
+    .avatar-sm { width: 28px; height: 28px; font-size: 0.65rem; }
+    .disc-body { font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 2.5rem; white-space: pre-wrap; }
+    .disc-body p { margin-bottom: 1rem; }
+    .replies-section { border-top: 1px solid var(--border-color); padding-top: 2rem; }
+    .replies-header { font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 1.5rem; }
+    .reply-card { padding: 1.25rem 0; border-bottom: 1px solid var(--color-gray-50); }
+    .reply-card:last-child { border-bottom: none; }
+    .reply-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .reply-author { font-weight: 600; font-size: 0.9rem; }
+    .reply-time { font-size: 0.8rem; color: var(--text-muted); }
+    .reply-body { font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; padding-left: 2.5rem; }
+    .reply-form { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+    .reply-form textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 0.95rem; resize: vertical; min-height: 100px; background: var(--bg-secondary); }
+    .reply-form textarea:focus { outline: none; border-color: var(--color-horizon); }
+    .reply-form-actions { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
+    .loading-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .error-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .toast { position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:#1B4D3E;color:white;padding:0.75rem 1.5rem;border-radius:8px;font-size:0.9rem;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:10000;transition:transform 0.3s;pointer-events:none; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast-error { background:#991B1B; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+      <nav class="nav-menu">
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link active">Discussions</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+      </nav>
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="disc-container">
+      <a href="discussions.html" class="back-link"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Back to Discussions</a>
+
+      <div id="loading" class="loading-state"><p>Loading discussion...</p></div>
+      <div id="error" class="error-state" style="display:none"><p>Discussion not found.</p><a href="discussions.html" class="btn btn-primary" style="margin-top:1rem">Browse Discussions</a></div>
+
+      <article id="discussion" style="display:none">
+        <div class="disc-header">
+          <h1 class="disc-title" id="disc-title"></h1>
+          <div class="disc-meta">
+            <div class="disc-meta-item"><div class="avatar" id="disc-avatar"></div><span id="disc-author"></span></div>
+            <div class="disc-meta-item"><i data-lucide="clock" style="width:14px;height:14px"></i><span id="disc-date"></span></div>
+            <div class="disc-meta-item"><i data-lucide="message-square" style="width:14px;height:14px"></i><span id="disc-reply-count"></span></div>
+          </div>
+        </div>
+        <div class="disc-body" id="disc-body"></div>
+
+        <div class="replies-section">
+          <h3 class="replies-header" id="replies-header">Replies</h3>
+          <div id="replies-list"></div>
+
+          <div class="reply-form" id="reply-form" style="display:none">
+            <textarea id="reply-content" placeholder="Share your thoughts..."></textarea>
+            <div class="reply-form-actions"><button class="btn btn-primary" id="submit-reply">Post Reply</button></div>
+          </div>
+          <div id="login-prompt" style="display:none;margin-top:1.5rem;padding:1rem;background:var(--bg-secondary);border-radius:8px;text-align:center;font-size:0.9rem;color:var(--text-muted);">
+            <a href="login.html" style="color:var(--color-horizon)">Sign in</a> to join the discussion
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    let currentUser = null, discId = null;
+    const params = new URLSearchParams(window.location.search);
+    discId = params.get('id');
+    const authH = () => { const h={'Content-Type':'application/json'}; const t=localStorage.getItem('ple_token'); if(t) h['Authorization']=`Bearer ${t}`; return h; };
+    const esc = s => { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; };
+    function fmtDate(d) { return new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); }
+    function fmtRel(d) { if(!d)return ''; const ms=Date.now()-new Date(d).getTime(); if(ms<60000)return 'just now'; if(ms<3600000)return Math.floor(ms/60000)+'m ago'; if(ms<86400000)return Math.floor(ms/3600000)+'h ago'; if(ms<604800000)return Math.floor(ms/86400000)+'d ago'; return fmtDate(d); }
+    function toast(msg,err){const t=document.createElement('div');t.className='toast'+(err?' toast-error':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000);}
+    function initials(name){return(name||'?').split(' ').map(n=>n[0]).join('').toUpperCase();}
+
+    async function checkAuth(){
+      const token=localStorage.getItem('ple_token'); if(!token){showLoginUI();return;}
+      try{const r=await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});
+        if(r.ok){const d=await r.json();currentUser=d.user||d;
+          document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');
+          document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');
+          document.getElementById('reply-form').style.display='block';
+        } else showLoginUI();
+      }catch(e){showLoginUI();}
+    }
+    function showLoginUI(){document.getElementById('login-prompt').style.display='block';}
+
+    async function loadDiscussion(){
+      if(!discId){showError();return;}
+      try{const r=await fetch(`/api/discussions?id=${discId}`,{headers:authH()});
+        if(!r.ok){showError();return;}
+        const data=await r.json();
+        if(!data.discussion){showError();return;}
+        render(data.discussion, data.replies||[]);
+      }catch(e){console.error(e);showError();}
+    }
+
+    function render(disc, replies){
+      document.title=`${disc.title||'Discussion'} | PLE`;
+      document.getElementById('disc-title').textContent=disc.title||'Untitled Discussion';
+      const name=disc.author?.name||'Anonymous';
+      document.getElementById('disc-avatar').textContent=initials(name);
+      document.getElementById('disc-author').textContent=name;
+      document.getElementById('disc-date').textContent=fmtDate(disc.createdAt);
+      document.getElementById('disc-reply-count').textContent=`${replies.length} repl${replies.length===1?'y':'ies'}`;
+      document.getElementById('disc-body').textContent=disc.content;
+      document.getElementById('replies-header').textContent=`${replies.length} Repl${replies.length===1?'y':'ies'}`;
+      const list=document.getElementById('replies-list');
+      if(replies.length===0){list.innerHTML='<p style="color:var(--text-muted);font-size:0.9rem;padding:1rem 0">No replies yet. Be the first to respond.</p>';}
+      else{list.innerHTML=replies.map(r=>{
+        const rn=r.author?.name||'Anonymous';
+        return`<div class="reply-card"><div class="reply-head"><div class="avatar avatar-sm">${initials(rn)}</div><span class="reply-author">${esc(rn)}</span><span class="reply-time">${fmtRel(r.createdAt)}</span></div><div class="reply-body">${esc(r.content)}</div></div>`;
+      }).join('');}
+      document.getElementById('loading').style.display='none';
+      document.getElementById('discussion').style.display='block';
+      lucide.createIcons();
+    }
+
+    function showError(){document.getElementById('loading').style.display='none';document.getElementById('error').style.display='block';}
+
+    document.getElementById('submit-reply').addEventListener('click',async()=>{
+      const content=document.getElementById('reply-content').value.trim();
+      if(!content){toast('Write something first',true);return;}
+      try{const r=await fetch('/api/discussions',{method:'POST',headers:authH(),body:JSON.stringify({content,parentId:discId})});
+        if(r.ok){document.getElementById('reply-content').value='';toast('Reply posted');loadDiscussion();}
+        else{const e=await r.json();toast(e.error||'Failed',true);}
+      }catch(e){toast('Failed to post reply',true);}
+    });
+
+    checkAuth();
+    loadDiscussion();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

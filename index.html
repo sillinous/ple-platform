@@ -24,10 +24,11 @@
       </a>
       
       <nav class="nav-menu">
-        <a href="architecture.html" class="nav-link">Architecture</a>
-        <a href="gato.html" class="nav-link">GATO</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="content.html" class="nav-link">Content</a>
         <a href="proposals.html" class="nav-link">Proposals</a>
         <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
       </nav>
       
       <div class="header-actions">
@@ -61,51 +62,45 @@
     </div>
   </section>
 
-  <!-- Stats Section -->
+  <!-- Live Stats Section -->
   <section class="section">
     <div class="container">
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-value" id="goals-count">9</div>
-          <div class="stat-label">Strategic Goals</div>
+          <div class="stat-value" id="content-count">-</div>
+          <div class="stat-label">Published Articles</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="strategies-count">6</div>
-          <div class="stat-label">Key Strategies</div>
+          <div class="stat-value" id="projects-count">-</div>
+          <div class="stat-label">Active Projects</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="capabilities-count">8</div>
-          <div class="stat-label">Core Capabilities</div>
+          <div class="stat-value" id="proposals-count">-</div>
+          <div class="stat-label">Community Proposals</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="principles-count">10</div>
-          <div class="stat-label">Guiding Principles</div>
+          <div class="stat-value" id="elements-count">-</div>
+          <div class="stat-label">Architecture Elements</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Architecture Preview -->
+  <!-- Latest Content -->
   <section class="section section-muted">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">Our Architecture Framework</h2>
+        <h2 class="section-title">Latest from the Community</h2>
         <p class="section-description">
-          A comprehensive TOGAF-aligned framework for building post-labor economic systems.
+          Research, analysis, and policy frameworks from contributors building the post-labor future.
         </p>
       </div>
-      
-      <div class="architecture-preview" id="architecture-preview">
-        <div class="loading">
-          <div class="loading-spinner"></div>
-        </div>
+      <div id="latest-content">
+        <div class="loading"><div class="loading-spinner"></div></div>
       </div>
-      
-      <div class="section-footer">
-        <a href="architecture.html" class="btn btn-outline">
-          Explore Full Architecture
-          <i data-lucide="arrow-right"></i>
-        </a>
+      <div class="section-footer" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="content.html" class="btn btn-outline">Browse All Content <i data-lucide="arrow-right"></i></a>
+        <a href="projects.html" class="btn btn-outline">View Projects <i data-lucide="arrow-right"></i></a>
       </div>
     </div>
   </section>
@@ -176,15 +171,18 @@
         
         <div class="footer-links">
           <h4>Platform</h4>
-          <a href="architecture.html">Architecture</a>
+          <a href="projects.html">Projects</a>
+          <a href="content.html">Content</a>
           <a href="proposals.html">Proposals</a>
           <a href="discussions.html">Discussions</a>
+          <a href="architecture.html">Architecture</a>
         </div>
         
         <div class="footer-links">
           <h4>Resources</h4>
           <a href="about.html">About</a>
-          <a href="https://daveshap.substack.com" target="_blank">Newsletter</a>
+          <a href="gato.html">GATO Framework</a>
+          <a href="prime.html">THE PRIME</a>
         </div>
         
         <div class="footer-links">
@@ -201,42 +199,40 @@
   </footer>
 
   <script type="module">
-    import { architecture, proposals, activity, formatDate, initPage } from './src/scripts/api.js';
+    import { proposals, activity, formatDate, initPage } from './src/scripts/api.js';
     
-    // Load architecture preview
-    async function loadArchitecture() {
+    // Load live stats
+    async function loadStats() {
       try {
-        const data = await architecture.list();
-        const container = document.getElementById('architecture-preview');
-        
-        const html = `
-          <div class="element-grid">
-            ${data.grouped.goals.slice(0, 3).map(el => `
-              <div class="element-card">
-                <div class="element-card-header">
-                  <span class="element-code goal">${el.code}</span>
-                </div>
-                <h4 class="element-title">${el.title}</h4>
-                <p class="element-description">${el.description || ''}</p>
-              </div>
-            `).join('')}
-          </div>
-        `;
-        
-        container.innerHTML = html;
-        
-        // Update stats
-        document.getElementById('goals-count').textContent = data.grouped.goals.length;
-        document.getElementById('strategies-count').textContent = data.grouped.strategies.length;
-        document.getElementById('capabilities-count').textContent = data.grouped.capabilities.length;
-        document.getElementById('principles-count').textContent = data.grouped.principles.length;
-      } catch (e) {
-        document.getElementById('architecture-preview').innerHTML = `
-          <div class="empty-state">
-            <p>Architecture data will appear once the platform is deployed.</p>
-          </div>
-        `;
-      }
+        const [cR, pR, prR, archR] = await Promise.allSettled([
+          fetch('/api/content?limit=1').then(r=>r.json()),
+          fetch('/api/projects?limit=1').then(r=>r.json()),
+          proposals.list({limit:1}),
+          fetch('/api/architecture').then(r=>r.json())
+        ]);
+        if(cR.status==='fulfilled') document.getElementById('content-count').textContent = cR.value.total||0;
+        if(pR.status==='fulfilled') document.getElementById('projects-count').textContent = pR.value.total||0;
+        if(prR.status==='fulfilled') document.getElementById('proposals-count').textContent = prR.value.total||0;
+        if(archR.status==='fulfilled') document.getElementById('elements-count').textContent = archR.value.total||0;
+      } catch(e) { console.error('Stats:', e); }
+    }
+
+    // Load latest content
+    async function loadContent() {
+      try {
+        const data = await fetch('/api/content?limit=4&status=published').then(r=>r.json());
+        const el = document.getElementById('latest-content');
+        if (!data.content?.length) { el.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Content coming soon.</p>'; return; }
+        el.innerHTML = `<div class="element-grid">${data.content.map(c => `
+          <a href="content-view.html?id=${c.id}" class="element-card" style="text-decoration:none;color:inherit;cursor:pointer;transition:box-shadow 0.2s;">
+            <div class="element-card-header">
+              <span class="element-code goal" style="font-size:0.7rem">${(c.contentType||'article').replace('_',' ').toUpperCase()}</span>
+            </div>
+            <h4 class="element-title">${c.title}</h4>
+            <p class="element-description">${c.excerpt||(c.body||'').substring(0,120)+'...'}</p>
+          </a>
+        `).join('')}</div>`;
+      } catch(e) { document.getElementById('latest-content').innerHTML=''; }
     }
     
     // Load recent proposals
@@ -246,16 +242,8 @@
         const container = document.getElementById('recent-proposals');
         
         if (data.proposals.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <i data-lucide="file-text" class="empty-state-icon"></i>
-              <h4 class="empty-state-title">No Proposals Yet</h4>
-              <p class="empty-state-description">Be the first to submit a proposal!</p>
-              <a href="proposal-create.html" class="btn btn-primary">Create Proposal</a>
-            </div>
-          `;
-          lucide.createIcons();
-          return;
+          container.innerHTML = '<div class="empty-state"><p>No proposals yet. Be the first!</p><a href="proposal-create.html" class="btn btn-primary">Create Proposal</a></div>';
+          lucide.createIcons(); return;
         }
         
         container.innerHTML = data.proposals.map(p => `
@@ -263,34 +251,17 @@
             <div class="proposal-card-header">
               <span class="proposal-type-badge ${p.proposalType}">${p.proposalType.replace('_', ' ')}</span>
             </div>
-            <h4 class="proposal-title">
-              <a href="proposal-view.html?id=${p.id}">${p.title}</a>
-            </h4>
+            <h4 class="proposal-title"><a href="proposal-view.html?id=${p.id}">${p.title}</a></h4>
             <p class="proposal-excerpt">${p.content.substring(0, 150)}${p.content.length > 150 ? '...' : ''}</p>
             <div class="proposal-meta">
-              <span class="proposal-meta-item">
-                <i data-lucide="user"></i>
-                ${p.author?.name || 'Anonymous'}
-              </span>
-              <span class="proposal-meta-item">
-                <i data-lucide="message-square"></i>
-                ${p.commentCount} comments
-              </span>
-              <span class="proposal-meta-item">
-                <i data-lucide="clock"></i>
-                ${formatDate(p.createdAt)}
-              </span>
+              <span class="proposal-meta-item"><i data-lucide="user"></i>${p.author?.name || 'Anonymous'}</span>
+              <span class="proposal-meta-item"><i data-lucide="clock"></i>${formatDate(p.createdAt)}</span>
             </div>
           </div>
         `).join('');
-        
         lucide.createIcons();
       } catch (e) {
-        document.getElementById('recent-proposals').innerHTML = `
-          <div class="empty-state">
-            <p>Proposals will appear once the platform is deployed.</p>
-          </div>
-        `;
+        document.getElementById('recent-proposals').innerHTML = '<p style="color:var(--text-muted)">Unable to load proposals.</p>';
       }
     }
     
@@ -301,55 +272,26 @@
         const container = document.getElementById('activity-feed');
         
         if (data.activities.length === 0) {
-          container.innerHTML = `
-            <div class="activity-feed-header">Latest Updates</div>
-            <div class="empty-state">
-              <p>Activity will appear as the community grows.</p>
-            </div>
-          `;
+          container.innerHTML = '<div class="activity-feed-header">Latest Updates</div><p style="color:var(--text-muted);padding:1rem 0">Activity will appear as the community grows.</p>';
           return;
         }
         
-        container.innerHTML = `
-          <div class="activity-feed-header">Latest Updates</div>
-          ${data.activities.map(a => `
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i data-lucide="${getActivityIcon(a.action)}"></i>
-              </div>
-              <div class="activity-content">
-                <div class="activity-description">${a.description}</div>
-                <div class="activity-time">${formatDate(a.createdAt)}</div>
-              </div>
-            </div>
-          `).join('')}
-        `;
-        
+        container.innerHTML = `<div class="activity-feed-header">Latest Updates</div>${data.activities.map(a => `
+          <div class="activity-item"><div class="activity-icon"><i data-lucide="${getIcon(a.action)}"></i></div><div class="activity-content"><div class="activity-description">${a.description}</div><div class="activity-time">${formatDate(a.createdAt)}</div></div></div>
+        `).join('')}`;
         lucide.createIcons();
       } catch (e) {
-        document.getElementById('activity-feed').innerHTML = `
-          <div class="activity-feed-header">Latest Updates</div>
-          <div class="empty-state">
-            <p>Activity will appear once the platform is deployed.</p>
-          </div>
-        `;
+        document.getElementById('activity-feed').innerHTML = '<div class="activity-feed-header">Latest Updates</div>';
       }
     }
     
-    function getActivityIcon(action) {
-      const icons = {
-        'user_registered': 'user-plus',
-        'proposal_created': 'file-plus',
-        'vote_cast': 'vote',
-        'discussion_created': 'message-square',
-        'reply_created': 'reply'
-      };
-      return icons[action] || 'activity';
+    function getIcon(a) {
+      return {'user_registered':'user-plus','proposal_created':'file-plus','vote_cast':'vote','discussion_created':'message-square','reply_created':'reply'}[a]||'activity';
     }
     
-    // Initialize
     await initPage();
-    loadArchitecture();
+    loadStats();
+    loadContent();
     loadProposals();
     loadActivity();
     lucide.createIcons();

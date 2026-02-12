@@ -25,6 +25,8 @@ export default defineConfig({
         content: 'content.html',
         'content-view': 'content-view.html',
         'content-editor': 'content-editor.html',
+        'discussion-view': 'discussion-view.html',
+        profile: 'profile.html',
       }
     }
   }

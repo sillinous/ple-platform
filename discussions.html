@@ -23,11 +23,11 @@
       </a>
       
       <nav class="nav-menu">
-        <a href="index.html" class="nav-link">Home</a>
-        <a href="architecture.html" class="nav-link">Architecture</a>
-        <a href="gato.html" class="nav-link">GATO</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="content.html" class="nav-link">Content</a>
         <a href="proposals.html" class="nav-link">Proposals</a>
         <a href="discussions.html" class="nav-link active">Discussions</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
       </nav>
       
       <div class="header-actions">
@@ -140,7 +140,7 @@
         container.innerHTML = data.discussions.map(d => `
           <div class="proposal-card">
             <h3 class="proposal-title" style="margin-bottom: 0.75rem;">
-              <a href="#" onclick="viewDiscussion('${d.id}'); return false;">${d.title || 'Untitled Discussion'}</a>
+              <a href="discussion-view.html?id=${d.id}">${d.title || 'Untitled Discussion'}</a>
             </h3>
             <p class="proposal-excerpt">${truncate(d.content, 200)}</p>
             <div class="proposal-meta">
@@ -170,17 +170,9 @@
       }
     }
     
-    // View discussion detail (simple inline expansion for now)
-    window.viewDiscussion = async (id) => {
-      try {
-        const data = await discussions.get(id);
-        const d = data.discussion;
-        
-        // Simple alert for now - in production, this would be a modal or separate page
-        alert(`${d.title}\n\n${d.content}\n\n${d.replyCount} replies`);
-      } catch (e) {
-        showToast('Failed to load discussion', 'error');
-      }
+    // View discussion detail
+    window.viewDiscussion = (id) => {
+      window.location = `discussion-view.html?id=${id}`;
     };
     
     function truncate(text, length) {
