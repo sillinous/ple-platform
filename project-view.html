@@ -276,7 +276,7 @@
       font-weight: 600;
     }
 
-    .add-task-btn {
+    .add-task-inline {
       width: 100%;
       padding: 0.75rem;
       border: 2px dashed var(--color-gray-300);
@@ -286,12 +286,89 @@
       cursor: pointer;
       font-size: 0.9rem;
       transition: all 0.2s;
+      margin-top: 0.75rem;
     }
 
-    .add-task-btn:hover {
+    .add-task-inline:hover {
       border-color: var(--color-horizon);
       color: var(--color-horizon);
     }
+
+    /* Drag and Drop */
+    .task-list.drag-over {
+      background: rgba(27, 77, 62, 0.05);
+      border: 2px dashed var(--color-horizon);
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin: -0.5rem;
+    }
+
+    .task-card.dragging {
+      opacity: 0.4;
+      transform: rotate(2deg);
+    }
+
+    /* Task card enhancements */
+    .task-milestone-tag {
+      font-size: 0.7rem;
+      color: var(--color-horizon);
+      background: rgba(27, 77, 62, 0.08);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .task-due {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .task-due.overdue {
+      color: #991B1B;
+      font-weight: 600;
+    }
+
+    /* Status quick buttons */
+    .status-quick-btn {
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .status-quick-btn:hover {
+      border-color: var(--color-horizon);
+      color: var(--color-horizon);
+    }
+
+    .status-quick-btn.active {
+      background: var(--color-horizon);
+      color: white;
+      border-color: var(--color-horizon);
+    }
+
+    /* Task detail status badges */
+    .status-badge.status-backlog { background: var(--color-gray-100); color: var(--color-gray-600); }
+    .status-badge.status-todo { background: rgba(108,99,255,0.1); color: #6c63ff; }
+    .status-badge.status-in_progress { background: rgba(244,162,97,0.15); color: #e76f51; }
+    .status-badge.status-review { background: rgba(42,157,143,0.1); color: #2a9d8f; }
+    .status-badge.status-done { background: rgba(42,157,143,0.15); color: #2a9d8f; }
+
+    .btn-danger {
+      background: #DC2626;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-danger:hover { background: #B91C1C; }
 
     /* Milestones */
     .milestones-list {
@@ -858,8 +935,7 @@
         <h2>Add Task</h2>
         <button class="modal-close" onclick="closeTaskModal()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
@@ -893,14 +969,93 @@
               </select>
             </div>
           </div>
-          <div class="form-group">
-            <label for="task-due">Due Date</label>
-            <input type="date" id="task-due" name="due_date">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-milestone-select">Milestone</label>
+              <select id="task-milestone-select" name="milestone_id">
+                <option value="">No milestone</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-due">Due Date</label>
+              <input type="date" id="task-due" name="due_date">
+            </div>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Add Task</button>
+          <button type="submit" class="btn btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Task Detail Modal -->
+  <div class="modal-overlay" id="task-detail-modal">
+    <div class="modal-content" style="max-width: 560px;">
+      <div class="modal-header">
+        <h2 class="task-detail-title" style="font-size: 1.25rem;">Task</h2>
+        <button class="modal-close" onclick="closeTaskDetail()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="task-modal-body">
+        <div class="task-status-bar" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;"></div>
+        <div class="task-detail-description" style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Status</span><span class="task-detail-status"></span></div>
+          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Priority</span><span class="task-detail-priority"></span></div>
+          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Milestone</span><span class="task-detail-milestone"></span></div>
+          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Assignee</span><span class="task-detail-assignee"></span></div>
+          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Due Date</span><span class="task-detail-due"></span></div>
+          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Created</span><span class="task-detail-created"></span></div>
+        </div>
+      </div>
+      <div class="modal-footer task-detail-actions"></div>
+    </div>
+  </div>
+
+  <!-- Add Milestone Modal -->
+  <div class="modal-overlay" id="milestone-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Milestone</h2>
+        <button class="modal-close" onclick="closeMilestoneModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="milestone-form" onsubmit="submitMilestone(event)">
+        <div class="task-modal-body">
+          <div class="form-group">
+            <label for="ms-title">Milestone Title *</label>
+            <input type="text" id="ms-title" name="title" required placeholder="e.g., Beta Launch">
+          </div>
+          <div class="form-group">
+            <label for="ms-description">Description</label>
+            <textarea id="ms-description" name="description" placeholder="What does this milestone represent?"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ms-target">Target Date</label>
+              <input type="date" id="ms-target" name="target_date">
+            </div>
+            <div class="form-group">
+              <label for="ms-status">Status</label>
+              <select id="ms-status" name="status">
+                <option value="upcoming" selected>Upcoming</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeMilestoneModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Milestone</button>
         </div>
       </form>
     </div>
@@ -909,84 +1064,84 @@
   <script>
     let project = null;
     let currentUser = null;
+    let allTasks = {};
+    let draggedTask = null;
     const projectId = new URLSearchParams(window.location.search).get('id');
 
-    // Auth check
+    // ═══════════════════════════════════════════
+    // AUTH
+    // ═══════════════════════════════════════════
     async function checkAuth() {
       const token = localStorage.getItem('ple_token');
       if (!token) return;
-
       try {
         const res = await fetch('/api/auth?action=me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
           currentUser = await res.json();
-          document.getElementById('nav-user').innerHTML = `<span class="user-name">${currentUser.display_name}</span>`;
+          document.querySelectorAll('[data-auth="logged-in"]').forEach(el => el.style.display = '');
+          document.querySelectorAll('[data-auth="logged-out"]').forEach(el => el.style.display = 'none');
           document.getElementById('add-task-btn').style.display = 'flex';
           document.getElementById('add-milestone-btn').style.display = 'flex';
         }
-      } catch (e) {
-        console.error('Auth check failed:', e);
-      }
+      } catch (e) { console.error('Auth check failed:', e); }
     }
 
-    // Load project
-    async function loadProject() {
-      if (!projectId) {
-        window.location = '/projects.html';
-        return;
-      }
+    function authHeaders() {
+      const token = localStorage.getItem('ple_token');
+      const h = { 'Content-Type': 'application/json' };
+      if (token) h['Authorization'] = `Bearer ${token}`;
+      return h;
+    }
 
+    // ═══════════════════════════════════════════
+    // LOAD PROJECT
+    // ═══════════════════════════════════════════
+    async function loadProject() {
+      if (!projectId) { window.location = '/projects.html'; return; }
       try {
         const token = localStorage.getItem('ple_token');
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-
         const res = await fetch(`/api/projects?id=${encodeURIComponent(projectId)}`, { headers });
         if (!res.ok) throw new Error('Project not found');
-
         const data = await res.json();
         project = data.project || data;
-        
-        // Attach nested data to project for rendering
         project.milestones = data.milestones || [];
         project.workingGroups = data.workingGroups || [];
         project.activity = data.activity || [];
         project.taskStats = data.taskStats || {};
         project.owner_name = project.owner?.name || project.owner_name || 'Unknown';
-        
         renderProject();
         loadTasks();
       } catch (e) {
         console.error('Failed to load project:', e);
         document.getElementById('project-title').textContent = 'Project not found';
-        // Hide loading spinner and show error state
         document.querySelectorAll('.loading').forEach(el => el.style.display = 'none');
       }
     }
 
+    // ═══════════════════════════════════════════
+    // RENDER PROJECT
+    // ═══════════════════════════════════════════
     function renderProject() {
       document.title = `${project.title} | PLE Platform`;
       document.getElementById('project-title').textContent = project.title;
       document.getElementById('project-type-text').textContent = capitalizeFirst(project.projectType || project.project_type);
       document.getElementById('project-status').textContent = capitalizeFirst(project.status);
       
-      // Handle owner name from either nested or flat structure
       const ownerName = project.owner?.name || project.owner_name || 'Unknown';
       document.getElementById('project-owner').querySelector('span').textContent = ownerName;
       document.getElementById('project-description').textContent = project.description || 'No description provided.';
+      
       const progress = project.progress || 0;
       document.getElementById('progress-percent').textContent = `${progress}%`;
-      
-      // Animate progress ring
       const ring = document.getElementById('progress-ring');
       if (ring) {
-        const circumference = 264; // 2 * π * 42
-        const offset = circumference - (progress / 100) * circumference;
+        const offset = 264 - (progress / 100) * 264;
         setTimeout(() => { ring.style.transition = 'stroke-dashoffset 0.8s ease'; ring.style.strokeDashoffset = offset; }, 100);
       }
 
-      // Dates
       const dates = [];
       const startDate = project.startDate || project.start_date;
       const endDate = project.targetEndDate || project.target_end_date;
@@ -994,7 +1149,6 @@
       if (endDate) dates.push(`Due ${formatDate(endDate)}`);
       document.getElementById('project-dates').querySelector('span').textContent = dates.join(' • ') || 'No dates set';
 
-      // Linked elements
       const linkedEls = project.linkedElements || project.linked_elements || [];
       if (linkedEls.length > 0) {
         document.getElementById('linked-elements-section').style.display = 'block';
@@ -1005,246 +1159,319 @@
         `).join('');
       }
 
-      // Milestones count
       document.getElementById('milestone-count').textContent = project.milestones?.length || 0;
       renderMilestones(project.milestones || []);
       renderMilestoneTimeline(project.milestones || []);
 
-      // Team count
       const teamCount = project.workingGroups?.length || 0;
       document.getElementById('team-count').textContent = teamCount;
       renderTeam(project.workingGroups || []);
 
-      // Task stats
       const taskStats = project.taskStats || {};
       const totalTasks = Object.values(taskStats).reduce((s, v) => s + v, 0);
-      const doneTasks = taskStats.done || 0;
-      const inProgressTasks = taskStats.in_progress || 0;
-
       document.getElementById('stat-total-tasks').textContent = totalTasks;
-      document.getElementById('stat-done-tasks').textContent = doneTasks;
-      document.getElementById('stat-in-progress').textContent = inProgressTasks;
+      document.getElementById('stat-done-tasks').textContent = taskStats.done || 0;
+      document.getElementById('stat-in-progress').textContent = taskStats.in_progress || 0;
       document.getElementById('stat-teams').textContent = teamCount;
-
       renderTaskBreakdown(taskStats, totalTasks);
 
-      // Activity
       renderActivity(project.activity || []);
+      populateMilestoneSelect(project.milestones || []);
     }
 
+    // ═══════════════════════════════════════════
+    // MILESTONE TIMELINE (Overview tab)
+    // ═══════════════════════════════════════════
     function renderMilestoneTimeline(milestones) {
-      const container = document.getElementById('milestone-timeline');
-      if (!milestones.length) {
-        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No milestones defined yet.</p>';
-        return;
-      }
-
-      container.innerHTML = milestones.map(m => `
+      const c = document.getElementById('milestone-timeline');
+      if (!milestones.length) { c.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No milestones defined yet.</p>'; return; }
+      c.innerHTML = milestones.map(m => `
         <div class="timeline-item">
-          <div class="timeline-marker">
-            <div class="timeline-dot ${m.status}"></div>
-            <div class="timeline-line"></div>
-          </div>
+          <div class="timeline-marker"><div class="timeline-dot ${m.status}"></div><div class="timeline-line"></div></div>
           <div class="timeline-content">
             <div class="timeline-title">${escapeHtml(m.title)}</div>
             <div class="timeline-meta">
               <span class="timeline-status ${m.status}">${m.status === 'in_progress' ? 'In Progress' : capitalizeFirst(m.status)}</span>
               ${m.target_date ? `<span>${formatDate(m.target_date)}</span>` : ''}
-              ${m.task_count > 0 ? `<span>${m.completed_tasks || 0}/${m.task_count} tasks</span>` : ''}
+              ${parseInt(m.task_count) > 0 ? `<span>${m.completed_tasks || 0}/${m.task_count} tasks</span>` : ''}
             </div>
           </div>
         </div>
       `).join('');
     }
 
+    // ═══════════════════════════════════════════
+    // TASK BREAKDOWN (Overview tab)
+    // ═══════════════════════════════════════════
     function renderTaskBreakdown(stats, total) {
-      const container = document.getElementById('task-breakdown');
-      if (total === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No tasks yet.</p>';
-        return;
-      }
-
+      const c = document.getElementById('task-breakdown');
+      if (total === 0) { c.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No tasks yet.</p>'; return; }
       const statuses = [
-        { key: 'done', label: 'Done' },
-        { key: 'in_progress', label: 'In Progress' },
-        { key: 'review', label: 'Review' },
-        { key: 'todo', label: 'To Do' },
-        { key: 'backlog', label: 'Backlog' }
+        { key: 'done', label: 'Done' }, { key: 'in_progress', label: 'In Progress' },
+        { key: 'review', label: 'Review' }, { key: 'todo', label: 'To Do' }, { key: 'backlog', label: 'Backlog' }
       ];
-
-      container.innerHTML = statuses
-        .filter(s => (stats[s.key] || 0) > 0)
-        .map(s => {
-          const count = stats[s.key] || 0;
-          const pct = Math.round((count / total) * 100);
-          return `
-            <div class="breakdown-row">
-              <span class="breakdown-label">${s.label}</span>
-              <div class="breakdown-bar-bg">
-                <div class="breakdown-bar-fill ${s.key}" style="width: ${pct}%"></div>
-              </div>
-              <span class="breakdown-count">${count}</span>
-            </div>
-          `;
-        }).join('');
+      c.innerHTML = statuses.filter(s => (stats[s.key] || 0) > 0).map(s => {
+        const count = stats[s.key] || 0;
+        const pct = Math.round((count / total) * 100);
+        return `<div class="breakdown-row">
+          <span class="breakdown-label">${s.label}</span>
+          <div class="breakdown-bar-bg"><div class="breakdown-bar-fill ${s.key}" style="width: ${pct}%"></div></div>
+          <span class="breakdown-count">${count}</span>
+        </div>`;
+      }).join('');
     }
 
-    // Load tasks
+    // ═══════════════════════════════════════════
+    // KANBAN BOARD
+    // ═══════════════════════════════════════════
     async function loadTasks() {
       try {
         const token = localStorage.getItem('ple_token');
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-
         const res = await fetch(`/api/tasks?projectId=${projectId}&view=kanban`, { headers });
         const data = await res.json();
-
         if (data.view === 'kanban') {
+          allTasks = data.columns;
           renderKanban(data.columns);
           const total = Object.values(data.columns).reduce((sum, col) => sum + col.length, 0);
           document.getElementById('task-count').textContent = total;
         }
-      } catch (e) {
-        console.error('Failed to load tasks:', e);
-      }
+      } catch (e) { console.error('Failed to load tasks:', e); }
     }
 
     function renderKanban(columns) {
       const board = document.getElementById('kanban-board');
       const columnDefs = [
-        { key: 'backlog', label: 'Backlog' },
-        { key: 'todo', label: 'To Do' },
-        { key: 'in_progress', label: 'In Progress' },
-        { key: 'review', label: 'Review' },
+        { key: 'backlog', label: 'Backlog' }, { key: 'todo', label: 'To Do' },
+        { key: 'in_progress', label: 'In Progress' }, { key: 'review', label: 'Review' },
         { key: 'done', label: 'Done' }
       ];
-
       board.innerHTML = columnDefs.map(col => `
         <div class="kanban-column" data-status="${col.key}">
           <div class="column-header">
             <span class="column-title">${col.label}</span>
             <span class="column-count">${columns[col.key]?.length || 0}</span>
           </div>
-          <div class="task-list" data-status="${col.key}">
+          <div class="task-list" data-status="${col.key}"
+            ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
             ${(columns[col.key] || []).map(renderTaskCard).join('')}
           </div>
-          ${currentUser ? `<button class="add-task-btn" onclick="openTaskModal('${col.key}')">+ Add task</button>` : ''}
+          ${currentUser ? `<button class="add-task-inline" onclick="openTaskModal('${col.key}')">+ Add task</button>` : ''}
         </div>
       `).join('');
+      initDragHandlers();
     }
 
     function renderTaskCard(task) {
-      const initials = task.assignee_name ? task.assignee_name.split(' ').map(n => n[0]).join('').toUpperCase() : '';
+      const initials = task.assignee?.name ? task.assignee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '';
+      const dueStr = task.dueDate ? formatDate(task.dueDate) : '';
+      const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
       return `
-        <div class="task-card" draggable="true" data-task-id="${task.id}">
+        <div class="task-card" draggable="${currentUser ? 'true' : 'false'}" data-task-id="${task.id}" onclick="openTaskDetail('${task.id}')">
           <div class="task-title">${escapeHtml(task.title)}</div>
+          ${task.milestone?.title ? `<div class="task-milestone-tag">${escapeHtml(task.milestone.title)}</div>` : ''}
           <div class="task-meta">
             <span class="task-priority priority-${task.priority}">${task.priority}</span>
-            ${task.assignee_name ? `<div class="task-assignee" title="${escapeHtml(task.assignee_name)}">${initials}</div>` : ''}
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              ${dueStr ? `<span class="task-due ${isOverdue ? 'overdue' : ''}">${dueStr}</span>` : ''}
+              ${initials ? `<div class="task-assignee" title="${escapeHtml(task.assignee.name)}">${initials}</div>` : ''}
+            </div>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    function renderMilestones(milestones) {
-      const list = document.getElementById('milestones-list');
-      if (milestones.length === 0) {
-        list.innerHTML = '<p style="color: var(--text-muted);">No milestones yet.</p>';
-        return;
-      }
-
-      list.innerHTML = milestones.map(m => `
-        <div class="milestone-card">
-          <div class="milestone-header">
-            <div>
-              <h4 class="milestone-title">${escapeHtml(m.title)}</h4>
-              ${m.description ? `<p style="color: var(--text-secondary); margin-top: 0.5rem;">${escapeHtml(m.description)}</p>` : ''}
-            </div>
-            <div class="milestone-date">
-              ${m.target_date ? `Target: ${formatDate(m.target_date)}` : 'No date set'}
-            </div>
-          </div>
-          <div class="milestone-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${m.task_count > 0 ? Math.round((m.completed_tasks / m.task_count) * 100) : 0}%"></div>
-            </div>
-            <span class="progress-text">${m.status === 'completed' ? 'Completed' : `${m.completed_tasks || 0} of ${m.task_count || 0} tasks`}</span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderTeam(groups) {
-      const grid = document.getElementById('team-grid');
-      
-      // Show project owner first
-      let html = `
-        <div class="member-card">
-          <div class="member-avatar">${(project.owner?.name || project.owner_name || 'O').split(' ').map(n => n[0]).join('').toUpperCase()}</div>
-          <div class="member-info">
-            <div class="member-name">${escapeHtml(project.owner?.name || project.owner_name || 'Unknown')}</div>
-            <div class="member-role">Project Owner</div>
-          </div>
-        </div>
-      `;
-
-      // Add working group info
-      if (groups.length > 0) {
-        html += groups.map(g => `
-          <div class="member-card">
-            <div class="member-avatar" style="background: var(--color-sage);">${g.member_count || 0}</div>
-            <div class="member-info">
-              <div class="member-name">${escapeHtml(g.name)}</div>
-              <div class="member-role">${g.member_count || 0} members • ${capitalizeFirst(g.status)}</div>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      grid.innerHTML = html || '<p style="color: var(--text-muted);">No team members yet.</p>';
-    }
-
-    function renderActivity(activities) {
-      const renderList = (container, items) => {
-        if (!items.length) {
-          container.innerHTML = '<p style="color: var(--text-muted);">No activity yet.</p>';
-          return;
-        }
-
-        container.innerHTML = items.slice(0, 10).map(a => `
-          <div class="activity-item">
-            <div class="activity-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-              </svg>
-            </div>
-            <div class="activity-content">
-              <div class="activity-text">
-                <strong>${escapeHtml(a.user_name || 'System')}</strong> ${a.action.replace('_', ' ')}
-              </div>
-              <div class="activity-time">${formatRelativeTime(a.created_at)}</div>
-            </div>
-          </div>
-        `).join('');
-      };
-
-      renderList(document.getElementById('recent-activity'), activities.slice(0, 5));
-      renderList(document.getElementById('full-activity'), activities);
-    }
-
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+    // ═══════════════════════════════════════════
+    // DRAG AND DROP
+    // ═══════════════════════════════════════════
+    function initDragHandlers() {
+      document.querySelectorAll('.task-card[draggable="true"]').forEach(card => {
+        card.addEventListener('dragstart', e => {
+          draggedTask = card;
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', card.dataset.taskId);
+        });
+        card.addEventListener('dragend', () => {
+          if (draggedTask) draggedTask.classList.remove('dragging');
+          draggedTask = null;
+          document.querySelectorAll('.task-list').forEach(l => l.classList.remove('drag-over'));
+        });
       });
-    });
+    }
 
-    // Task modal
-    function openTaskModal(status = 'todo') {
-      document.getElementById('task-status').value = status;
-      document.getElementById('task-modal').classList.add('active');
+    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function handleDragEnter(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    function handleDragLeave(e) {
+      if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.classList.remove('drag-over');
+    }
+
+    async function handleDrop(e) {
+      e.preventDefault();
+      const list = e.currentTarget;
+      list.classList.remove('drag-over');
+      const taskId = e.dataTransfer.getData('text/plain');
+      const newStatus = list.dataset.status;
+      if (!taskId || !newStatus || !currentUser) return;
+
+      // Optimistic UI: move the card
+      const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+      if (card) {
+        // Determine drop position
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement) list.insertBefore(card, afterElement);
+        else list.appendChild(card);
+      }
+      updateColumnCounts();
+
+      // API call
+      try {
+        const cards = [...list.querySelectorAll('.task-card')];
+        const orderIndex = cards.indexOf(card);
+        const res = await fetch(`/api/tasks?action=move`, {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ id: taskId, status: newStatus, order_index: orderIndex })
+        });
+        if (!res.ok) { loadTasks(); return; } // revert on failure
+        // Refresh stats after move
+        loadProject();
+      } catch (err) { console.error('Move failed:', err); loadTasks(); }
+    }
+
+    function getDragAfterElement(list, y) {
+      const cards = [...list.querySelectorAll('.task-card:not(.dragging)')];
+      return cards.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) return { offset, element: child };
+        return closest;
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function updateColumnCounts() {
+      document.querySelectorAll('.kanban-column').forEach(col => {
+        const count = col.querySelectorAll('.task-card').length;
+        col.querySelector('.column-count').textContent = count;
+      });
+    }
+
+    // ═══════════════════════════════════════════
+    // TASK DETAIL MODAL
+    // ═══════════════════════════════════════════
+    function openTaskDetail(taskId) {
+      // Find the task in allTasks
+      let task = null;
+      for (const col of Object.values(allTasks)) {
+        task = col.find(t => t.id === taskId);
+        if (task) break;
+      }
+      if (!task) return;
+
+      const modal = document.getElementById('task-detail-modal');
+      const isEditable = !!currentUser;
+      
+      modal.querySelector('.task-detail-title').textContent = task.title;
+      modal.querySelector('.task-detail-description').textContent = task.description || 'No description provided.';
+      modal.querySelector('.task-detail-status').textContent = capitalizeFirst(task.status);
+      modal.querySelector('.task-detail-status').className = `task-detail-status status-badge status-${task.status}`;
+      modal.querySelector('.task-detail-priority').textContent = capitalizeFirst(task.priority);
+      modal.querySelector('.task-detail-priority').className = `task-detail-priority priority-${task.priority}`;
+      modal.querySelector('.task-detail-milestone').textContent = task.milestone?.title || 'None';
+      modal.querySelector('.task-detail-assignee').textContent = task.assignee?.name || 'Unassigned';
+      modal.querySelector('.task-detail-due').textContent = task.dueDate ? formatDate(task.dueDate) : 'No due date';
+      modal.querySelector('.task-detail-created').textContent = formatRelativeTime(task.createdAt);
+
+      // Edit/delete buttons
+      const actions = modal.querySelector('.task-detail-actions');
+      if (isEditable) {
+        actions.innerHTML = `
+          <button class="btn btn-secondary" onclick="editTaskFromDetail('${task.id}')">Edit</button>
+          <button class="btn btn-danger" onclick="deleteTask('${task.id}')">Delete</button>
+        `;
+      } else { actions.innerHTML = ''; }
+
+      // Quick status change buttons
+      const statusBar = modal.querySelector('.task-status-bar');
+      if (isEditable) {
+        const statuses = ['backlog','todo','in_progress','review','done'];
+        statusBar.innerHTML = statuses.map(s => `
+          <button class="status-quick-btn ${s === task.status ? 'active' : ''}" onclick="quickChangeStatus('${task.id}','${s}')">${capitalizeFirst(s)}</button>
+        `).join('');
+      } else { statusBar.innerHTML = ''; }
+
+      modal.classList.add('active');
+      modal.dataset.taskId = taskId;
+    }
+
+    function closeTaskDetail() {
+      document.getElementById('task-detail-modal').classList.remove('active');
+    }
+
+    async function quickChangeStatus(taskId, newStatus) {
+      if (!currentUser) return;
+      try {
+        const res = await fetch('/api/tasks', {
+          method: 'PUT', headers: authHeaders(),
+          body: JSON.stringify({ id: taskId, status: newStatus })
+        });
+        if (res.ok) {
+          closeTaskDetail();
+          loadTasks();
+          loadProject(); // refresh stats
+        }
+      } catch (e) { console.error('Status change failed:', e); }
+    }
+
+    function editTaskFromDetail(taskId) {
+      let task = null;
+      for (const col of Object.values(allTasks)) {
+        task = col.find(t => t.id === taskId);
+        if (task) break;
+      }
+      if (!task) return;
+      closeTaskDetail();
+      openTaskModal(task.status, task);
+    }
+
+    async function deleteTask(taskId) {
+      if (!confirm('Delete this task? This cannot be undone.')) return;
+      try {
+        const res = await fetch(`/api/tasks?id=${taskId}`, {
+          method: 'DELETE', headers: authHeaders()
+        });
+        if (res.ok) {
+          closeTaskDetail();
+          loadTasks();
+          loadProject();
+        } else {
+          const err = await res.json();
+          alert(err.error || 'Failed to delete task');
+        }
+      } catch (e) { alert('Failed to delete task'); }
+    }
+
+    // ═══════════════════════════════════════════
+    // ADD/EDIT TASK MODAL
+    // ═══════════════════════════════════════════
+    function openTaskModal(status = 'todo', editTask = null) {
+      const modal = document.getElementById('task-modal');
+      const form = document.getElementById('task-form');
+      form.reset();
+      
+      if (editTask) {
+        modal.querySelector('h2').textContent = 'Edit Task';
+        document.getElementById('task-title').value = editTask.title;
+        document.getElementById('task-description').value = editTask.description || '';
+        document.getElementById('task-status').value = editTask.status;
+        document.getElementById('task-priority').value = editTask.priority;
+        document.getElementById('task-milestone-select').value = editTask.milestone?.id || '';
+        document.getElementById('task-due').value = editTask.dueDate ? editTask.dueDate.split('T')[0] : '';
+        form.dataset.editId = editTask.id;
+      } else {
+        modal.querySelector('h2').textContent = 'Add Task';
+        document.getElementById('task-status').value = status;
+        delete form.dataset.editId;
+      }
+      modal.classList.add('active');
     }
 
     function closeTaskModal() {
@@ -1258,62 +1485,165 @@
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
       data.project_id = projectId;
+      if (!data.milestone_id) delete data.milestone_id;
 
+      const editId = form.dataset.editId;
       try {
         const res = await fetch('/api/tasks', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('ple_token')}`
-          },
-          body: JSON.stringify(data)
+          method: editId ? 'PUT' : 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(editId ? { ...data, id: editId } : data)
         });
-
         if (res.ok) {
           closeTaskModal();
           loadTasks();
+          loadProject();
         } else {
           const error = await res.json();
-          alert(error.error || 'Failed to create task');
+          alert(error.error || 'Failed to save task');
         }
-      } catch (e) {
-        console.error('Failed to create task:', e);
-        alert('Failed to create task');
-      }
+      } catch (e) { alert('Failed to save task'); }
     }
 
-    // Milestone modal placeholder
+    function populateMilestoneSelect(milestones) {
+      const select = document.getElementById('task-milestone-select');
+      if (!select) return;
+      select.innerHTML = '<option value="">No milestone</option>' + 
+        milestones.map(m => `<option value="${m.id}">${escapeHtml(m.title)}</option>`).join('');
+    }
+
+    // ═══════════════════════════════════════════
+    // MILESTONES
+    // ═══════════════════════════════════════════
+    function renderMilestones(milestones) {
+      const list = document.getElementById('milestones-list');
+      if (milestones.length === 0) { list.innerHTML = '<p style="color: var(--text-muted);">No milestones yet.</p>'; return; }
+      list.innerHTML = milestones.map(m => {
+        const pct = parseInt(m.task_count) > 0 ? Math.round((parseInt(m.completed_tasks) / parseInt(m.task_count)) * 100) : 0;
+        return `
+          <div class="milestone-card">
+            <div class="milestone-header">
+              <div>
+                <h4 class="milestone-title">${escapeHtml(m.title)}</h4>
+                ${m.description ? `<p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">${escapeHtml(m.description)}</p>` : ''}
+              </div>
+              <div style="text-align: right;">
+                <div class="milestone-date">${m.target_date ? formatDate(m.target_date) : 'No date set'}</div>
+                <span class="timeline-status ${m.status}" style="margin-top: 0.5rem; display:inline-block;">${m.status === 'in_progress' ? 'In Progress' : capitalizeFirst(m.status)}</span>
+              </div>
+            </div>
+            <div class="milestone-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+              <span class="progress-text">${m.status === 'completed' ? 'Completed' : `${m.completed_tasks || 0} of ${m.task_count || 0} tasks (${pct}%)`}</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
     function openMilestoneModal() {
-      alert('Milestone creation coming soon!');
+      document.getElementById('milestone-modal').classList.add('active');
+    }
+    function closeMilestoneModal() {
+      document.getElementById('milestone-modal').classList.remove('active');
+      document.getElementById('milestone-form').reset();
     }
 
-    // Utils
+    async function submitMilestone(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      data.project_id = projectId;
+      try {
+        const res = await fetch('/api/milestones', {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          closeMilestoneModal();
+          loadProject(); // refresh milestones
+        } else {
+          const error = await res.json();
+          alert(error.error || 'Failed to create milestone');
+        }
+      } catch (e) { alert('Failed to create milestone'); }
+    }
+
+    // ═══════════════════════════════════════════
+    // TEAM & ACTIVITY
+    // ═══════════════════════════════════════════
+    function renderTeam(groups) {
+      const grid = document.getElementById('team-grid');
+      let html = `
+        <div class="member-card">
+          <div class="member-avatar">${(project.owner?.name || project.owner_name || 'O').split(' ').map(n => n[0]).join('').toUpperCase()}</div>
+          <div class="member-info">
+            <div class="member-name">${escapeHtml(project.owner?.name || project.owner_name || 'Unknown')}</div>
+            <div class="member-role">Project Owner</div>
+          </div>
+        </div>`;
+      if (groups.length > 0) {
+        html += groups.map(g => `
+          <div class="member-card">
+            <div class="member-avatar" style="background: var(--color-sage);">${g.member_count || 0}</div>
+            <div class="member-info">
+              <div class="member-name">${escapeHtml(g.name)}</div>
+              <div class="member-role">${g.member_count || 0} members · ${capitalizeFirst(g.status)}</div>
+            </div>
+          </div>`).join('');
+      }
+      grid.innerHTML = html;
+    }
+
+    function renderActivity(activities) {
+      const renderList = (container, items) => {
+        if (!items.length) { container.innerHTML = '<p style="color: var(--text-muted);">No activity yet.</p>'; return; }
+        container.innerHTML = items.slice(0, 15).map(a => `
+          <div class="activity-item">
+            <div class="activity-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></div>
+            <div class="activity-content">
+              <div class="activity-text"><strong>${escapeHtml(a.user_name || 'System')}</strong> ${a.action.replace(/_/g, ' ')}</div>
+              <div class="activity-time">${formatRelativeTime(a.created_at)}</div>
+            </div>
+          </div>`).join('');
+      };
+      renderList(document.getElementById('recent-activity'), activities.slice(0, 5));
+      renderList(document.getElementById('full-activity'), activities);
+    }
+
+    // ═══════════════════════════════════════════
+    // TAB SWITCHING
+    // ═══════════════════════════════════════════
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // ═══════════════════════════════════════════
+    // UTILS
+    // ═══════════════════════════════════════════
     function escapeHtml(str) {
       if (!str) return '';
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
-
     function capitalizeFirst(str) {
       if (!str) return '';
-      return str.charAt(0).toUpperCase() + str.slice(1).replace('_', ' ');
+      return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ');
     }
-
     function formatDate(dateStr) {
       return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
-
     function formatRelativeTime(dateStr) {
-      const date = new Date(dateStr);
-      const now = new Date();
-      const diff = now - date;
-      const minutes = Math.floor(diff / 60000);
-      const hours = Math.floor(diff / 3600000);
-      const days = Math.floor(diff / 86400000);
-
-      if (minutes < 1) return 'Just now';
-      if (minutes < 60) return `${minutes}m ago`;
-      if (hours < 24) return `${hours}h ago`;
-      if (days < 7) return `${days}d ago`;
+      const diff = Date.now() - new Date(dateStr);
+      const m = Math.floor(diff / 60000), h = Math.floor(diff / 3600000), d = Math.floor(diff / 86400000);
+      if (m < 1) return 'Just now';
+      if (m < 60) return `${m}m ago`;
+      if (h < 24) return `${h}h ago`;
+      if (d < 7) return `${d}d ago`;
       return formatDate(dateStr);
     }
 
