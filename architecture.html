@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <span class="logo-symbol">L/0</span>
+        <span class="logo-text">Post-Labor Economics</span>
+      </a>
+      
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="architecture.html" class="nav-link active">Architecture</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+      </nav>
+      
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Page Header -->
+      <div class="section-header">
+        <h1 class="page-title">Architecture Framework</h1>
+        <p class="page-description">
+          A TOGAF-aligned framework for building post-labor economic systems. 
+          Explore our strategic goals, strategies, capabilities, and guiding principles.
+        </p>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="proposals-filters" style="margin-bottom: 2rem;">
+        <button class="filter-btn active" data-type="">All</button>
+        <button class="filter-btn" data-type="goal">Goals</button>
+        <button class="filter-btn" data-type="strategy">Strategies</button>
+        <button class="filter-btn" data-type="capability">Capabilities</button>
+        <button class="filter-btn" data-type="principle">Principles</button>
+      </div>
+
+      <!-- Search -->
+      <div class="form-group" style="max-width: 400px; margin-bottom: 2rem;">
+        <input type="text" id="search-input" class="form-input" placeholder="Search elements...">
+      </div>
+
+      <!-- Elements Grid -->
+      <div id="elements-container">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Element Detail Modal -->
+  <div id="element-modal" class="modal" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" style="max-width: 600px; background: var(--color-bg-secondary); border-radius: 1rem; padding: 2rem; position: relative; max-height: 80vh; overflow-y: auto;">
+      <button class="modal-close" id="modal-close" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-text-muted); cursor: pointer;">
+        <i data-lucide="x"></i>
+      </button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <style>
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+    }
+    .modal-content {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+
+  <script type="module">
+    import { architecture, formatDate, initPage, updateAuthUI } from './src/scripts/api.js';
+    
+    let allElements = [];
+    let currentType = '';
+    let searchTerm = '';
+    
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentType = btn.dataset.type;
+        renderElements();
+      });
+    });
+    
+    // Search
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      searchTerm = e.target.value.toLowerCase();
+      renderElements();
+    });
+    
+    // Load elements
+    async function loadElements() {
+      try {
+        const data = await architecture.list();
+        allElements = data.elements;
+        renderElements();
+      } catch (e) {
+        document.getElementById('elements-container').innerHTML = `
+          <div class="empty-state">
+            <p>Failed to load architecture elements. Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+    
+    // Render elements
+    function renderElements() {
+      const container = document.getElementById('elements-container');
+      
+      let filtered = allElements;
+      
+      if (currentType) {
+        filtered = filtered.filter(el => el.type === currentType);
+      }
+      
+      if (searchTerm) {
+        filtered = filtered.filter(el => 
+          el.title.toLowerCase().includes(searchTerm) ||
+          el.description?.toLowerCase().includes(searchTerm) ||
+          el.code.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="layers" class="empty-state-icon"></i>
+            <h4 class="empty-state-title">No Elements Found</h4>
+            <p class="empty-state-description">Try adjusting your filters or search term.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+      
+      // Group by type for display
+      const grouped = {};
+      filtered.forEach(el => {
+        if (!grouped[el.type]) grouped[el.type] = [];
+        grouped[el.type].push(el);
+      });
+      
+      let html = '';
+      const typeOrder = ['goal', 'strategy', 'capability', 'principle'];
+      const typeLabels = {
+        goal: 'Strategic Goals',
+        strategy: 'Key Strategies',
+        capability: 'Core Capabilities',
+        principle: 'Guiding Principles'
+      };
+      
+      typeOrder.forEach(type => {
+        if (grouped[type] && grouped[type].length > 0) {
+          html += `
+            <div style="margin-bottom: 2rem;">
+              <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--color-text-muted);">${typeLabels[type]}</h2>
+              <div class="element-grid">
+                ${grouped[type].map(el => `
+                  <div class="element-card" data-id="${el.id}" style="cursor: pointer;">
+                    <div class="element-card-header">
+                      <span class="element-code ${el.type}">${el.code}</span>
+                    </div>
+                    <h4 class="element-title">${el.title}</h4>
+                    <p class="element-description">${truncate(el.description || '', 120)}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      });
+      
+      container.innerHTML = html;
+      
+      // Add click handlers
+      container.querySelectorAll('.element-card').forEach(card => {
+        card.addEventListener('click', () => showElementDetail(card.dataset.id));
+      });
+      
+      lucide.createIcons();
+    }
+    
+    // Show element detail modal
+    async function showElementDetail(id) {
+      const element = allElements.find(el => el.id === id);
+      if (!element) return;
+      
+      const modal = document.getElementById('element-modal');
+      const modalBody = document.getElementById('modal-body');
+      
+      modalBody.innerHTML = `
+        <div class="element-card-header" style="margin-bottom: 1rem;">
+          <span class="element-code ${element.type}">${element.code}</span>
+          <span style="font-size: 0.875rem; color: var(--color-text-muted); text-transform: capitalize;">
+            ${element.type}
+          </span>
+        </div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">${element.title}</h2>
+        <p style="line-height: 1.7; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+          ${element.description || 'No description provided.'}
+        </p>
+        <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: var(--color-text-muted);">
+          <span>Status: ${element.status}</span>
+          ${element.proposalCount > 0 ? `<span>${element.proposalCount} related proposals</span>` : ''}
+        </div>
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+          <a href="proposal-create.html?elementId=${element.id}" class="btn btn-primary btn-sm" data-auth="logged-in">
+            Propose Change
+          </a>
+        </div>
+      `;
+      
+      modal.style.display = 'flex';
+      updateAuthUI();
+      lucide.createIcons();
+    }
+    
+    // Close modal
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('element-modal').style.display = 'none';
+    });
+    
+    document.querySelector('.modal-backdrop')?.addEventListener('click', () => {
+      document.getElementById('element-modal').style.display = 'none';
+    });
+    
+    // Escape key closes modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('element-modal').style.display = 'none';
+      }
+    });
+    
+    function truncate(text, length) {
+      if (text.length <= length) return text;
+      return text.substring(0, length) + '...';
+    }
+    
+    // Initialize
+    await initPage();
+    updateAuthUI();
+    loadElements();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Proposal | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <span class="logo-symbol">L/0</span>
+        <span class="logo-text">Post-Labor Economics</span>
+      </a>
+      
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+      </nav>
+      
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 900px;">
+      <a href="proposals.html" class="btn btn-ghost btn-sm" style="margin-bottom: 1rem;">
+        <i data-lucide="arrow-left"></i>
+        Back to Proposals
+      </a>
+
+      <!-- Proposal Content -->
+      <div id="proposal-content">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+
+      <!-- Voting Section -->
+      <div class="vote-section" id="vote-section" style="display: none;">
+        <h3 class="vote-title">Cast Your Vote</h3>
+        <div class="vote-buttons" data-auth="logged-in" style="display: none;">
+          <button class="vote-btn approve" data-vote="approve">
+            <i data-lucide="thumbs-up"></i>
+            Approve
+          </button>
+          <button class="vote-btn reject" data-vote="reject">
+            <i data-lucide="thumbs-down"></i>
+            Reject
+          </button>
+          <button class="vote-btn abstain" data-vote="abstain">
+            <i data-lucide="minus"></i>
+            Abstain
+          </button>
+        </div>
+        <p data-auth="logged-out" style="color: var(--color-text-muted);">
+          <a href="login.html">Sign in</a> to vote on this proposal.
+        </p>
+        <div class="vote-results" id="vote-results">
+          <div class="vote-result approve">
+            <div class="vote-result-value" id="approve-count">0</div>
+            <div class="vote-result-label">Approve</div>
+          </div>
+          <div class="vote-result reject">
+            <div class="vote-result-value" id="reject-count">0</div>
+            <div class="vote-result-label">Reject</div>
+          </div>
+          <div class="vote-result abstain">
+            <div class="vote-result-value" id="abstain-count">0</div>
+            <div class="vote-result-label">Abstain</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div style="margin-top: 2rem;">
+        <h3 class="subsection-title">Discussion</h3>
+        
+        <!-- Comment Form -->
+        <div class="comment-form" data-auth="logged-in" style="display: none;">
+          <textarea id="comment-input" class="form-textarea" rows="3" 
+                    placeholder="Share your thoughts on this proposal..."></textarea>
+          <button class="btn btn-primary btn-sm" id="submit-comment" style="margin-top: 0.5rem;">
+            Post Comment
+          </button>
+        </div>
+        <p data-auth="logged-out" style="color: var(--color-text-muted); margin-bottom: 1.5rem;">
+          <a href="login.html">Sign in</a> to join the discussion.
+        </p>
+
+        <div class="comment-list" id="comments-list">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, proposals, votes, discussions, formatDate, initPage, updateAuthUI, showToast } from './src/scripts/api.js';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const proposalId = urlParams.get('id');
+    
+    if (!proposalId) {
+      window.location.href = 'proposals.html';
+    }
+    
+    let currentProposal = null;
+    
+    // Load proposal
+    async function loadProposal() {
+      try {
+        const data = await proposals.get(proposalId);
+        currentProposal = data.proposal;
+        
+        const container = document.getElementById('proposal-content');
+        container.innerHTML = `
+          <div class="proposal-card" style="border: none; padding: 0; background: transparent;">
+            <div class="proposal-card-header" style="margin-bottom: 1rem;">
+              <span class="proposal-type-badge ${currentProposal.proposalType}">${formatType(currentProposal.proposalType)}</span>
+              <span class="proposal-status-badge" style="background: var(--color-bg-secondary); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem;">
+                ${currentProposal.status}
+              </span>
+            </div>
+            <h1 style="font-size: 2rem; margin-bottom: 1rem;">${currentProposal.title}</h1>
+            <div class="proposal-meta" style="margin-bottom: 1.5rem;">
+              <span class="proposal-meta-item">
+                <i data-lucide="user"></i>
+                ${currentProposal.author?.name || 'Anonymous'}
+              </span>
+              <span class="proposal-meta-item">
+                <i data-lucide="clock"></i>
+                ${formatDate(currentProposal.createdAt)}
+              </span>
+              ${currentProposal.element ? `
+                <span class="proposal-meta-item">
+                  <i data-lucide="git-branch"></i>
+                  ${currentProposal.element.code}: ${currentProposal.element.title}
+                </span>
+              ` : ''}
+            </div>
+            <div style="line-height: 1.8; color: var(--color-text-secondary); white-space: pre-wrap;">
+              ${escapeHtml(currentProposal.content)}
+            </div>
+          </div>
+        `;
+        
+        document.title = `${currentProposal.title} | Post-Labor Economics`;
+        document.getElementById('vote-section').style.display = 'block';
+        
+        // Load votes
+        loadVotes();
+        
+        // Load comments
+        renderComments(data.comments);
+        
+        lucide.createIcons();
+      } catch (e) {
+        document.getElementById('proposal-content').innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="alert-circle" class="empty-state-icon"></i>
+            <h4 class="empty-state-title">Proposal Not Found</h4>
+            <p class="empty-state-description">This proposal may have been deleted or doesn't exist.</p>
+            <a href="proposals.html" class="btn btn-primary">View All Proposals</a>
+          </div>
+        `;
+        lucide.createIcons();
+      }
+    }
+    
+    // Load votes
+    async function loadVotes() {
+      try {
+        const data = await votes.get(proposalId);
+        
+        document.getElementById('approve-count').textContent = data.counts.approve;
+        document.getElementById('reject-count').textContent = data.counts.reject;
+        document.getElementById('abstain-count').textContent = data.counts.abstain;
+        
+        // Highlight user's current vote
+        if (data.userVote) {
+          document.querySelectorAll('.vote-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.vote === data.userVote.type);
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load votes:', e);
+      }
+    }
+    
+    // Vote handlers
+    document.querySelectorAll('.vote-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!auth.isLoggedIn()) {
+          window.location.href = `login.html?redirect=proposal-view.html?id=${proposalId}`;
+          return;
+        }
+        
+        try {
+          const voteType = btn.dataset.vote;
+          const data = await votes.cast(proposalId, voteType);
+          
+          document.getElementById('approve-count').textContent = data.counts.approve;
+          document.getElementById('reject-count').textContent = data.counts.reject;
+          document.getElementById('abstain-count').textContent = data.counts.abstain;
+          
+          document.querySelectorAll('.vote-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.vote === voteType);
+          });
+          
+          showToast('Vote recorded!', 'success');
+        } catch (e) {
+          showToast(e.message || 'Failed to vote', 'error');
+        }
+      });
+    });
+    
+    // Render comments
+    function renderComments(comments) {
+      const container = document.getElementById('comments-list');
+      
+      if (!comments || comments.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>No comments yet. Be the first to share your thoughts!</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = comments.map(c => `
+        <div class="comment-item">
+          <div class="comment-avatar">${getInitials(c.author?.name)}</div>
+          <div class="comment-content">
+            <div class="comment-header">
+              <span class="comment-author">${c.author?.name || 'Anonymous'}</span>
+              <span class="comment-time">${formatDate(c.createdAt)}</span>
+            </div>
+            <div class="comment-body">${escapeHtml(c.content)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // Submit comment
+    document.getElementById('submit-comment').addEventListener('click', async () => {
+      const input = document.getElementById('comment-input');
+      const content = input.value.trim();
+      
+      if (!content) return;
+      
+      try {
+        await discussions.create({
+          content,
+          proposalId
+        });
+        
+        input.value = '';
+        showToast('Comment posted!', 'success');
+        
+        // Reload proposal to get updated comments
+        loadProposal();
+      } catch (e) {
+        showToast(e.message || 'Failed to post comment', 'error');
+      }
+    });
+    
+    // Helpers
+    function formatType(type) {
+      return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function getInitials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+    
+    // Initialize
+    await initPage();
+    updateAuthUI();
+    loadProposal();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

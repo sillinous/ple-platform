@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Us | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <a href="index.html">
+          <span class="logo-symbol" style="font-size: 2rem;">L/0</span>
+        </a>
+      </div>
+      
+      <h1 class="auth-title">Join the Movement</h1>
+      <p class="auth-subtitle">Create your account to participate in building the future</p>
+      
+      <form class="auth-form" id="register-form">
+        <div class="form-group">
+          <label class="form-label required" for="displayName">Display Name</label>
+          <input type="text" id="displayName" name="displayName" class="form-input" 
+                 placeholder="How should we address you?" required>
+          <p class="form-hint">This will be shown publicly on your contributions</p>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label required" for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-input" 
+                 placeholder="you@example.com" required autocomplete="email">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label required" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-input" 
+                 placeholder="At least 8 characters" required autocomplete="new-password" minlength="8">
+          <p class="form-hint">Must be at least 8 characters</p>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label required" for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" 
+                 placeholder="Confirm your password" required autocomplete="new-password">
+        </div>
+        
+        <div id="form-error" class="form-error" style="display: none;"></div>
+        
+        <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+          Create Account
+        </button>
+      </form>
+      
+      <div class="auth-footer">
+        Already have an account? <a href="login.html">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './src/scripts/api.js';
+    
+    // Check if already logged in
+    if (auth.isLoggedIn()) {
+      window.location.href = 'dashboard.html';
+    }
+    
+    const form = document.getElementById('register-form');
+    const errorDiv = document.getElementById('form-error');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const displayName = document.getElementById('displayName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      // Reset error
+      errorDiv.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating account...';
+      
+      try {
+        await auth.register(email, password, displayName);
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        errorDiv.textContent = error.message || 'Registration failed. Please try again.';
+        errorDiv.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Account';
+      }
+    });
+  </script>
+</body>
+</html>

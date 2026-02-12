@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Proposal | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <span class="logo-symbol">L/0</span>
+        <span class="logo-text">Post-Labor Economics</span>
+      </a>
+      
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+      </nav>
+      
+      <div class="header-actions">
+        <a href="dashboard.html" class="btn btn-ghost">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 800px;">
+      <!-- Page Header -->
+      <div style="margin-bottom: 2rem;">
+        <a href="proposals.html" class="btn btn-ghost btn-sm" style="margin-bottom: 1rem;">
+          <i data-lucide="arrow-left"></i>
+          Back to Proposals
+        </a>
+        <h1 class="page-title">Create New Proposal</h1>
+        <p class="page-description">Submit a proposal for community review and voting</p>
+      </div>
+
+      <!-- Form -->
+      <form id="proposal-form" class="auth-form" style="background: var(--color-bg-secondary); padding: 2rem; border-radius: 1rem; border: 1px solid var(--color-border);">
+        <div class="form-group">
+          <label class="form-label required" for="proposalType">Proposal Type</label>
+          <select id="proposalType" name="proposalType" class="form-select" required>
+            <option value="">Select a type...</option>
+            <option value="new_element">New Architecture Element</option>
+            <option value="modify_element">Modify Existing Element</option>
+            <option value="deprecate_element">Deprecate Element</option>
+            <option value="policy">Policy Change</option>
+            <option value="process">Process Improvement</option>
+            <option value="general">General Proposal</option>
+          </select>
+          <p class="form-hint">What kind of change are you proposing?</p>
+        </div>
+
+        <div class="form-group" id="element-group" style="display: none;">
+          <label class="form-label" for="elementId">Related Architecture Element</label>
+          <select id="elementId" name="elementId" class="form-select">
+            <option value="">Select an element (optional)...</option>
+          </select>
+          <p class="form-hint">Link this proposal to an existing architecture element</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="title">Title</label>
+          <input type="text" id="title" name="title" class="form-input" 
+                 placeholder="A clear, descriptive title for your proposal" required maxlength="200">
+          <p class="form-hint">Keep it concise but descriptive (max 200 characters)</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required" for="content">Description</label>
+          <textarea id="content" name="content" class="form-textarea" rows="10"
+                    placeholder="Describe your proposal in detail. Include:
+• What you're proposing
+• Why this change is needed
+• How it aligns with PLE goals
+• Any potential risks or concerns
+• Implementation considerations" required></textarea>
+          <p class="form-hint">Be thorough - good proposals include context, rationale, and implementation details</p>
+        </div>
+
+        <div id="form-error" class="form-error" style="display: none;"></div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            Submit Proposal
+          </button>
+          <a href="proposals.html" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, proposals, architecture, showToast, initPage } from './src/scripts/api.js';
+    
+    // Check auth
+    async function checkAuth() {
+      const user = await auth.getCurrentUser();
+      if (!user) {
+        window.location.href = 'login.html?redirect=proposal-create.html';
+        return;
+      }
+      loadElements();
+    }
+    
+    // Load architecture elements for dropdown
+    async function loadElements() {
+      try {
+        const data = await architecture.list();
+        const select = document.getElementById('elementId');
+        
+        data.elements.forEach(el => {
+          const option = document.createElement('option');
+          option.value = el.id;
+          option.textContent = `[${el.code}] ${el.title}`;
+          select.appendChild(option);
+        });
+      } catch (e) {
+        console.error('Failed to load elements:', e);
+      }
+    }
+    
+    // Show/hide element selector based on type
+    document.getElementById('proposalType').addEventListener('change', (e) => {
+      const type = e.target.value;
+      const elementGroup = document.getElementById('element-group');
+      
+      if (type === 'modify_element' || type === 'deprecate_element') {
+        elementGroup.style.display = 'block';
+        document.getElementById('elementId').required = true;
+      } else if (type === 'new_element') {
+        elementGroup.style.display = 'block';
+        document.getElementById('elementId').required = false;
+      } else {
+        elementGroup.style.display = 'none';
+        document.getElementById('elementId').required = false;
+      }
+    });
+    
+    // Form submission
+    const form = document.getElementById('proposal-form');
+    const errorDiv = document.getElementById('form-error');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const proposalType = document.getElementById('proposalType').value;
+      const elementId = document.getElementById('elementId').value || null;
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      
+      errorDiv.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      
+      try {
+        const result = await proposals.create({
+          proposalType,
+          elementId,
+          title,
+          content
+        });
+        
+        showToast('Proposal created successfully!', 'success');
+        window.location.href = `proposal-view.html?id=${result.id}`;
+      } catch (error) {
+        errorDiv.textContent = error.message || 'Failed to create proposal. Please try again.';
+        errorDiv.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Proposal';
+      }
+    });
+    
+    checkAuth();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

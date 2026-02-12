@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <a href="index.html">
+          <span class="logo-symbol" style="font-size: 2rem;">L/0</span>
+        </a>
+      </div>
+      
+      <h1 class="auth-title">Welcome Back</h1>
+      <p class="auth-subtitle">Sign in to continue to the platform</p>
+      
+      <form class="auth-form" id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-input" 
+                 placeholder="you@example.com" required autocomplete="email">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-input" 
+                 placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        
+        <div id="form-error" class="form-error" style="display: none;"></div>
+        
+        <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+          Sign In
+        </button>
+      </form>
+      
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Create one</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './src/scripts/api.js';
+    
+    // Check if already logged in
+    if (auth.isLoggedIn()) {
+      window.location.href = 'dashboard.html';
+    }
+    
+    const form = document.getElementById('login-form');
+    const errorDiv = document.getElementById('form-error');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      // Reset error
+      errorDiv.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in...';
+      
+      try {
+        await auth.login(email, password);
+        
+        // Redirect to dashboard or intended page
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+        window.location.href = redirect || 'dashboard.html';
+      } catch (error) {
+        errorDiv.textContent = error.message || 'Login failed. Please try again.';
+        errorDiv.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+      }
+    });
+  </script>
+</body>
+</html>

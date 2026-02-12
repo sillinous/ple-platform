@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <span class="logo-symbol">L/0</span>
+        <span class="logo-text">Post-Labor Economics</span>
+      </a>
+      
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+      </nav>
+      
+      <div class="header-actions">
+        <span class="nav-link" data-user-name></span>
+        <button class="btn btn-ghost" id="logout-btn">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Dashboard Header -->
+      <div class="dashboard-header">
+        <h1 class="dashboard-welcome">Welcome back, <span data-user-name>Member</span>!</h1>
+        <p class="dashboard-subtitle">Here's what's happening in the community</p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon">
+              <i data-lucide="file-text"></i>
+            </div>
+          </div>
+          <div class="stat-card-value" id="proposals-count">-</div>
+          <div class="stat-card-label">Active Proposals</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon">
+              <i data-lucide="vote"></i>
+            </div>
+          </div>
+          <div class="stat-card-value" id="votes-count">-</div>
+          <div class="stat-card-label">Your Votes</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon">
+              <i data-lucide="message-square"></i>
+            </div>
+          </div>
+          <div class="stat-card-value" id="discussions-count">-</div>
+          <div class="stat-card-label">Discussions</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-icon">
+              <i data-lucide="layers"></i>
+            </div>
+          </div>
+          <div class="stat-card-value" id="elements-count">-</div>
+          <div class="stat-card-label">Architecture Elements</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="section-header" style="margin-top: 2rem;">
+        <h2 class="section-title">Quick Actions</h2>
+      </div>
+      
+      <div class="dashboard-grid">
+        <a href="proposal-create.html" class="stat-card" style="text-decoration: none;">
+          <div class="stat-card-header">
+            <div class="stat-card-icon">
+              <i data-lucide="plus"></i>
+            </div>
+          </div>
+          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">Create Proposal</div>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+            Submit a new proposal for community review
+          </p>
+        </a>
+        
+        <a href="proposals.html?status=voting" class="stat-card" style="text-decoration: none;">
+          <div class="stat-card-header">
+            <div class="stat-card-icon">
+              <i data-lucide="vote"></i>
+            </div>
+          </div>
+          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">Vote on Proposals</div>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+            Review and vote on active proposals
+          </p>
+        </a>
+        
+        <a href="architecture.html" class="stat-card" style="text-decoration: none;">
+          <div class="stat-card-header">
+            <div class="stat-card-icon">
+              <i data-lucide="git-branch"></i>
+            </div>
+          </div>
+          <div class="stat-card-label" style="font-size: 1rem; font-weight: 600;">Explore Architecture</div>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+            Browse goals, strategies, and capabilities
+          </p>
+        </a>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="two-column-grid" style="margin-top: 2rem;">
+        <div>
+          <h3 class="subsection-title">Your Recent Proposals</h3>
+          <div id="my-proposals">
+            <div class="loading">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="subsection-title">Platform Activity</h3>
+          <div class="activity-feed" id="activity-feed">
+            <div class="activity-feed-header">Latest Updates</div>
+            <div class="loading">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, proposals, architecture, activity, formatDate, initPage, updateAuthUI } from './src/scripts/api.js';
+    
+    // Check auth
+    async function checkAuth() {
+      const user = await auth.getCurrentUser();
+      if (!user) {
+        window.location.href = 'login.html?redirect=dashboard.html';
+        return;
+      }
+      updateAuthUI();
+      loadDashboard();
+    }
+    
+    // Logout handler
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await auth.logout();
+      window.location.href = 'index.html';
+    });
+    
+    // Load dashboard data
+    async function loadDashboard() {
+      // Load stats
+      try {
+        const [proposalsData, archData] = await Promise.all([
+          proposals.list({ limit: 1 }),
+          architecture.list()
+        ]);
+        
+        document.getElementById('proposals-count').textContent = proposalsData.total || 0;
+        document.getElementById('elements-count').textContent = archData.total || 0;
+        document.getElementById('votes-count').textContent = '-';
+        document.getElementById('discussions-count').textContent = '-';
+      } catch (e) {
+        console.error('Failed to load stats:', e);
+      }
+      
+      // Load user's proposals
+      try {
+        const user = auth.getUser();
+        const data = await proposals.list({ limit: 5 });
+        const myProposals = data.proposals.filter(p => p.author?.id === user?.id);
+        
+        const container = document.getElementById('my-proposals');
+        
+        if (myProposals.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i data-lucide="file-text" class="empty-state-icon"></i>
+              <h4 class="empty-state-title">No Proposals Yet</h4>
+              <p class="empty-state-description">You haven't submitted any proposals yet.</p>
+              <a href="proposal-create.html" class="btn btn-primary">Create Your First</a>
+            </div>
+          `;
+        } else {
+          container.innerHTML = myProposals.map(p => `
+            <div class="proposal-card">
+              <span class="proposal-type-badge ${p.proposalType}">${p.proposalType.replace('_', ' ')}</span>
+              <h4 class="proposal-title">
+                <a href="proposal-view.html?id=${p.id}">${p.title}</a>
+              </h4>
+              <div class="proposal-meta">
+                <span class="proposal-meta-item">
+                  <i data-lucide="clock"></i>
+                  ${formatDate(p.createdAt)}
+                </span>
+                <span class="proposal-meta-item">
+                  Status: ${p.status}
+                </span>
+              </div>
+            </div>
+          `).join('');
+        }
+        lucide.createIcons();
+      } catch (e) {
+        document.getElementById('my-proposals').innerHTML = `
+          <div class="empty-state">
+            <p>Unable to load proposals.</p>
+          </div>
+        `;
+      }
+      
+      // Load activity
+      try {
+        const data = await activity.list({ limit: 5 });
+        const container = document.getElementById('activity-feed');
+        
+        if (data.activities.length === 0) {
+          container.innerHTML = `
+            <div class="activity-feed-header">Latest Updates</div>
+            <div class="empty-state">
+              <p>No recent activity.</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="activity-feed-header">Latest Updates</div>
+            ${data.activities.map(a => `
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <i data-lucide="activity"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-description">${a.description}</div>
+                  <div class="activity-time">${formatDate(a.createdAt)}</div>
+                </div>
+              </div>
+            `).join('')}
+          `;
+        }
+        lucide.createIcons();
+      } catch (e) {
+        console.error('Failed to load activity:', e);
+      }
+    }
+    
+    checkAuth();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

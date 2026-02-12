@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposals | Post-Labor Economics</title>
+  
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <span class="logo-symbol">L/0</span>
+        <span class="logo-text">Post-Labor Economics</span>
+      </a>
+      
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="proposals.html" class="nav-link active">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+      </nav>
+      
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Page Header -->
+      <div class="proposals-header">
+        <div>
+          <h1 class="page-title">Proposals</h1>
+          <p class="page-description">Community proposals for architecture changes and governance decisions</p>
+        </div>
+        <a href="proposal-create.html" class="btn btn-primary" data-auth="logged-in" style="display:none">
+          <i data-lucide="plus"></i>
+          New Proposal
+        </a>
+      </div>
+
+      <!-- Filters -->
+      <div class="proposals-filters">
+        <button class="filter-btn active" data-status="">All</button>
+        <button class="filter-btn" data-status="draft">Draft</button>
+        <button class="filter-btn" data-status="open">Open</button>
+        <button class="filter-btn" data-status="voting">Voting</button>
+        <button class="filter-btn" data-status="approved">Approved</button>
+        <button class="filter-btn" data-status="rejected">Rejected</button>
+      </div>
+
+      <!-- Proposals List -->
+      <div id="proposals-list">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination" style="margin-top: 2rem; text-align: center;"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, proposals, formatDate, initPage, updateAuthUI } from './src/scripts/api.js';
+    
+    let currentStatus = '';
+    let currentOffset = 0;
+    const limit = 10;
+    
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatus = btn.dataset.status;
+        currentOffset = 0;
+        loadProposals();
+      });
+    });
+    
+    // Load proposals
+    async function loadProposals() {
+      const container = document.getElementById('proposals-list');
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+      
+      try {
+        const params = { limit, offset: currentOffset };
+        if (currentStatus) params.status = currentStatus;
+        
+        const data = await proposals.list(params);
+        
+        if (data.proposals.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i data-lucide="file-text" class="empty-state-icon"></i>
+              <h4 class="empty-state-title">No Proposals Found</h4>
+              <p class="empty-state-description">
+                ${currentStatus ? `No proposals with status "${currentStatus}".` : 'Be the first to submit a proposal!'}
+              </p>
+              <a href="proposal-create.html" class="btn btn-primary" data-auth="logged-in">Create Proposal</a>
+            </div>
+          `;
+          updateAuthUI();
+          lucide.createIcons();
+          return;
+        }
+        
+        container.innerHTML = data.proposals.map(p => `
+          <div class="proposal-card">
+            <div class="proposal-card-header">
+              <span class="proposal-type-badge ${p.proposalType}">${formatType(p.proposalType)}</span>
+              <span class="proposal-status-badge">${p.status}</span>
+            </div>
+            <h3 class="proposal-title">
+              <a href="proposal-view.html?id=${p.id}">${p.title}</a>
+            </h3>
+            <p class="proposal-excerpt">${truncate(p.content, 200)}</p>
+            <div class="proposal-meta">
+              <span class="proposal-meta-item">
+                <i data-lucide="user"></i>
+                ${p.author?.name || 'Anonymous'}
+              </span>
+              <span class="proposal-meta-item">
+                <i data-lucide="thumbs-up"></i>
+                ${p.votes.approve} approve
+              </span>
+              <span class="proposal-meta-item">
+                <i data-lucide="thumbs-down"></i>
+                ${p.votes.reject} reject
+              </span>
+              <span class="proposal-meta-item">
+                <i data-lucide="message-square"></i>
+                ${p.commentCount} comments
+              </span>
+              <span class="proposal-meta-item">
+                <i data-lucide="clock"></i>
+                ${formatDate(p.createdAt)}
+              </span>
+            </div>
+          </div>
+        `).join('');
+        
+        // Pagination
+        const paginationContainer = document.getElementById('pagination');
+        const totalPages = Math.ceil(data.total / limit);
+        const currentPage = Math.floor(currentOffset / limit) + 1;
+        
+        if (totalPages > 1) {
+          paginationContainer.innerHTML = `
+            <button class="btn btn-ghost" ${currentPage <= 1 ? 'disabled' : ''} id="prev-btn">Previous</button>
+            <span style="margin: 0 1rem;">Page ${currentPage} of ${totalPages}</span>
+            <button class="btn btn-ghost" ${currentPage >= totalPages ? 'disabled' : ''} id="next-btn">Next</button>
+          `;
+          
+          document.getElementById('prev-btn')?.addEventListener('click', () => {
+            currentOffset = Math.max(0, currentOffset - limit);
+            loadProposals();
+          });
+          
+          document.getElementById('next-btn')?.addEventListener('click', () => {
+            currentOffset += limit;
+            loadProposals();
+          });
+        } else {
+          paginationContainer.innerHTML = '';
+        }
+        
+        lucide.createIcons();
+      } catch (e) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>Failed to load proposals. Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+    
+    function formatType(type) {
+      return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+    
+    function truncate(text, length) {
+      if (text.length <= length) return text;
+      return text.substring(0, length) + '...';
+    }
+    
+    // Check for status in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const statusParam = urlParams.get('status');
+    if (statusParam) {
+      currentStatus = statusParam;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.status === statusParam);
+      });
+    }
+    
+    // Initialize
+    await initPage();
+    updateAuthUI();
+    loadProposals();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
