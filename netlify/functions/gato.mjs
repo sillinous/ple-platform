@@ -357,9 +357,17 @@ Disagreements are resolved through discussion aimed at consensus. When consensus
   }
 
   // Add some tags
-  const tags = ['ubi', 'automation', 'policy', 'gato', 'economics', 'ai-alignment', 'governance'];
-  for (const tagName of tags) {
-    await sql`INSERT INTO tags (name) VALUES (${tagName}) ON CONFLICT DO NOTHING`;
+  const tags = [
+    { name: 'UBI', slug: 'ubi' },
+    { name: 'Automation', slug: 'automation' },
+    { name: 'Policy', slug: 'policy' },
+    { name: 'GATO', slug: 'gato' },
+    { name: 'Economics', slug: 'economics' },
+    { name: 'AI Alignment', slug: 'ai-alignment' },
+    { name: 'Governance', slug: 'governance' }
+  ];
+  for (const tag of tags) {
+    await sql`INSERT INTO tags (name, slug) VALUES (${tag.name}, ${tag.slug}) ON CONFLICT DO NOTHING`;
   }
 
   return jsonResponse({

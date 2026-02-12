@@ -150,7 +150,9 @@ async function createContent(sql, body, user) {
   if (tags.length > 0) {
     for (const tagName of tags) {
       const tagResult = await sql`
-        INSERT INTO tags (name) VALUES (${tagName.toLowerCase()})
+      const tagSlug = tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const tagResult = await sql`
+        INSERT INTO tags (name, slug) VALUES (${tagName}, ${tagSlug})
         ON CONFLICT (name) DO UPDATE SET name = tags.name
         RETURNING id
       `;
