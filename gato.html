@@ -191,12 +191,12 @@
     /* PRIME Hero Card */
     .prime-hero-card {
       position: relative;
-      background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 70%, black));
+      background: linear-gradient(135deg, var(--color-horizon), var(--color-horizon-dark));
       border-radius: 1.5rem;
       padding: 3rem;
       margin-bottom: 3rem;
       overflow: hidden;
-      border: 2px solid var(--color-accent);
+      border: 2px solid var(--color-dawn);
     }
     
     .prime-glow {
@@ -205,7 +205,7 @@
       right: -20%;
       width: 60%;
       height: 200%;
-      background: radial-gradient(circle, rgba(244, 162, 97, 0.15) 0%, transparent 60%);
+      background: radial-gradient(circle, rgba(244, 162, 97, 0.2) 0%, transparent 60%);
       pointer-events: none;
     }
     
@@ -217,8 +217,8 @@
     
     .prime-badge-sm {
       display: inline-block;
-      background: rgba(244, 162, 97, 0.2);
-      color: var(--color-accent);
+      background: rgba(244, 162, 97, 0.25);
+      color: var(--color-dawn);
       padding: 0.375rem 1rem;
       border-radius: 2rem;
       font-size: 0.7rem;
@@ -230,13 +230,13 @@
     .prime-hero-card h2 {
       font-family: var(--font-display);
       font-size: 2.5rem;
-      color: white;
+      color: #FFFFFF;
       margin-bottom: 0.5rem;
       letter-spacing: 0.05em;
     }
     
     .prime-tagline {
-      color: rgba(255,255,255,0.85);
+      color: rgba(255,255,255,0.9);
       font-size: 1.1rem;
       margin-bottom: 1.5rem;
     }
@@ -256,33 +256,33 @@
       font-weight: 600;
     }
     
-    .imp-1 { background: rgba(231, 111, 81, 0.3); color: #ffa07a; }
-    .imp-2 { background: rgba(42, 157, 143, 0.3); color: #7fdfcf; }
-    .imp-3 { background: rgba(233, 196, 106, 0.3); color: #f5e6ab; }
+    .imp-1 { background: rgba(231, 111, 81, 0.4); color: #FFFFFF; border: 1px solid rgba(231, 111, 81, 0.6); }
+    .imp-2 { background: rgba(42, 157, 143, 0.4); color: #FFFFFF; border: 1px solid rgba(42, 157, 143, 0.6); }
+    .imp-3 { background: rgba(233, 196, 106, 0.4); color: #FFFFFF; border: 1px solid rgba(233, 196, 106, 0.6); }
     
     .prime-desc {
-      color: rgba(255,255,255,0.75);
+      color: rgba(255,255,255,0.9);
       font-size: 0.95rem;
       max-width: 700px;
       margin: 0 auto 1.5rem;
     }
     
     .btn-accent {
-      background: var(--color-accent);
-      color: var(--color-bg-primary);
+      background: var(--color-dawn);
+      color: var(--color-midnight);
       font-weight: 600;
     }
     
     .btn-accent:hover {
-      background: var(--color-accent-hover);
+      background: var(--color-dawn-light);
     }
     
     .gato-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
-      color: var(--color-bg-primary);
+      background: linear-gradient(135deg, var(--color-dawn), var(--color-dawn-dark));
+      color: var(--color-midnight);
       padding: 0.5rem 1rem;
       border-radius: 2rem;
       font-weight: 600;
@@ -307,7 +307,7 @@
     }
     
     .source-link:hover {
-      color: var(--color-accent);
+      color: var(--color-dawn);
     }
     
     .source-link svg {
@@ -326,12 +326,12 @@
     
     .alert-info {
       background: rgba(244, 162, 97, 0.1);
-      border: 1px solid var(--color-accent);
+      border: 1px solid var(--color-dawn);
     }
     
     .alert svg {
       flex-shrink: 0;
-      color: var(--color-accent);
+      color: var(--color-dawn);
     }
     
     .alert p {
@@ -359,7 +359,7 @@
     }
     
     .section-title svg {
-      color: var(--color-accent);
+      color: var(--color-dawn);
     }
     
     .section-intro p {
@@ -390,7 +390,7 @@
     }
     
     .imperative-card:hover {
-      border-color: var(--color-accent);
+      border-color: var(--color-dawn);
       transform: translateY(-4px);
     }
     
@@ -441,7 +441,7 @@
     }
     
     .layer-card:hover {
-      border-color: var(--color-primary);
+      border-color: var(--color-horizon);
       background: var(--color-bg-tertiary);
     }
     
@@ -449,7 +449,7 @@
       width: 3rem;
       height: 3rem;
       border-radius: 50%;
-      background: var(--color-primary);
+      background: var(--color-horizon);
       color: white;
       display: flex;
       align-items: center;
@@ -491,7 +491,7 @@
     }
     
     .alignment-arrow {
-      color: var(--color-accent);
+      color: var(--color-dawn);
     }
     
     .alignment-source, .alignment-target {
@@ -502,12 +502,12 @@
     
     .alignment-source {
       background: rgba(244, 162, 97, 0.2);
-      color: var(--color-accent);
+      color: var(--color-dawn);
     }
     
     .alignment-target {
       background: rgba(27, 77, 62, 0.2);
-      color: var(--color-primary);
+      color: var(--color-horizon);
     }
     
     .alignment-desc {
@@ -536,8 +536,8 @@
       width: 2rem;
       height: 2rem;
       border-radius: 50%;
-      background: var(--color-accent);
-      color: var(--color-bg-primary);
+      background: var(--color-dawn);
+      color: var(--color-midnight);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -610,7 +610,7 @@
     .gato-cta {
       margin: 4rem 0 2rem;
       padding: 3rem;
-      background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 80%, black));
+      background: linear-gradient(135deg, var(--color-horizon), color-mix(in srgb, var(--color-horizon) 80%, black));
       border-radius: 1.5rem;
       text-align: center;
     }
