@@ -9,7 +9,7 @@ const sql = neon();
 
 // Migration status tracking (per-instance, runs once per cold start)
 let migrationChecked = false;
-const SEED_VERSION = 4; // Increment to force re-seed
+const SEED_VERSION = 5; // Increment to force re-seed
 
 /**
  * Ensure database is initialized before any query
@@ -592,10 +592,10 @@ async function seedArchitecture() {
 
   // ── Seed Content ──
   // Clean all system-authored content and also any old seed content
-  await sql`DELETE FROM content_tags WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${SYSTEM_USER_ID} OR id::text LIKE '20000000%')`;
-  await sql`DELETE FROM content_versions WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${SYSTEM_USER_ID} OR id::text LIKE '20000000%')`;
-  await sql`DELETE FROM comments WHERE entity_type = 'content' AND entity_id IN (SELECT id FROM content_items WHERE author_id = ${SYSTEM_USER_ID} OR id::text LIKE '20000000%')`;
-  await sql`DELETE FROM content_items WHERE author_id = ${SYSTEM_USER_ID} OR id::text LIKE '20000000%'`;
+  await sql`DELETE FROM content_tags WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%')`;
+  await sql`DELETE FROM content_versions WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%')`;
+  await sql`DELETE FROM comments WHERE entity_type = 'content' AND entity_id IN (SELECT id FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%')`;
+  await sql`DELETE FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%'`;
 
   const contentItems = [
     {
@@ -668,7 +668,7 @@ async function seedArchitecture() {
 
   for (const item of contentItems) {
     await sql`INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, author_id, version, published_at, created_at)
-      VALUES (${item.id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${SYSTEM_USER_ID}, 1,
+      VALUES (${item.id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${systemUserId}, 1,
         ${item.status === 'published' ? sql`CURRENT_TIMESTAMP` : null}, CURRENT_TIMESTAMP)
       ON CONFLICT (slug) DO NOTHING`;
 
