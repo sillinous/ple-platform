@@ -23,6 +23,7 @@ export default defineConfig({
         projects: 'projects.html',
         'project-view': 'project-view.html',
         content: 'content.html',
+        'content-view': 'content-view.html',
       }
     }
   }
