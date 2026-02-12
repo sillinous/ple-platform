@@ -702,37 +702,54 @@
         const token = localStorage.getItem('ple_token');
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-        const res = await fetch(`/api/projects/${projectId}`, { headers });
+        const res = await fetch(`/api/projects?id=${encodeURIComponent(projectId)}`, { headers });
         if (!res.ok) throw new Error('Project not found');
 
-        project = await res.json();
+        const data = await res.json();
+        project = data.project || data;
+        
+        // Attach nested data to project for rendering
+        project.milestones = data.milestones || [];
+        project.workingGroups = data.workingGroups || [];
+        project.activity = data.activity || [];
+        project.taskStats = data.taskStats || {};
+        project.owner_name = project.owner?.name || project.owner_name || 'Unknown';
+        
         renderProject();
         loadTasks();
       } catch (e) {
         console.error('Failed to load project:', e);
         document.getElementById('project-title').textContent = 'Project not found';
+        // Hide loading spinner and show error state
+        document.querySelectorAll('.loading').forEach(el => el.style.display = 'none');
       }
     }
 
     function renderProject() {
       document.title = `${project.title} | PLE Platform`;
       document.getElementById('project-title').textContent = project.title;
-      document.getElementById('project-type-text').textContent = capitalizeFirst(project.project_type);
+      document.getElementById('project-type-text').textContent = capitalizeFirst(project.projectType || project.project_type);
       document.getElementById('project-status').textContent = capitalizeFirst(project.status);
-      document.getElementById('project-owner').querySelector('span').textContent = project.owner_name || 'Unknown';
+      
+      // Handle owner name from either nested or flat structure
+      const ownerName = project.owner?.name || project.owner_name || 'Unknown';
+      document.getElementById('project-owner').querySelector('span').textContent = ownerName;
       document.getElementById('project-description').textContent = project.description || 'No description provided.';
       document.getElementById('progress-percent').textContent = `${project.progress || 0}%`;
 
       // Dates
       const dates = [];
-      if (project.start_date) dates.push(`Started ${formatDate(project.start_date)}`);
-      if (project.target_end_date) dates.push(`Due ${formatDate(project.target_end_date)}`);
+      const startDate = project.startDate || project.start_date;
+      const endDate = project.targetEndDate || project.target_end_date;
+      if (startDate) dates.push(`Started ${formatDate(startDate)}`);
+      if (endDate) dates.push(`Due ${formatDate(endDate)}`);
       document.getElementById('project-dates').querySelector('span').textContent = dates.join(' • ') || 'No dates set';
 
       // Linked elements
-      if (project.linkedElements && project.linkedElements.length > 0) {
+      const linkedEls = project.linkedElements || project.linked_elements || [];
+      if (linkedEls.length > 0) {
         document.getElementById('linked-elements-section').style.display = 'block';
-        document.getElementById('linked-elements').innerHTML = project.linkedElements.map(el => `
+        document.getElementById('linked-elements').innerHTML = linkedEls.map(el => `
           <span class="element-tag" style="background: var(--color-${el.element_type}-bg); color: var(--color-${el.element_type});">
             ${el.code}: ${el.title}
           </span>
@@ -841,9 +858,9 @@
       // Show project owner first
       let html = `
         <div class="member-card">
-          <div class="member-avatar">${project.owner_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'O'}</div>
+          <div class="member-avatar">${(project.owner?.name || project.owner_name || 'O').split(' ').map(n => n[0]).join('').toUpperCase()}</div>
           <div class="member-info">
-            <div class="member-name">${escapeHtml(project.owner_name || 'Unknown')}</div>
+            <div class="member-name">${escapeHtml(project.owner?.name || project.owner_name || 'Unknown')}</div>
             <div class="member-role">Project Owner</div>
           </div>
         </div>
