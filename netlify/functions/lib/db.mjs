@@ -335,22 +335,30 @@ async function runMigrations() {
 }
 
 async function seedProjects() {
-  // Check if enriched seed has already been applied (look for system user)
-  const systemCheck = await sql`SELECT COUNT(*) as count FROM users WHERE email = 'system@postlaboreconomics.com'`;
-  if (parseInt(systemCheck[0]?.count) > 0) return;
+  // Version-based seed check — increment SEED_VERSION constant to force re-seed
+  const versionCheck = await sql`SELECT COUNT(*) as count FROM users WHERE email = 'system@postlaboreconomics.com' AND bio LIKE ${'%v' + SEED_VERSION + '%'}`;
+  if (parseInt(versionCheck[0]?.count) > 0) return;
+
+  console.log(`📦 Running project seed v${SEED_VERSION}...`);
 
   // Remove old placeholder projects (no owner, no tasks) and replace with enriched versions
   await sql`DELETE FROM tasks WHERE project_id IN (SELECT id FROM projects WHERE owner_id IS NULL)`;
   await sql`DELETE FROM milestones WHERE project_id IN (SELECT id FROM projects WHERE owner_id IS NULL)`;
   await sql`DELETE FROM working_groups WHERE project_id IN (SELECT id FROM projects WHERE owner_id IS NULL)`;
   await sql`DELETE FROM projects WHERE owner_id IS NULL`;
+  
+  // Also clean up any duplicate seeded data from prior runs
+  await sql`DELETE FROM tasks WHERE project_id IN ('10000000-0000-0000-0000-000000000001'::uuid, '10000000-0000-0000-0000-000000000002'::uuid, '10000000-0000-0000-0000-000000000003'::uuid, '10000000-0000-0000-0000-000000000004'::uuid, '10000000-0000-0000-0000-000000000005'::uuid, '10000000-0000-0000-0000-000000000006'::uuid)`;
+  await sql`DELETE FROM working_groups WHERE project_id IN ('10000000-0000-0000-0000-000000000001'::uuid, '10000000-0000-0000-0000-000000000002'::uuid, '10000000-0000-0000-0000-000000000003'::uuid, '10000000-0000-0000-0000-000000000004'::uuid, '10000000-0000-0000-0000-000000000005'::uuid, '10000000-0000-0000-0000-000000000006'::uuid)`;
+  await sql`DELETE FROM milestones WHERE project_id IN ('10000000-0000-0000-0000-000000000001'::uuid, '10000000-0000-0000-0000-000000000002'::uuid, '10000000-0000-0000-0000-000000000003'::uuid, '10000000-0000-0000-0000-000000000004'::uuid, '10000000-0000-0000-0000-000000000005'::uuid, '10000000-0000-0000-0000-000000000006'::uuid)`;
+  await sql`DELETE FROM projects WHERE id IN ('10000000-0000-0000-0000-000000000001'::uuid, '10000000-0000-0000-0000-000000000002'::uuid, '10000000-0000-0000-0000-000000000003'::uuid, '10000000-0000-0000-0000-000000000004'::uuid, '10000000-0000-0000-0000-000000000005'::uuid, '10000000-0000-0000-0000-000000000006'::uuid)`;
 
   // Create a system user for seeded content
   const systemUserId = '00000000-0000-0000-0000-000000000001';
   await sql`INSERT INTO users (id, email, password_hash, display_name, role, bio)
     VALUES (${systemUserId}, 'system@postlaboreconomics.com', 'SYSTEM_NO_LOGIN', 'PLE Platform', 'admin',
-      'System account for seeded content and platform operations.')
-    ON CONFLICT (email) DO NOTHING`;
+      ${'System account for seeded content and platform operations. Seed v' + SEED_VERSION})
+    ON CONFLICT (email) DO UPDATE SET bio = ${'System account for seeded content and platform operations. Seed v' + SEED_VERSION}`;
 
   // ── Project 1: GATO Framework Implementation ──
   const gatoId = '10000000-0000-0000-0000-000000000001';
