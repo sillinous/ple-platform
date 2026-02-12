@@ -24,6 +24,7 @@ export default defineConfig({
         'project-view': 'project-view.html',
         content: 'content.html',
         'content-view': 'content-view.html',
+        'content-editor': 'content-editor.html',
       }
     }
   }

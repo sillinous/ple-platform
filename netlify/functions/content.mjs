@@ -87,15 +87,16 @@ async function listContent(sql, params, user) {
 }
 
 async function getContent(sql, id, user) {
-  const content = await sql`
-    SELECT c.*, u.display_name as author_name, u.email as author_email, u.avatar_url as author_avatar,
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const content = isUuid
+    ? await sql`SELECT c.*, u.display_name as author_name, u.email as author_email, u.avatar_url as author_avatar,
            r.display_name as reviewer_name, p.title as project_title
-    FROM content_items c
-    LEFT JOIN users u ON c.author_id = u.id
-    LEFT JOIN users r ON c.reviewer_id = r.id
-    LEFT JOIN projects p ON c.project_id = p.id
-    WHERE (${id}::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND c.id = ${id}::uuid) OR c.slug = ${id}
-  `;
+      FROM content_items c LEFT JOIN users u ON c.author_id = u.id LEFT JOIN users r ON c.reviewer_id = r.id LEFT JOIN projects p ON c.project_id = p.id
+      WHERE c.id = ${id}::uuid`
+    : await sql`SELECT c.*, u.display_name as author_name, u.email as author_email, u.avatar_url as author_avatar,
+           r.display_name as reviewer_name, p.title as project_title
+      FROM content_items c LEFT JOIN users u ON c.author_id = u.id LEFT JOIN users r ON c.reviewer_id = r.id LEFT JOIN projects p ON c.project_id = p.id
+      WHERE c.slug = ${id}`;
 
   if (content.length === 0) return jsonResponse({ error: 'Content not found' }, 404);
   const item = content[0];
