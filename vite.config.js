@@ -4,6 +4,7 @@ import netlifyPlugin from '@netlify/vite-plugin';
 export default defineConfig({
   plugins: [netlifyPlugin()],
   build: {
+    target: 'esnext',
     outDir: 'dist',
     rollupOptions: {
       input: {
