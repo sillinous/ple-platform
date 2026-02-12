@@ -9,7 +9,7 @@ const sql = neon();
 
 // Migration status tracking (per-instance, runs once per cold start)
 let migrationChecked = false;
-const SEED_VERSION = 5; // Increment to force re-seed
+const SEED_VERSION = 6; // Increment to force re-seed
 
 /**
  * Ensure database is initialized before any query
@@ -590,12 +590,11 @@ async function seedArchitecture() {
               VALUES (${type}, ${code}, ${title}, ${desc}, ${status}) ON CONFLICT (code) DO NOTHING`;
   }
 
-  // ── Seed Content ──
-  // Clean all system-authored content and also any old seed content
-  await sql`DELETE FROM content_tags WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%')`;
-  await sql`DELETE FROM content_versions WHERE content_id IN (SELECT id FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%')`;
-  await sql`DELETE FROM comments WHERE entity_type = 'content' AND entity_id IN (SELECT id FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%')`;
-  await sql`DELETE FROM content_items WHERE author_id = ${systemUserId} OR id::text LIKE '20000000%'`;
+  // ── Seed Content ── (clean slate approach)
+  await sql`DELETE FROM content_tags`;
+  await sql`DELETE FROM content_versions`;
+  await sql`DELETE FROM comments WHERE entity_type = 'content'`;
+  await sql`DELETE FROM content_items`;
 
   const contentItems = [
     {
