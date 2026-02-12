@@ -597,8 +597,10 @@
     }
 
     function renderContentCard(item) {
-      const initials = (item.author_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
-      const typeLabel = item.content_type.replace('_', ' ');
+      const authorName = item.author?.name || 'Unknown';
+      const initials = authorName.split(' ').map(n => n[0]).join('').toUpperCase();
+      const contentType = item.contentType || 'article';
+      const typeLabel = contentType.replace('_', ' ');
       
       return `
         <div class="content-card" onclick="viewContent('${item.id}')">
@@ -612,7 +614,7 @@
             </svg>
           </div>
           <div class="content-body">
-            <span class="content-type-badge type-${item.content_type}">${typeLabel}</span>
+            <span class="content-type-badge type-${contentType}">${typeLabel}</span>
             
             ${item.status === 'in_review' ? `
               <div class="workflow-status needs-review">
@@ -648,7 +650,7 @@
             <div class="content-meta">
               <div class="content-author">
                 <div class="author-avatar">${initials}</div>
-                <span>${escapeHtml(item.author_name || 'Unknown')}</span>
+                <span>${escapeHtml(authorName)}</span>
               </div>
               <div class="content-status">
                 <span class="status-indicator status-${item.status}"></span>

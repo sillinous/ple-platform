@@ -565,16 +565,18 @@
     }
 
     function renderProjectCard(project) {
-      const initials = (project.owner_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+      const ownerName = project.owner?.name || 'Unknown';
+      const initials = ownerName.split(' ').map(n => n[0]).join('').toUpperCase();
       const progress = project.progress || 0;
-      const taskCount = parseInt(project.task_count) || 0;
-      const completedTasks = parseInt(project.completed_tasks) || 0;
+      const taskCount = parseInt(project.taskCount) || 0;
+      const completedTasks = parseInt(project.completedTasks) || 0;
+      const projectType = project.projectType || 'initiative';
 
       return `
         <div class="project-card" onclick="window.location='/project-view.html?id=${project.id}'" style="position: relative;">
           <div class="priority-indicator priority-${project.priority}"></div>
           <div class="project-card-header">
-            <span class="project-type-badge type-${project.project_type}">${project.project_type}</span>
+            <span class="project-type-badge type-${projectType}">${projectType}</span>
             <div class="project-status">
               <span class="status-dot status-${project.status}"></span>
               ${capitalizeFirst(project.status)}
@@ -593,7 +595,7 @@
           <div class="project-meta">
             <div class="project-owner">
               <div class="owner-avatar">${initials}</div>
-              <span class="owner-name">${escapeHtml(project.owner_name || 'Unknown')}</span>
+              <span class="owner-name">${escapeHtml(ownerName)}</span>
             </div>
             <div class="project-stats">
               <span class="stat-item">
