@@ -147,6 +147,183 @@ async function runMigrations() {
     user_agent TEXT
   )`;
 
+  // ==========================================
+  // PROJECTS & WORK MANAGEMENT
+  // ==========================================
+
+  // Projects
+  await sql`CREATE TABLE IF NOT EXISTS projects (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(200) NOT NULL,
+    slug VARCHAR(200) UNIQUE NOT NULL,
+    description TEXT,
+    project_type VARCHAR(50) DEFAULT 'initiative',
+    status VARCHAR(50) DEFAULT 'draft',
+    visibility VARCHAR(50) DEFAULT 'members',
+    priority VARCHAR(20) DEFAULT 'medium',
+    owner_id UUID REFERENCES users(id),
+    linked_proposal_id UUID REFERENCES proposals(id),
+    linked_elements JSONB DEFAULT '[]',
+    start_date DATE,
+    target_end_date DATE,
+    actual_end_date DATE,
+    progress INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB DEFAULT '{}'
+  )`;
+
+  // Working Groups (Teams)
+  await sql`CREATE TABLE IF NOT EXISTS working_groups (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    project_id UUID REFERENCES projects(id),
+    lead_id UUID REFERENCES users(id),
+    status VARCHAR(50) DEFAULT 'forming',
+    visibility VARCHAR(50) DEFAULT 'members',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB DEFAULT '{}'
+  )`;
+
+  // Working Group Members
+  await sql`CREATE TABLE IF NOT EXISTS working_group_members (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id UUID REFERENCES working_groups(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(50) DEFAULT 'member',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    left_at TIMESTAMP,
+    UNIQUE(group_id, user_id)
+  )`;
+
+  // Milestones
+  await sql`CREATE TABLE IF NOT EXISTS milestones (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    target_date DATE,
+    completed_date DATE,
+    status VARCHAR(50) DEFAULT 'upcoming',
+    order_index INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  // Tasks
+  await sql`CREATE TABLE IF NOT EXISTS tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    milestone_id UUID REFERENCES milestones(id) ON DELETE SET NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    status VARCHAR(50) DEFAULT 'backlog',
+    priority VARCHAR(20) DEFAULT 'medium',
+    assigned_to UUID REFERENCES users(id) ON DELETE SET NULL,
+    parent_task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
+    due_date DATE,
+    estimated_hours DECIMAL(5,2),
+    actual_hours DECIMAL(5,2),
+    order_index INTEGER DEFAULT 0,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    metadata JSONB DEFAULT '{}'
+  )`;
+
+  // ==========================================
+  // CONTENT MANAGEMENT SYSTEM
+  // ==========================================
+
+  // Content Items
+  await sql`CREATE TABLE IF NOT EXISTS content_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(300) NOT NULL,
+    slug VARCHAR(300) UNIQUE NOT NULL,
+    content_type VARCHAR(50) DEFAULT 'article',
+    body TEXT,
+    excerpt TEXT,
+    status VARCHAR(50) DEFAULT 'draft',
+    visibility VARCHAR(50) DEFAULT 'internal',
+    author_id UUID REFERENCES users(id),
+    reviewer_id UUID REFERENCES users(id),
+    project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+    version INTEGER DEFAULT 1,
+    featured_image TEXT,
+    published_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB DEFAULT '{}'
+  )`;
+
+  // Content Versions (for version history)
+  await sql`CREATE TABLE IF NOT EXISTS content_versions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    content_id UUID REFERENCES content_items(id) ON DELETE CASCADE,
+    version_number INTEGER NOT NULL,
+    title VARCHAR(300) NOT NULL,
+    body TEXT,
+    changed_by UUID REFERENCES users(id),
+    change_summary TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  // Generic Comments (attach to any entity)
+  await sql`CREATE TABLE IF NOT EXISTS comments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id UUID NOT NULL,
+    author_id UUID REFERENCES users(id),
+    body TEXT NOT NULL,
+    parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  // Attachments (files for any entity)
+  await sql`CREATE TABLE IF NOT EXISTS attachments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id UUID NOT NULL,
+    filename VARCHAR(255) NOT NULL,
+    file_url TEXT NOT NULL,
+    file_type VARCHAR(100),
+    file_size INTEGER,
+    uploaded_by UUID REFERENCES users(id),
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  // Tags (for content organization)
+  await sql`CREATE TABLE IF NOT EXISTS tags (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) UNIQUE NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    color VARCHAR(7) DEFAULT '#6B7280'
+  )`;
+
+  // Content Tags (many-to-many)
+  await sql`CREATE TABLE IF NOT EXISTS content_tags (
+    content_id UUID REFERENCES content_items(id) ON DELETE CASCADE,
+    tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (content_id, tag_id)
+  )`;
+
+  // Create indexes for performance
+  await sql`CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_projects_owner ON projects(owner_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_content_status ON content_items(status)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_content_type ON content_items(content_type)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_comments_entity ON comments(entity_type, entity_id)`;
+
   // Seed architecture data
   await seedArchitecture();
 }

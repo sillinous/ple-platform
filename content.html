@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content | Post-Labor Economics Platform</title>
+  <link rel="stylesheet" href="/src/styles/brand.css">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <style>
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .content-header h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-h2);
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .content-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0;
+    }
+
+    .content-tab {
+      padding: 0.75rem 1.25rem;
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .content-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .content-tab.active {
+      color: var(--color-horizon);
+    }
+
+    .content-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--color-horizon);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .content-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .content-card:hover {
+      border-color: var(--color-horizon);
+      box-shadow: 0 4px 12px rgba(27, 77, 62, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .content-image {
+      height: 160px;
+      background: linear-gradient(135deg, var(--color-horizon) 0%, var(--color-sage) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .content-image svg {
+      width: 48px;
+      height: 48px;
+      color: white;
+      opacity: 0.5;
+    }
+
+    .content-body {
+      padding: 1.25rem;
+    }
+
+    .content-type-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.75rem;
+    }
+
+    .type-article { background: var(--color-goal-bg); color: var(--color-goal); }
+    .type-report { background: var(--color-strategy-bg); color: var(--color-strategy); }
+    .type-policy_brief { background: var(--color-capability-bg); color: var(--color-capability); }
+    .type-case_study { background: var(--color-principle-bg); color: var(--color-principle); }
+    .type-blog { background: var(--color-info-bg); color: var(--color-info); }
+
+    .content-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .content-excerpt {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .content-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .content-author {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .author-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-horizon);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    .content-status {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-draft { background: var(--color-gray-400); }
+    .status-in_review { background: var(--color-warning); }
+    .status-approved { background: var(--color-info); }
+    .status-published { background: var(--color-success); }
+    .status-archived { background: var(--color-gray-300); }
+
+    .content-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag {
+      padding: 0.15rem 0.5rem;
+      background: var(--color-gray-100);
+      color: var(--color-gray-600);
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    /* Workflow indicators */
+    .workflow-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--color-warning-bg);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: var(--color-gray-700);
+      margin-bottom: 0.75rem;
+    }
+
+    .workflow-status.needs-review {
+      background: var(--color-warning-bg);
+    }
+
+    .workflow-status.ready-publish {
+      background: var(--color-success-bg);
+    }
+
+    /* Empty and loading states */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Create Content Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: var(--bg-primary);
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-horizon);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .tags-input {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-primary);
+      min-height: 44px;
+    }
+
+    .tags-input input {
+      border: none;
+      outline: none;
+      padding: 0.25rem;
+      flex: 1;
+      min-width: 100px;
+      background: transparent;
+    }
+
+    .tags-input .tag {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      background: var(--color-horizon);
+      color: white;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .tags-input .tag button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-main">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">
+        <img src="/ple-logo.svg" alt="PLE" style="height: 32px;">
+        <span>Post-Labor Economics</span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/architecture.html">Architecture</a>
+        <a href="/projects.html">Projects</a>
+        <a href="/content.html" class="active">Content</a>
+        <a href="/proposals.html">Proposals</a>
+        <a href="/discussions.html">Discussions</a>
+      </div>
+      <div class="nav-user" id="nav-user"></div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="content-header">
+        <div>
+          <h1>Content</h1>
+          <p style="color: var(--text-secondary); margin-top: 0.25rem;">Articles, reports, and publications</p>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateModal()" id="create-btn" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          New Content
+        </button>
+      </div>
+
+      <div class="content-tabs">
+        <button class="content-tab active" data-filter="all">All</button>
+        <button class="content-tab" data-filter="published">Published</button>
+        <button class="content-tab" data-filter="drafts">My Drafts</button>
+        <button class="content-tab" data-filter="in_review">In Review</button>
+      </div>
+
+      <div class="content-grid" id="content-grid">
+        <div class="loading">Loading content...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Create Content Modal -->
+  <div class="modal-overlay" id="create-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Content</h2>
+        <button class="modal-close" onclick="closeCreateModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="create-form" onsubmit="submitContent(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="content-title">Title *</label>
+            <input type="text" id="content-title" name="title" required placeholder="Enter title">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="content-type">Content Type</label>
+              <select id="content-type" name="content_type">
+                <option value="article">Article</option>
+                <option value="report">Report</option>
+                <option value="policy_brief">Policy Brief</option>
+                <option value="case_study">Case Study</option>
+                <option value="blog">Blog Post</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="content-visibility">Visibility</label>
+              <select id="content-visibility" name="visibility">
+                <option value="internal">Internal Only</option>
+                <option value="members">Members</option>
+                <option value="public">Public</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="content-excerpt">Excerpt / Summary</label>
+            <textarea id="content-excerpt" name="excerpt" rows="2" placeholder="Brief summary for listings..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="content-body">Content *</label>
+            <textarea id="content-body" name="body" required placeholder="Write your content here... (Markdown supported)"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Tags</label>
+            <div class="tags-input" id="tags-input">
+              <input type="text" id="tag-input" placeholder="Add tags..." onkeydown="handleTagInput(event)">
+            </div>
+            <input type="hidden" id="tags-hidden" name="tags">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Draft</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let currentFilter = 'all';
+    let contentTags = [];
+
+    // Check auth
+    async function checkAuth() {
+      const token = localStorage.getItem('ple_token');
+      if (!token) return;
+
+      try {
+        const res = await fetch('/api/auth?action=me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          currentUser = await res.json();
+          document.getElementById('nav-user').innerHTML = `
+            <span class="user-name">${currentUser.display_name}</span>
+          `;
+          document.getElementById('create-btn').style.display = 'flex';
+        }
+      } catch (e) {
+        console.error('Auth check failed:', e);
+      }
+    }
+
+    // Load content
+    async function loadContent() {
+      const grid = document.getElementById('content-grid');
+      
+      try {
+        let url = '/api/content?limit=50';
+        
+        if (currentFilter === 'published') {
+          url += '&status=published';
+        } else if (currentFilter === 'drafts' && currentUser) {
+          url += '&status=draft&author=me';
+        } else if (currentFilter === 'in_review') {
+          url += '&status=in_review';
+        }
+
+        const token = localStorage.getItem('ple_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const res = await fetch(url, { headers });
+        const data = await res.json();
+
+        if (data.content && data.content.length > 0) {
+          grid.innerHTML = data.content.map(renderContentCard).join('');
+        } else {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+              <h3>No content yet</h3>
+              <p>${currentFilter === 'drafts' ? 'Start writing your first draft.' : 'Content will appear here once created.'}</p>
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error('Failed to load content:', e);
+        grid.innerHTML = '<div class="error">Failed to load content</div>';
+      }
+    }
+
+    function renderContentCard(item) {
+      const initials = (item.author_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+      const typeLabel = item.content_type.replace('_', ' ');
+      
+      return `
+        <div class="content-card" onclick="viewContent('${item.id}')">
+          <div class="content-image">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+          </div>
+          <div class="content-body">
+            <span class="content-type-badge type-${item.content_type}">${typeLabel}</span>
+            
+            ${item.status === 'in_review' ? `
+              <div class="workflow-status needs-review">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Awaiting Review
+              </div>
+            ` : ''}
+            
+            ${item.status === 'approved' ? `
+              <div class="workflow-status ready-publish">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                  <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+                Ready to Publish
+              </div>
+            ` : ''}
+            
+            <h3 class="content-title">${escapeHtml(item.title)}</h3>
+            <p class="content-excerpt">${escapeHtml(item.excerpt || 'No excerpt')}</p>
+            
+            ${item.tags && item.tags.length > 0 ? `
+              <div class="content-tags">
+                ${item.tags.slice(0, 3).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+                ${item.tags.length > 3 ? `<span class="tag">+${item.tags.length - 3}</span>` : ''}
+              </div>
+            ` : ''}
+            
+            <div class="content-meta">
+              <div class="content-author">
+                <div class="author-avatar">${initials}</div>
+                <span>${escapeHtml(item.author_name || 'Unknown')}</span>
+              </div>
+              <div class="content-status">
+                <span class="status-indicator status-${item.status}"></span>
+                ${capitalizeFirst(item.status)}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function viewContent(id) {
+      window.location = `/content-view.html?id=${id}`;
+    }
+
+    // Tab handling
+    document.querySelectorAll('.content-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        loadContent();
+      });
+    });
+
+    // Modal
+    function openCreateModal() {
+      document.getElementById('create-modal').classList.add('active');
+    }
+
+    function closeCreateModal() {
+      document.getElementById('create-modal').classList.remove('active');
+      document.getElementById('create-form').reset();
+      contentTags = [];
+      renderTags();
+    }
+
+    // Tags input
+    function handleTagInput(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const input = e.target;
+        const tag = input.value.trim().replace(',', '');
+        if (tag && !contentTags.includes(tag)) {
+          contentTags.push(tag);
+          renderTags();
+        }
+        input.value = '';
+      }
+    }
+
+    function renderTags() {
+      const container = document.getElementById('tags-input');
+      const input = document.getElementById('tag-input');
+      
+      // Remove existing tags
+      container.querySelectorAll('.tag').forEach(t => t.remove());
+      
+      // Add tags before input
+      contentTags.forEach((tag, i) => {
+        const tagEl = document.createElement('span');
+        tagEl.className = 'tag';
+        tagEl.innerHTML = `${escapeHtml(tag)} <button type="button" onclick="removeTag(${i})">&times;</button>`;
+        container.insertBefore(tagEl, input);
+      });
+
+      // Update hidden field
+      document.getElementById('tags-hidden').value = JSON.stringify(contentTags);
+    }
+
+    function removeTag(index) {
+      contentTags.splice(index, 1);
+      renderTags();
+    }
+
+    async function submitContent(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      data.tags = contentTags;
+
+      try {
+        const res = await fetch('/api/content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('ple_token')}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          const content = await res.json();
+          closeCreateModal();
+          window.location = `/content-view.html?id=${content.id}`;
+        } else {
+          const error = await res.json();
+          alert(error.error || 'Failed to create content');
+        }
+      } catch (e) {
+        console.error('Failed to create content:', e);
+        alert('Failed to create content');
+      }
+    }
+
+    // Utils
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function capitalizeFirst(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1).replace('_', ' ');
+    }
+
+    // Init
+    checkAuth();
+    loadContent();
+  </script>
+</body>
+</html>

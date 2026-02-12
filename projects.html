@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects | Post-Labor Economics Platform</title>
+  <link rel="stylesheet" href="/src/styles/brand.css">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <style>
+    .projects-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .projects-header h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-h2);
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .filters-bar {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--color-horizon);
+    }
+
+    .filter-btn.active {
+      background: var(--color-horizon);
+      color: white;
+      border-color: var(--color-horizon);
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      border-color: var(--color-horizon);
+      box-shadow: 0 4px 12px rgba(27, 77, 62, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .project-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .project-type-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .type-initiative { background: var(--color-goal-bg); color: var(--color-goal); }
+    .type-research { background: var(--color-strategy-bg); color: var(--color-strategy); }
+    .type-policy { background: var(--color-capability-bg); color: var(--color-capability); }
+    .type-campaign { background: var(--color-principle-bg); color: var(--color-principle); }
+    .type-internal { background: var(--color-gray-100); color: var(--color-gray-600); }
+
+    .project-status {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-draft { background: var(--color-gray-400); }
+    .status-planning { background: var(--color-info); }
+    .status-active { background: var(--color-success); }
+    .status-paused { background: var(--color-warning); }
+    .status-completed { background: var(--color-horizon); }
+    .status-archived { background: var(--color-gray-300); }
+
+    .project-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .project-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .project-progress {
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--color-gray-200);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 0.35rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--color-horizon);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .project-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .project-owner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .owner-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-horizon);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .owner-name {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .project-stats {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stat-item svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.7;
+    }
+
+    .priority-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      border-radius: 12px 0 0 12px;
+    }
+
+    .priority-urgent { background: var(--color-error); }
+    .priority-high { background: var(--color-coral); }
+    .priority-medium { background: var(--color-dawn); }
+    .priority-low { background: var(--color-gray-400); }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Create Project Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: var(--bg-primary);
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-horizon);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-main">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">
+        <img src="/ple-logo.svg" alt="PLE" style="height: 32px;">
+        <span>Post-Labor Economics</span>
+      </a>
+      <div class="nav-links">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/architecture.html">Architecture</a>
+        <a href="/projects.html" class="active">Projects</a>
+        <a href="/content.html">Content</a>
+        <a href="/proposals.html">Proposals</a>
+        <a href="/discussions.html">Discussions</a>
+      </div>
+      <div class="nav-user" id="nav-user"></div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="projects-header">
+        <div>
+          <h1>Projects</h1>
+          <p style="color: var(--text-secondary); margin-top: 0.25rem;">Initiatives and work in progress across the movement</p>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateModal()" id="create-btn" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          New Project
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <div class="filter-group" id="status-filters">
+          <button class="filter-btn active" data-status="">All</button>
+          <button class="filter-btn" data-status="active">Active</button>
+          <button class="filter-btn" data-status="planning">Planning</button>
+          <button class="filter-btn" data-status="completed">Completed</button>
+        </div>
+        <div class="filter-group" id="type-filters">
+          <button class="filter-btn active" data-type="">All Types</button>
+          <button class="filter-btn" data-type="initiative">Initiative</button>
+          <button class="filter-btn" data-type="research">Research</button>
+          <button class="filter-btn" data-type="policy">Policy</button>
+          <button class="filter-btn" data-type="campaign">Campaign</button>
+        </div>
+      </div>
+
+      <div class="projects-grid" id="projects-grid">
+        <div class="loading">Loading projects...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Create Project Modal -->
+  <div class="modal-overlay" id="create-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Create New Project</h2>
+        <button class="modal-close" onclick="closeCreateModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="create-form" onsubmit="submitProject(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="project-title">Project Title *</label>
+            <input type="text" id="project-title" name="title" required placeholder="Enter project title">
+          </div>
+
+          <div class="form-group">
+            <label for="project-description">Description</label>
+            <textarea id="project-description" name="description" placeholder="Describe the project goals and scope"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="project-type">Project Type</label>
+              <select id="project-type" name="project_type">
+                <option value="initiative">Initiative</option>
+                <option value="research">Research</option>
+                <option value="policy">Policy Development</option>
+                <option value="campaign">Campaign</option>
+                <option value="internal">Internal</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="project-priority">Priority</label>
+              <select id="project-priority" name="priority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="project-start">Start Date</label>
+              <input type="date" id="project-start" name="start_date">
+            </div>
+            <div class="form-group">
+              <label for="project-end">Target End Date</label>
+              <input type="date" id="project-end" name="target_end_date">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="project-visibility">Visibility</label>
+            <select id="project-visibility" name="visibility">
+              <option value="members">Members Only</option>
+              <option value="public">Public</option>
+              <option value="team">Team Only</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let currentFilters = { status: '', type: '' };
+
+    // Check auth
+    async function checkAuth() {
+      const token = localStorage.getItem('ple_token');
+      if (!token) return;
+
+      try {
+        const res = await fetch('/api/auth?action=me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          currentUser = await res.json();
+          document.getElementById('nav-user').innerHTML = `
+            <span class="user-name">${currentUser.display_name}</span>
+          `;
+          document.getElementById('create-btn').style.display = 'flex';
+        }
+      } catch (e) {
+        console.error('Auth check failed:', e);
+      }
+    }
+
+    // Load projects
+    async function loadProjects() {
+      const grid = document.getElementById('projects-grid');
+      
+      try {
+        let url = '/api/projects?limit=50';
+        if (currentFilters.status) url += `&status=${currentFilters.status}`;
+        if (currentFilters.type) url += `&type=${currentFilters.type}`;
+
+        const token = localStorage.getItem('ple_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        const res = await fetch(url, { headers });
+        const data = await res.json();
+
+        if (data.projects && data.projects.length > 0) {
+          grid.innerHTML = data.projects.map(renderProjectCard).join('');
+        } else {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+              </svg>
+              <h3>No projects yet</h3>
+              <p>Create your first project to start organizing work.</p>
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error('Failed to load projects:', e);
+        grid.innerHTML = '<div class="error">Failed to load projects</div>';
+      }
+    }
+
+    function renderProjectCard(project) {
+      const initials = (project.owner_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+      const progress = project.progress || 0;
+      const taskCount = parseInt(project.task_count) || 0;
+      const completedTasks = parseInt(project.completed_tasks) || 0;
+
+      return `
+        <div class="project-card" onclick="window.location='/project-view.html?id=${project.id}'" style="position: relative;">
+          <div class="priority-indicator priority-${project.priority}"></div>
+          <div class="project-card-header">
+            <span class="project-type-badge type-${project.project_type}">${project.project_type}</span>
+            <div class="project-status">
+              <span class="status-dot status-${project.status}"></span>
+              ${capitalizeFirst(project.status)}
+            </div>
+          </div>
+          <h3 class="project-title">${escapeHtml(project.title)}</h3>
+          <p class="project-description">${escapeHtml(project.description || 'No description')}</p>
+          ${taskCount > 0 ? `
+            <div class="project-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%"></div>
+              </div>
+              <span class="progress-text">${completedTasks} of ${taskCount} tasks complete</span>
+            </div>
+          ` : ''}
+          <div class="project-meta">
+            <div class="project-owner">
+              <div class="owner-avatar">${initials}</div>
+              <span class="owner-name">${escapeHtml(project.owner_name || 'Unknown')}</span>
+            </div>
+            <div class="project-stats">
+              <span class="stat-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                ${taskCount}
+              </span>
+              <span class="stat-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 010 7.75"></path>
+                </svg>
+                ${project.team_count || 0}
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Filter handling
+    document.querySelectorAll('#status-filters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#status-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilters.status = btn.dataset.status;
+        loadProjects();
+      });
+    });
+
+    document.querySelectorAll('#type-filters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#type-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilters.type = btn.dataset.type;
+        loadProjects();
+      });
+    });
+
+    // Modal
+    function openCreateModal() {
+      document.getElementById('create-modal').classList.add('active');
+    }
+
+    function closeCreateModal() {
+      document.getElementById('create-modal').classList.remove('active');
+      document.getElementById('create-form').reset();
+    }
+
+    async function submitProject(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      try {
+        const res = await fetch('/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('ple_token')}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          const project = await res.json();
+          closeCreateModal();
+          window.location = `/project-view.html?id=${project.id}`;
+        } else {
+          const error = await res.json();
+          alert(error.error || 'Failed to create project');
+        }
+      } catch (e) {
+        console.error('Failed to create project:', e);
+        alert('Failed to create project');
+      }
+    }
+
+    // Utils
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function capitalizeFirst(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1).replace('_', ' ');
+    }
+
+    // Init
+    checkAuth();
+    loadProjects();
+  </script>
+</body>
+</html>
