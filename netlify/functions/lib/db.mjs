@@ -9,7 +9,7 @@ const sql = neon();
 
 // Migration status tracking (per-instance, runs once per cold start)
 let migrationChecked = false;
-const SEED_VERSION = 7; // Increment to force re-seed
+const SEED_VERSION = 8; // Increment to force re-seed
 
 /**
  * Ensure database is initialized before any query
@@ -599,7 +599,6 @@ async function seedArchitecture() {
 
   const contentItems = [
     {
-      id: '20000000-0000-0000-0000-000000000001',
       title: 'What Is Post-Labor Economics?',
       slug: 'what-is-post-labor-economics',
       content_type: 'article',
@@ -610,7 +609,6 @@ async function seedArchitecture() {
       tags: ['introduction', 'post-labor', 'economics', 'automation']
     },
     {
-      id: '20000000-0000-0000-0000-000000000002',
       title: 'The Case for Universal Basic Income in an Automated Economy',
       slug: 'case-for-ubi-automated-economy',
       content_type: 'policy_brief',
@@ -621,7 +619,6 @@ async function seedArchitecture() {
       tags: ['UBI', 'policy', 'automation-tax', 'universal-basic-income']
     },
     {
-      id: '20000000-0000-0000-0000-000000000003',
       title: 'Automation Tax Policy: A Comparative Analysis',
       slug: 'automation-tax-comparative-analysis',
       content_type: 'report',
@@ -632,7 +629,6 @@ async function seedArchitecture() {
       tags: ['automation-tax', 'policy-analysis', 'comparative', 'taxation']
     },
     {
-      id: '20000000-0000-0000-0000-000000000004',
       title: 'Data Dividends: Recognizing Collective Data as Economic Contribution',
       slug: 'data-dividends-collective-contribution',
       content_type: 'article',
@@ -643,7 +639,6 @@ async function seedArchitecture() {
       tags: ['data-dividends', 'data-economy', 'AI', 'collective-ownership']
     },
     {
-      id: '20000000-0000-0000-0000-000000000005',
       title: 'Purpose Beyond Employment: Frameworks for Meaning in a Post-Labor World',
       slug: 'purpose-beyond-employment',
       content_type: 'article',
@@ -654,7 +649,6 @@ async function seedArchitecture() {
       tags: ['purpose', 'meaning', 'identity', 'philosophy', 'wellbeing']
     },
     {
-      id: '20000000-0000-0000-0000-000000000006',
       title: 'GATO Framework: Governance Architecture for Transition Operations',
       slug: 'gato-framework-overview',
       content_type: 'case_study',
@@ -667,9 +661,10 @@ async function seedArchitecture() {
   ];
 
   for (const item of contentItems) {
-    const pubAt = item.status === 'published' ? new Date().toISOString() : null;
+    const cid = crypto.randomUUID();
     await sql`INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, author_id, version, published_at)
-      VALUES (${item.id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${systemUserId}, 1, ${pubAt})
+      VALUES (${cid}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${systemUserId}, 1,
+        ${item.status === 'published' ? sql`CURRENT_TIMESTAMP` : null})
       ON CONFLICT (slug) DO NOTHING`;
 
     // Seed tags
@@ -677,7 +672,7 @@ async function seedArchitecture() {
       const tagSlug = tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const tagResult = await sql`INSERT INTO tags (name, slug) VALUES (${tagName}, ${tagSlug}) ON CONFLICT (name) DO UPDATE SET name = tags.name RETURNING id`;
       if (tagResult.length > 0) {
-        await sql`INSERT INTO content_tags (content_id, tag_id) VALUES (${item.id}, ${tagResult[0].id}) ON CONFLICT DO NOTHING`;
+        await sql`INSERT INTO content_tags (content_id, tag_id) VALUES (${cid}, ${tagResult[0].id}) ON CONFLICT DO NOTHING`;
       }
     }
   }

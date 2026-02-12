@@ -94,7 +94,7 @@ async function getContent(sql, id, user) {
     LEFT JOIN users u ON c.author_id = u.id
     LEFT JOIN users r ON c.reviewer_id = r.id
     LEFT JOIN projects p ON c.project_id = p.id
-    WHERE c.id = ${id}::uuid OR c.slug = ${id}
+    WHERE (${id}::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND c.id = ${id}::uuid) OR c.slug = ${id}
   `;
 
   if (content.length === 0) return jsonResponse({ error: 'Content not found' }, 404);
