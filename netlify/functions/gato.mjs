@@ -18,8 +18,11 @@ export default async (req, context) => {
         return await getPRIME(sql);
       }
       if (action === 'seed-community') {
-      return await seedCommunityContent(sql);
-    }
+        return await seedCommunityContent(sql);
+      }
+      if (action === 'seed-projects') {
+        return await seedProjectsAndContent(sql);
+      }
     
     return await getGATOFramework(sql);
     }
@@ -30,6 +33,345 @@ export default async (req, context) => {
     return jsonResponse({ error: 'Internal server error', details: error.message }, 500);
   }
 };
+
+// Seed sample Projects and Content
+async function seedProjectsAndContent(sql) {
+  // Check if already seeded
+  const existingProjects = await sql`SELECT COUNT(*) as count FROM projects`;
+  const existingContent = await sql`SELECT COUNT(*) as count FROM content_items`;
+  
+  if (parseInt(existingProjects[0]?.count) > 0 || parseInt(existingContent[0]?.count) > 0) {
+    return jsonResponse({
+      message: 'Projects/Content already seeded',
+      existing: {
+        projects: parseInt(existingProjects[0]?.count),
+        content: parseInt(existingContent[0]?.count)
+      }
+    });
+  }
+
+  // Seed Projects
+  const projects = [
+    {
+      title: 'UBI Pilot Design Framework',
+      slug: 'ubi-pilot-design',
+      description: 'Develop comprehensive design parameters for a Universal Basic Income pilot program that could be proposed to municipal or regional governments. This includes participant selection methodology, payment structure optimization, and measurement frameworks aligned with our Heuristic Imperatives.',
+      project_type: 'research',
+      status: 'active',
+      priority: 'high',
+      progress: 35
+    },
+    {
+      title: 'Automation Impact Assessment Toolkit',
+      slug: 'automation-impact-toolkit',
+      description: 'Create an open-source toolkit for organizations and policymakers to assess the societal impact of automation technologies before widespread deployment. Modeled on Environmental Impact Assessments but focused on labor and economic effects.',
+      project_type: 'initiative',
+      status: 'active',
+      priority: 'high',
+      progress: 20
+    },
+    {
+      title: 'Post-Labor Economics Curriculum',
+      slug: 'ple-curriculum',
+      description: 'Develop an accessible, open-source educational curriculum introducing post-labor economics concepts to general audiences. Covers automation landscape, economic foundations, policy toolkit, values alignment, and action pathways.',
+      project_type: 'initiative',
+      status: 'planning',
+      priority: 'medium',
+      progress: 10
+    },
+    {
+      title: 'Data Ownership Rights Framework',
+      slug: 'data-ownership-framework',
+      description: 'Research and develop policy frameworks for individual data ownership in an AI-driven economy. Explore data dividend models, data cooperatives, and public data trusts.',
+      project_type: 'policy',
+      status: 'active',
+      priority: 'medium',
+      progress: 45
+    },
+    {
+      title: 'Coalition Building Initiative',
+      slug: 'coalition-building',
+      description: 'Build partnerships with labor unions, academic institutions, policy think tanks, and technology organizations to advance post-labor economic policies. Coordinate advocacy efforts and shared research.',
+      project_type: 'campaign',
+      status: 'active',
+      priority: 'high',
+      progress: 25
+    },
+    {
+      title: 'Platform Architecture Documentation',
+      slug: 'platform-docs',
+      description: 'Maintain comprehensive documentation of the PLE platform architecture, including goals, strategies, capabilities, and principles. Ensure alignment with GATO Framework and Heuristic Imperatives.',
+      project_type: 'internal',
+      status: 'active',
+      priority: 'medium',
+      progress: 70
+    }
+  ];
+
+  let projectCount = 0;
+  for (const proj of projects) {
+    const id = crypto.randomUUID();
+    await sql`
+      INSERT INTO projects (id, title, slug, description, project_type, status, priority, progress, visibility)
+      VALUES (${id}, ${proj.title}, ${proj.slug}, ${proj.description}, ${proj.project_type}, ${proj.status}, ${proj.priority}, ${proj.progress}, 'public')
+    `;
+    projectCount++;
+  }
+
+  // Seed Content Items
+  const contentItems = [
+    {
+      title: 'Introduction to Post-Labor Economics',
+      slug: 'intro-to-ple',
+      content_type: 'article',
+      excerpt: 'A foundational overview of post-labor economics: what it means, why it matters, and how we can build prosperity beyond traditional employment.',
+      body: `# Introduction to Post-Labor Economics
+
+Post-Labor Economics (PLE) is a framework for thinking about economic systems in a world where human labor is no longer the primary driver of production. As automation, artificial intelligence, and robotics advance, we face a fundamental question: how do we distribute prosperity when machines do most of the work?
+
+## The Challenge
+
+Traditional economics assumes labor as the primary means by which individuals access economic resources. You work, you earn, you spend. But what happens when:
+
+- AI can perform most cognitive tasks
+- Robots handle physical labor
+- Automation makes human work optional rather than necessary
+
+## Our Approach
+
+Rather than viewing this as a crisis to be avoided, we see it as an opportunity to be designed. Post-Labor Economics asks: how do we build systems that ensure prosperity for all, regardless of employment status?
+
+## Core Principles
+
+1. **Human Dignity First** — Economic systems should serve human flourishing, not the reverse
+2. **Universal Prosperity** — The gains from automation should be broadly shared
+3. **Meaningful Choice** — People should have genuine options for how they spend their time
+4. **Democratic Governance** — Economic decisions should be made democratically
+
+## Getting Involved
+
+This platform is where we develop policies, conduct research, and build the movement for post-labor prosperity. Explore our proposals, join discussions, and contribute to building a better economic future.`,
+      status: 'published',
+      visibility: 'public'
+    },
+    {
+      title: 'The Case for Universal Basic Income',
+      slug: 'case-for-ubi',
+      content_type: 'policy_brief',
+      excerpt: 'Why UBI is essential infrastructure for a post-labor economy, and how we can implement it effectively.',
+      body: `# The Case for Universal Basic Income
+
+Universal Basic Income (UBI) is a regular cash payment to all citizens, without conditions or work requirements. In a post-labor economy, UBI becomes essential infrastructure for ensuring universal prosperity.
+
+## Why UBI?
+
+### Decoupling Income from Employment
+
+As automation reduces the need for human labor, we need mechanisms to distribute economic resources that don't depend on employment. UBI provides this decoupling directly.
+
+### Reducing Suffering
+
+UBI directly addresses the first Heuristic Imperative by eliminating poverty and economic insecurity. No one should suffer from lack of basic resources in a society of abundance.
+
+### Enabling Prosperity
+
+With basic needs met, people can pursue education, entrepreneurship, caregiving, art, and community building—activities that increase prosperity but may not be "employed" in traditional terms.
+
+## Implementation Considerations
+
+- **Funding mechanisms**: Automation taxes, data dividends, carbon pricing
+- **Amount**: Must be sufficient for basic needs while maintaining incentives
+- **Universality**: No means-testing, available to all citizens
+- **Integration**: Coordination with existing benefit systems
+
+## Evidence from Pilots
+
+Research from Finland, Stockton, Kenya, and other pilot programs shows positive outcomes including improved mental health, maintained employment rates, and increased entrepreneurship.`,
+      status: 'published',
+      visibility: 'public'
+    },
+    {
+      title: 'Understanding the GATO Framework',
+      slug: 'understanding-gato',
+      content_type: 'article',
+      excerpt: 'How the Global Alignment Taxonomy Omnibus provides structure for AI alignment and post-labor economics.',
+      body: `# Understanding the GATO Framework
+
+The Global Alignment Taxonomy Omnibus (GATO) is a comprehensive framework for AI alignment developed by David Shapiro. It provides the ethical and structural foundation for our approach to post-labor economics.
+
+## The Three Heuristic Imperatives
+
+At the core of GATO are three fundamental values:
+
+1. **Reduce suffering in the universe**
+2. **Increase prosperity in the universe**  
+3. **Increase understanding in the universe**
+
+These imperatives guide all our policy proposals and platform decisions.
+
+## Seven Layers of Implementation
+
+GATO describes seven layers for achieving global AI alignment:
+
+1. Model Alignment — Training AI on ethical principles
+2. Autonomous Agents — Building aligned AI architectures
+3. Decentralized Networks — Using consensus mechanisms
+4. Corporate Adoption — Business incentives for alignment
+5. National Regulation — Government oversight
+6. International Entity — Global coordination
+7. Global Consensus — Universal understanding
+
+## Application to PLE
+
+Post-Labor Economics implements GATO by:
+
+- Designing economic policies that reduce suffering
+- Building systems that increase shared prosperity
+- Creating platforms that increase collective understanding
+- Working across all layers from individual action to global coordination`,
+      status: 'published',
+      visibility: 'public'
+    },
+    {
+      title: 'Automation Tax Implementation Guide',
+      slug: 'automation-tax-guide',
+      content_type: 'report',
+      excerpt: 'Technical analysis of automation taxation mechanisms and their potential for funding post-labor social programs.',
+      body: `# Automation Tax Implementation Guide
+
+## Executive Summary
+
+As automation displaces labor, traditional income tax bases erode while productivity increases. Automation taxes can capture some of this productivity gain to fund social programs including UBI.
+
+## Tax Design Options
+
+### Robot Tax
+A per-unit tax on robots or automated systems that replace human workers. Simple to understand but difficult to define and may discourage beneficial automation.
+
+### Automation VAT
+Value-added tax on automated production. Captures gains without requiring definition of "robot" but may be regressive.
+
+### Productivity Tax
+Tax on productivity gains from automation, calculated as output per worker increases. Better captures economic effects but complex to administer.
+
+### Data Dividend
+Taxes on data extraction and AI training, recognizing data as a collectively-produced resource.
+
+## Recommended Approach
+
+A hybrid system combining:
+- Productivity-based corporate tax adjustments
+- Data extraction fees
+- Automation impact assessments with mitigation requirements
+
+## Revenue Allocation
+
+See our proposal for automation tax revenue allocation across direct support, capability building, future investment, and governance.`,
+      status: 'published',
+      visibility: 'public'
+    },
+    {
+      title: 'Worker Transition Support Programs',
+      slug: 'worker-transition-support',
+      content_type: 'policy_brief',
+      excerpt: 'Comprehensive strategies for supporting workers through automation-driven economic transitions.',
+      body: `# Worker Transition Support Programs
+
+## The Challenge
+
+Automation doesn't just change job numbers—it changes entire career paths, skills requirements, and community economics. Effective transition support must address all these dimensions.
+
+## Support Pillars
+
+### Income Support
+- Extended unemployment benefits during transitions
+- UBI as baseline economic security
+- Wage insurance for workers taking lower-paying jobs
+
+### Skill Development
+- Free retraining programs aligned with emerging needs
+- Portable credentials and micro-certifications
+- On-the-job training subsidies
+
+### Geographic Mobility
+- Relocation assistance for workers in declining regions
+- Remote work infrastructure investments
+- Place-based economic development
+
+### Community Resilience
+- Economic diversification grants
+- Community land trusts
+- Cooperative development support
+
+## Implementation Framework
+
+Transition programs should be triggered by automation impact assessments, funded through automation taxation, and administered through regional workforce development boards with community input.`,
+      status: 'published',
+      visibility: 'public'
+    },
+    {
+      title: 'Platform Governance Model',
+      slug: 'platform-governance',
+      content_type: 'internal_doc',
+      excerpt: 'Internal documentation of how the PLE platform makes decisions and manages community contributions.',
+      body: `# Platform Governance Model
+
+## Overview
+
+The PLE Platform uses deliberative governance to make decisions about policies, priorities, and platform development. This document describes how that governance works.
+
+## Proposal Process
+
+1. **Draft** — Author develops proposal
+2. **Discussion** — Community provides feedback
+3. **Revision** — Author incorporates feedback
+4. **Voting** — Community votes on final proposal
+5. **Implementation** — Approved proposals are enacted
+
+## Working Groups
+
+Working groups form around specific projects and have delegated authority to make day-to-day decisions within their scope. Major decisions still go through the full proposal process.
+
+## Roles
+
+- **Members** — Can propose, discuss, vote
+- **Editors** — Can approve content for publication
+- **Admins** — Can manage platform operations
+
+## Conflict Resolution
+
+Disagreements are resolved through discussion aimed at consensus. When consensus cannot be reached, matters go to a vote with clear thresholds for different decision types.`,
+      status: 'published',
+      visibility: 'members'
+    }
+  ];
+
+  let contentCount = 0;
+  for (const item of contentItems) {
+    const id = crypto.randomUUID();
+    await sql`
+      INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, version, published_at)
+      VALUES (${id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, 1, ${item.status === 'published' ? sql`CURRENT_TIMESTAMP` : null})
+    `;
+    contentCount++;
+  }
+
+  // Add some tags
+  const tags = ['ubi', 'automation', 'policy', 'gato', 'economics', 'ai-alignment', 'governance'];
+  for (const tagName of tags) {
+    await sql`INSERT INTO tags (name) VALUES (${tagName}) ON CONFLICT DO NOTHING`;
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'Projects and Content seeded successfully',
+    seeded: {
+      projects: projectCount,
+      content: contentCount,
+      tags: tags.length
+    }
+  });
+}
 
 // Seed THE PRIME and Dimensions specifically (for when GATO was seeded before PRIME was added)
 async function seedPrimeOnly(sql) {

@@ -361,25 +361,32 @@
       border-top: 1px solid var(--border-color);
     }
   </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <nav class="nav-main">
-    <div class="nav-container">
-      <a href="/" class="nav-logo">
-        <img src="/ple-logo.svg" alt="PLE" style="height: 32px;">
-        <span>Post-Labor Economics</span>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <span class="logo-symbol">L/0</span>
+        <span class="logo-text">Post-Labor Economics</span>
       </a>
-      <div class="nav-links">
-        <a href="/dashboard.html">Dashboard</a>
-        <a href="/architecture.html">Architecture</a>
-        <a href="/projects.html" class="active">Projects</a>
-        <a href="/content.html">Content</a>
-        <a href="/proposals.html">Proposals</a>
-        <a href="/discussions.html">Discussions</a>
+      
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="gato.html" class="nav-link">GATO</a>
+        <a href="projects.html" class="nav-link active">Projects</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+      </nav>
+      
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
       </div>
-      <div class="nav-user" id="nav-user"></div>
     </div>
-  </nav>
+  </header>
 
   <main class="main-content">
     <div class="container">
