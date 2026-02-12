@@ -370,6 +370,33 @@
 
     .btn-danger:hover { background: #B91C1C; }
 
+    /* Toast notifications */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: #1B4D3E; color: white; padding: 0.75rem 1.5rem; border-radius: 8px;
+      font-size: 0.9rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 10000;
+      transition: transform 0.3s ease; pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast-error { background: #991B1B; }
+
+    /* Icon buttons */
+    .btn-icon {
+      background: none; border: none; cursor: pointer; font-size: 0.9rem;
+      padding: 0.25rem; opacity: 0.6; transition: opacity 0.15s;
+    }
+    .btn-icon:hover { opacity: 1; }
+
+    /* Detail labels */
+    .detail-label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem; }
+
+    /* Status badge colors in detail modal */
+    .status-badge.status-backlog { background: var(--color-gray-100); color: var(--color-gray-600); }
+    .status-badge.status-todo { background: rgba(108,99,255,0.1); color: #6c63ff; }
+    .status-badge.status-in_progress { background: rgba(244,162,97,0.15); color: #e76f51; }
+    .status-badge.status-review { background: rgba(42,157,143,0.1); color: #2a9d8f; }
+    .status-badge.status-done { background: rgba(42,157,143,0.15); color: #2a9d8f; }
+
     /* Milestones */
     .milestones-list {
       display: flex;
@@ -804,852 +831,401 @@
         <button class="tab-btn" data-tab="milestones">Milestones <span class="tab-count" id="milestone-count">0</span></button>
         <button class="tab-btn" data-tab="team">Team <span class="tab-count" id="team-count">0</span></button>
         <button class="tab-btn" data-tab="activity">Activity</button>
+        <button class="tab-btn auth-only" data-tab="settings" style="display:none;">Settings</button>
       </div>
 
       <!-- Overview Tab -->
       <div class="tab-content active" id="tab-overview">
-        <!-- Quick Stats -->
         <div class="quick-stats" id="quick-stats">
-          <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(27,77,62,0.1); color: var(--color-horizon);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value" id="stat-total-tasks">—</div>
-              <div class="stat-label">Total Tasks</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(42,157,143,0.1); color: #2a9d8f;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value" id="stat-done-tasks">—</div>
-              <div class="stat-label">Completed</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(244,162,97,0.1); color: var(--color-dawn);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value" id="stat-in-progress">—</div>
-              <div class="stat-label">In Progress</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(108,99,255,0.1); color: #6c63ff;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value" id="stat-teams">—</div>
-              <div class="stat-label">Working Groups</div>
-            </div>
-          </div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(27,77,62,0.1);color:var(--color-horizon)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-total-tasks">—</div><div class="stat-label">Total Tasks</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(42,157,143,0.1);color:#2a9d8f"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-done-tasks">—</div><div class="stat-label">Completed</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(244,162,97,0.1);color:var(--color-dawn)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-in-progress">—</div><div class="stat-label">In Progress</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(108,99,255,0.1);color:#6c63ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-teams">—</div><div class="stat-label">Working Groups</div></div></div>
         </div>
-
         <div class="overview-grid">
           <div>
-            <div class="overview-section">
-              <h3>Description</h3>
-              <div class="overview-description" id="project-description">Loading...</div>
-            </div>
-
-            <!-- Milestone Timeline -->
-            <div class="overview-section" id="milestone-timeline-section">
-              <h3>Milestone Timeline</h3>
-              <div class="milestone-timeline" id="milestone-timeline">
-                <div class="loading">Loading...</div>
-              </div>
-            </div>
-
-            <div class="overview-section" id="linked-elements-section" style="display: none;">
-              <h3>Linked Architecture Elements</h3>
-              <div class="linked-elements" id="linked-elements"></div>
-            </div>
+            <div class="overview-section"><h3>Description</h3><div class="overview-description" id="project-description">Loading...</div></div>
+            <div class="overview-section" id="milestone-timeline-section"><h3>Milestone Timeline</h3><div class="milestone-timeline" id="milestone-timeline"><div class="loading">Loading...</div></div></div>
+            <div class="overview-section" id="linked-elements-section" style="display:none"><h3>Linked Architecture Elements</h3><div class="linked-elements" id="linked-elements"></div></div>
           </div>
-
           <div>
-            <!-- Task Breakdown -->
-            <div class="overview-section" id="task-breakdown-section">
-              <h3>Task Breakdown</h3>
-              <div class="task-breakdown" id="task-breakdown"></div>
-            </div>
-
-            <div class="overview-section">
-              <h3>Recent Activity</h3>
-              <div class="activity-list" id="recent-activity">
-                <div class="loading">Loading...</div>
-              </div>
-            </div>
+            <div class="overview-section"><h3>Task Breakdown</h3><div class="task-breakdown" id="task-breakdown"></div></div>
+            <div class="overview-section"><h3>Recent Activity</h3><div class="activity-list" id="recent-activity"><div class="loading">Loading...</div></div></div>
           </div>
         </div>
       </div>
 
       <!-- Tasks Tab -->
       <div class="tab-content" id="tab-tasks">
-        <div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
-          <button class="btn btn-primary" onclick="openTaskModal()" id="add-task-btn" style="display: none;">
-            + Add Task
-          </button>
-        </div>
-        <div class="kanban-board" id="kanban-board">
-          <div class="loading">Loading tasks...</div>
-        </div>
+        <div style="margin-bottom:1rem;display:flex;justify-content:flex-end"><button class="btn btn-primary auth-only" onclick="openTaskModal()" id="add-task-btn" style="display:none">+ Add Task</button></div>
+        <div class="kanban-board" id="kanban-board"><div class="loading">Loading tasks...</div></div>
       </div>
 
       <!-- Milestones Tab -->
       <div class="tab-content" id="tab-milestones">
-        <div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
-          <button class="btn btn-primary" onclick="openMilestoneModal()" id="add-milestone-btn" style="display: none;">
-            + Add Milestone
-          </button>
-        </div>
-        <div class="milestones-list" id="milestones-list">
-          <div class="loading">Loading milestones...</div>
-        </div>
+        <div style="margin-bottom:1rem;display:flex;justify-content:flex-end"><button class="btn btn-primary auth-only" onclick="openMsModal()" id="add-milestone-btn" style="display:none">+ Add Milestone</button></div>
+        <div class="milestones-list" id="milestones-list"><div class="loading">Loading milestones...</div></div>
       </div>
 
       <!-- Team Tab -->
       <div class="tab-content" id="tab-team">
-        <div class="team-grid" id="team-grid">
-          <div class="loading">Loading team...</div>
-        </div>
+        <div style="margin-bottom:1rem;display:flex;justify-content:flex-end"><button class="btn btn-primary auth-only" onclick="openGrpModal()" id="add-group-btn" style="display:none">+ Add Working Group</button></div>
+        <div class="team-grid" id="team-grid"><div class="loading">Loading team...</div></div>
       </div>
 
       <!-- Activity Tab -->
       <div class="tab-content" id="tab-activity">
+        <div class="overview-section"><div class="activity-list" id="full-activity"><div class="loading">Loading activity...</div></div></div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div class="tab-content" id="tab-settings">
         <div class="overview-section">
-          <div class="activity-list" id="full-activity">
-            <div class="loading">Loading activity...</div>
-          </div>
+          <h3>Project Settings</h3>
+          <form id="project-settings-form" onsubmit="saveSettings(event)" style="max-width:640px">
+            <div class="form-group"><label for="set-title">Title</label><input type="text" id="set-title" name="title"></div>
+            <div class="form-group"><label for="set-desc">Description</label><textarea id="set-desc" name="description" rows="4"></textarea></div>
+            <div class="form-row">
+              <div class="form-group"><label for="set-status">Status</label><select id="set-status" name="status"><option value="planning">Planning</option><option value="active">Active</option><option value="on_hold">On Hold</option><option value="completed">Completed</option><option value="archived">Archived</option></select></div>
+              <div class="form-group"><label for="set-priority">Priority</label><select id="set-priority" name="priority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+            </div>
+            <div class="form-group"><label for="set-visibility">Visibility</label><select id="set-visibility" name="visibility"><option value="public">Public</option><option value="members">Members Only</option><option value="private">Private</option></select></div>
+            <div style="margin-top:1.5rem"><button type="submit" class="btn btn-primary">Save Changes</button></div>
+          </form>
+        </div>
+        <div class="overview-section" style="margin-top:2rem;border-top:2px solid #FEE2E2;padding-top:2rem">
+          <h3 style="color:#991B1B">Danger Zone</h3>
+          <p style="color:var(--text-secondary);margin-bottom:1rem">Archiving hides this project from the listing.</p>
+          <button class="btn btn-danger" onclick="archiveProject()">Archive Project</button>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Add Task Modal -->
-  <div class="modal-overlay" id="task-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Add Task</h2>
-        <button class="modal-close" onclick="closeTaskModal()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+  <!-- Task Create/Edit Modal -->
+  <div class="modal-overlay" id="task-modal"><div class="modal-content">
+    <div class="modal-header"><h2 id="task-modal-title">Add Task</h2><button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
+    <form id="task-form" onsubmit="submitTask(event)"><div class="task-modal-body">
+      <div class="form-group"><label>Title *</label><input type="text" id="task-title" name="title" required placeholder="What needs to be done?"></div>
+      <div class="form-group"><label>Description</label><textarea id="task-desc" name="description" rows="3" placeholder="Add details..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Status</label><select id="task-status" name="status"><option value="backlog">Backlog</option><option value="todo" selected>To Do</option><option value="in_progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div>
+        <div class="form-group"><label>Priority</label><select id="task-priority" name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
       </div>
-      <form id="task-form" onsubmit="submitTask(event)">
-        <div class="task-modal-body">
-          <div class="form-group">
-            <label for="task-title">Task Title *</label>
-            <input type="text" id="task-title" name="title" required placeholder="What needs to be done?">
-          </div>
-          <div class="form-group">
-            <label for="task-description">Description</label>
-            <textarea id="task-description" name="description" placeholder="Add details..."></textarea>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="task-status">Status</label>
-              <select id="task-status" name="status">
-                <option value="backlog">Backlog</option>
-                <option value="todo" selected>To Do</option>
-                <option value="in_progress">In Progress</option>
-                <option value="review">Review</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="task-priority">Priority</label>
-              <select id="task-priority" name="priority">
-                <option value="low">Low</option>
-                <option value="medium" selected>Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="task-milestone-select">Milestone</label>
-              <select id="task-milestone-select" name="milestone_id">
-                <option value="">No milestone</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="task-due">Due Date</label>
-              <input type="date" id="task-due" name="due_date">
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Task</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      <div class="form-row">
+        <div class="form-group"><label>Milestone</label><select id="task-ms" name="milestone_id"><option value="">None</option></select></div>
+        <div class="form-group"><label>Due Date</label><input type="date" id="task-due" name="due_date"></div>
+      </div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('task-modal')">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div></form>
+  </div></div>
 
   <!-- Task Detail Modal -->
-  <div class="modal-overlay" id="task-detail-modal">
-    <div class="modal-content" style="max-width: 560px;">
-      <div class="modal-header">
-        <h2 class="task-detail-title" style="font-size: 1.25rem;">Task</h2>
-        <button class="modal-close" onclick="closeTaskDetail()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+  <div class="modal-overlay" id="task-detail-modal"><div class="modal-content" style="max-width:560px">
+    <div class="modal-header"><h2 class="td-title" style="font-size:1.25rem">Task</h2><button class="modal-close" onclick="closeModal('task-detail-modal')">✕</button></div>
+    <div class="task-modal-body">
+      <div class="td-status-bar" style="display:flex;gap:0.5rem;margin-bottom:1.25rem;flex-wrap:wrap"></div>
+      <div class="td-desc" style="color:var(--text-secondary);margin-bottom:1.5rem;line-height:1.6"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+        <div><span class="detail-label">Status</span><span class="td-status"></span></div>
+        <div><span class="detail-label">Priority</span><span class="td-priority"></span></div>
+        <div><span class="detail-label">Milestone</span><span class="td-milestone"></span></div>
+        <div><span class="detail-label">Assignee</span><span class="td-assignee"></span></div>
+        <div><span class="detail-label">Due Date</span><span class="td-due"></span></div>
+        <div><span class="detail-label">Created</span><span class="td-created"></span></div>
       </div>
-      <div class="task-modal-body">
-        <div class="task-status-bar" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;"></div>
-        <div class="task-detail-description" style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;"></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Status</span><span class="task-detail-status"></span></div>
-          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Priority</span><span class="task-detail-priority"></span></div>
-          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Milestone</span><span class="task-detail-milestone"></span></div>
-          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Assignee</span><span class="task-detail-assignee"></span></div>
-          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Due Date</span><span class="task-detail-due"></span></div>
-          <div><span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Created</span><span class="task-detail-created"></span></div>
-        </div>
-      </div>
-      <div class="modal-footer task-detail-actions"></div>
     </div>
-  </div>
+    <div class="modal-footer td-actions"></div>
+  </div></div>
 
-  <!-- Add Milestone Modal -->
-  <div class="modal-overlay" id="milestone-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Add Milestone</h2>
-        <button class="modal-close" onclick="closeMilestoneModal()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+  <!-- Milestone Create/Edit Modal -->
+  <div class="modal-overlay" id="ms-modal"><div class="modal-content">
+    <div class="modal-header"><h2 id="ms-modal-title">Add Milestone</h2><button class="modal-close" onclick="closeModal('ms-modal')">✕</button></div>
+    <form id="ms-form" onsubmit="submitMs(event)"><div class="task-modal-body">
+      <div class="form-group"><label>Title *</label><input type="text" id="ms-title" name="title" required placeholder="e.g., Beta Launch"></div>
+      <div class="form-group"><label>Description</label><textarea id="ms-desc" name="description" rows="3" placeholder="What does this milestone represent?"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Target Date</label><input type="date" id="ms-target" name="target_date"></div>
+        <div class="form-group"><label>Status</label><select id="ms-status" name="status"><option value="upcoming" selected>Upcoming</option><option value="in_progress">In Progress</option><option value="completed">Completed</option></select></div>
       </div>
-      <form id="milestone-form" onsubmit="submitMilestone(event)">
-        <div class="task-modal-body">
-          <div class="form-group">
-            <label for="ms-title">Milestone Title *</label>
-            <input type="text" id="ms-title" name="title" required placeholder="e.g., Beta Launch">
-          </div>
-          <div class="form-group">
-            <label for="ms-description">Description</label>
-            <textarea id="ms-description" name="description" placeholder="What does this milestone represent?"></textarea>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ms-target">Target Date</label>
-              <input type="date" id="ms-target" name="target_date">
-            </div>
-            <div class="form-group">
-              <label for="ms-status">Status</label>
-              <select id="ms-status" name="status">
-                <option value="upcoming" selected>Upcoming</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeMilestoneModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Milestone</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('ms-modal')">Cancel</button><button type="submit" class="btn btn-primary" id="ms-submit">Create Milestone</button></div></form>
+  </div></div>
+
+  <!-- Working Group Create/Edit Modal -->
+  <div class="modal-overlay" id="grp-modal"><div class="modal-content">
+    <div class="modal-header"><h2 id="grp-modal-title">Add Working Group</h2><button class="modal-close" onclick="closeModal('grp-modal')">✕</button></div>
+    <form id="grp-form" onsubmit="submitGrp(event)"><div class="task-modal-body">
+      <div class="form-group"><label>Name *</label><input type="text" id="grp-name" name="name" required placeholder="e.g., Policy Analysis Team"></div>
+      <div class="form-group"><label>Description</label><textarea id="grp-desc" name="description" rows="3" placeholder="What does this group do?"></textarea></div>
+      <div class="form-group"><label>Visibility</label><select id="grp-vis" name="visibility"><option value="public">Public</option><option value="members" selected>Members Only</option></select></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('grp-modal')">Cancel</button><button type="submit" class="btn btn-primary" id="grp-submit">Create Group</button></div></form>
+  </div></div>
 
   <script>
-    let project = null;
-    let currentUser = null;
-    let allTasks = {};
-    let draggedTask = null;
+    let project = null, currentUser = null, allTasks = {}, draggedTask = null;
     const projectId = new URLSearchParams(window.location.search).get('id');
 
-    // ═══════════════════════════════════════════
-    // AUTH
-    // ═══════════════════════════════════════════
+    // ── Helpers ──
+    const authH = () => { const h = {'Content-Type':'application/json'}; const t = localStorage.getItem('ple_token'); if (t) h['Authorization'] = `Bearer ${t}`; return h; };
+    const closeModal = id => document.getElementById(id).classList.remove('active');
+    const esc = s => s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g,' ') : '';
+    const fmtDate = d => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const fmtRel = d => { const df=Date.now()-new Date(d), m=Math.floor(df/6e4), h=Math.floor(df/36e5), dy=Math.floor(df/864e5);
+      return m<1?'Just now':m<60?`${m}m ago`:h<24?`${h}h ago`:dy<7?`${dy}d ago`:fmtDate(d); };
+    function toast(msg,type='success') { const t=document.createElement('div'); t.className=`toast toast-${type}`; t.textContent=msg;
+      document.body.appendChild(t); setTimeout(()=>t.classList.add('show'),10); setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000); }
+
+    // ── Auth ──
     async function checkAuth() {
-      const token = localStorage.getItem('ple_token');
-      if (!token) return;
-      try {
-        const res = await fetch('/api/auth?action=me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          currentUser = await res.json();
-          document.querySelectorAll('[data-auth="logged-in"]').forEach(el => el.style.display = '');
-          document.querySelectorAll('[data-auth="logged-out"]').forEach(el => el.style.display = 'none');
-          document.getElementById('add-task-btn').style.display = 'flex';
-          document.getElementById('add-milestone-btn').style.display = 'flex';
+      const token = localStorage.getItem('ple_token'); if (!token) return;
+      try { const r = await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});
+        if (r.ok) { currentUser = await r.json();
+          document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');
+          document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');
+          document.querySelectorAll('.auth-only').forEach(el=>el.style.display='');
         }
-      } catch (e) { console.error('Auth check failed:', e); }
+      } catch(e) { console.error('Auth:',e); }
     }
 
-    function authHeaders() {
-      const token = localStorage.getItem('ple_token');
-      const h = { 'Content-Type': 'application/json' };
-      if (token) h['Authorization'] = `Bearer ${token}`;
-      return h;
-    }
-
-    // ═══════════════════════════════════════════
-    // LOAD PROJECT
-    // ═══════════════════════════════════════════
+    // ── Load Project ──
     async function loadProject() {
-      if (!projectId) { window.location = '/projects.html'; return; }
-      try {
-        const token = localStorage.getItem('ple_token');
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const res = await fetch(`/api/projects?id=${encodeURIComponent(projectId)}`, { headers });
-        if (!res.ok) throw new Error('Project not found');
-        const data = await res.json();
-        project = data.project || data;
-        project.milestones = data.milestones || [];
-        project.workingGroups = data.workingGroups || [];
-        project.activity = data.activity || [];
-        project.taskStats = data.taskStats || {};
-        project.owner_name = project.owner?.name || project.owner_name || 'Unknown';
-        renderProject();
-        loadTasks();
-      } catch (e) {
-        console.error('Failed to load project:', e);
-        document.getElementById('project-title').textContent = 'Project not found';
-        document.querySelectorAll('.loading').forEach(el => el.style.display = 'none');
-      }
+      if (!projectId) { window.location='/projects.html'; return; }
+      try { const r = await fetch(`/api/projects?id=${encodeURIComponent(projectId)}`,{headers:authH()});
+        if (!r.ok) throw new Error('Not found');
+        const d = await r.json(); project = d.project||d;
+        project.milestones=d.milestones||[]; project.workingGroups=d.workingGroups||[];
+        project.activity=d.activity||[]; project.taskStats=d.taskStats||{};
+        renderProject(); loadTasks();
+      } catch(e) { console.error(e); document.getElementById('project-title').textContent='Project not found';
+        document.querySelectorAll('.loading').forEach(el=>el.style.display='none'); }
     }
 
-    // ═══════════════════════════════════════════
-    // RENDER PROJECT
-    // ═══════════════════════════════════════════
+    // ── Render ──
     function renderProject() {
-      document.title = `${project.title} | PLE Platform`;
-      document.getElementById('project-title').textContent = project.title;
-      document.getElementById('project-type-text').textContent = capitalizeFirst(project.projectType || project.project_type);
-      document.getElementById('project-status').textContent = capitalizeFirst(project.status);
-      
-      const ownerName = project.owner?.name || project.owner_name || 'Unknown';
-      document.getElementById('project-owner').querySelector('span').textContent = ownerName;
-      document.getElementById('project-description').textContent = project.description || 'No description provided.';
-      
-      const progress = project.progress || 0;
-      document.getElementById('progress-percent').textContent = `${progress}%`;
-      const ring = document.getElementById('progress-ring');
-      if (ring) {
-        const offset = 264 - (progress / 100) * 264;
-        setTimeout(() => { ring.style.transition = 'stroke-dashoffset 0.8s ease'; ring.style.strokeDashoffset = offset; }, 100);
-      }
-
-      const dates = [];
-      const startDate = project.startDate || project.start_date;
-      const endDate = project.targetEndDate || project.target_end_date;
-      if (startDate) dates.push(`Started ${formatDate(startDate)}`);
-      if (endDate) dates.push(`Due ${formatDate(endDate)}`);
-      document.getElementById('project-dates').querySelector('span').textContent = dates.join(' • ') || 'No dates set';
-
-      const linkedEls = project.linkedElements || project.linked_elements || [];
-      if (linkedEls.length > 0) {
-        document.getElementById('linked-elements-section').style.display = 'block';
-        document.getElementById('linked-elements').innerHTML = linkedEls.map(el => `
-          <span class="element-tag" style="background: var(--color-${el.element_type}-bg); color: var(--color-${el.element_type});">
-            ${el.code}: ${el.title}
-          </span>
-        `).join('');
-      }
-
-      document.getElementById('milestone-count').textContent = project.milestones?.length || 0;
-      renderMilestones(project.milestones || []);
-      renderMilestoneTimeline(project.milestones || []);
-
-      const teamCount = project.workingGroups?.length || 0;
-      document.getElementById('team-count').textContent = teamCount;
-      renderTeam(project.workingGroups || []);
-
-      const taskStats = project.taskStats || {};
-      const totalTasks = Object.values(taskStats).reduce((s, v) => s + v, 0);
-      document.getElementById('stat-total-tasks').textContent = totalTasks;
-      document.getElementById('stat-done-tasks').textContent = taskStats.done || 0;
-      document.getElementById('stat-in-progress').textContent = taskStats.in_progress || 0;
-      document.getElementById('stat-teams').textContent = teamCount;
-      renderTaskBreakdown(taskStats, totalTasks);
-
-      renderActivity(project.activity || []);
-      populateMilestoneSelect(project.milestones || []);
+      document.title=`${project.title} | PLE Platform`;
+      document.getElementById('project-title').textContent=project.title;
+      document.getElementById('project-type-text').textContent=cap(project.projectType||project.project_type);
+      document.getElementById('project-status').textContent=cap(project.status);
+      const own=project.owner?.name||project.owner_name||'Unknown';
+      document.getElementById('project-owner').querySelector('span').textContent=own;
+      document.getElementById('project-description').textContent=project.description||'No description.';
+      const prog=project.progress||0;
+      document.getElementById('progress-percent').textContent=`${prog}%`;
+      const ring=document.getElementById('progress-ring');
+      if(ring){const off=264-(prog/100)*264;setTimeout(()=>{ring.style.transition='stroke-dashoffset 0.8s ease';ring.style.strokeDashoffset=off},100);}
+      const dates=[];
+      if(project.startDate||project.start_date)dates.push(`Started ${fmtDate(project.startDate||project.start_date)}`);
+      if(project.targetEndDate||project.target_end_date)dates.push(`Due ${fmtDate(project.targetEndDate||project.target_end_date)}`);
+      document.getElementById('project-dates').querySelector('span').textContent=dates.join(' · ')||'No dates set';
+      const linked=project.linkedElements||project.linked_elements||[];
+      if(linked.length){document.getElementById('linked-elements-section').style.display='block';
+        document.getElementById('linked-elements').innerHTML=linked.map(el=>`<span class="element-tag">${el.code}: ${el.title}</span>`).join('');}
+      document.getElementById('milestone-count').textContent=project.milestones.length;
+      renderMilestones(project.milestones); renderTimeline(project.milestones);
+      const tc=project.workingGroups.length; document.getElementById('team-count').textContent=tc; renderTeam(project.workingGroups);
+      const ts=project.taskStats, tot=Object.values(ts).reduce((s,v)=>s+v,0);
+      document.getElementById('stat-total-tasks').textContent=tot;
+      document.getElementById('stat-done-tasks').textContent=ts.done||0;
+      document.getElementById('stat-in-progress').textContent=ts.in_progress||0;
+      document.getElementById('stat-teams').textContent=tc;
+      renderBreakdown(ts,tot); renderActivity(project.activity);
+      populateMsSelect(project.milestones); populateSettings();
     }
 
-    // ═══════════════════════════════════════════
-    // MILESTONE TIMELINE (Overview tab)
-    // ═══════════════════════════════════════════
-    function renderMilestoneTimeline(milestones) {
-      const c = document.getElementById('milestone-timeline');
-      if (!milestones.length) { c.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No milestones defined yet.</p>'; return; }
-      c.innerHTML = milestones.map(m => `
-        <div class="timeline-item">
-          <div class="timeline-marker"><div class="timeline-dot ${m.status}"></div><div class="timeline-line"></div></div>
-          <div class="timeline-content">
-            <div class="timeline-title">${escapeHtml(m.title)}</div>
-            <div class="timeline-meta">
-              <span class="timeline-status ${m.status}">${m.status === 'in_progress' ? 'In Progress' : capitalizeFirst(m.status)}</span>
-              ${m.target_date ? `<span>${formatDate(m.target_date)}</span>` : ''}
-              ${parseInt(m.task_count) > 0 ? `<span>${m.completed_tasks || 0}/${m.task_count} tasks</span>` : ''}
-            </div>
-          </div>
-        </div>
-      `).join('');
+    // ── Overview widgets ──
+    function renderTimeline(ms) {
+      const c=document.getElementById('milestone-timeline');
+      if(!ms.length){c.innerHTML='<p style="color:var(--text-muted)">No milestones yet.</p>';return;}
+      c.innerHTML=ms.map(m=>`<div class="timeline-item"><div class="timeline-marker"><div class="timeline-dot ${m.status}"></div><div class="timeline-line"></div></div>
+        <div class="timeline-content"><div class="timeline-title">${esc(m.title)}</div><div class="timeline-meta">
+        <span class="timeline-status ${m.status}">${cap(m.status)}</span>${m.target_date?`<span>${fmtDate(m.target_date)}</span>`:''}
+        ${parseInt(m.task_count)>0?`<span>${m.completed_tasks||0}/${m.task_count} tasks</span>`:''}</div></div></div>`).join('');
+    }
+    function renderBreakdown(stats,total) {
+      const c=document.getElementById('task-breakdown');
+      if(!total){c.innerHTML='<p style="color:var(--text-muted)">No tasks yet.</p>';return;}
+      const ds=[{k:'done',l:'Done'},{k:'in_progress',l:'In Progress'},{k:'review',l:'Review'},{k:'todo',l:'To Do'},{k:'backlog',l:'Backlog'}];
+      c.innerHTML=ds.filter(s=>stats[s.k]).map(s=>{const ct=stats[s.k],p=Math.round(ct/total*100);
+        return`<div class="breakdown-row"><span class="breakdown-label">${s.l}</span><div class="breakdown-bar-bg"><div class="breakdown-bar-fill ${s.k}" style="width:${p}%"></div></div><span class="breakdown-count">${ct}</span></div>`;}).join('');
     }
 
-    // ═══════════════════════════════════════════
-    // TASK BREAKDOWN (Overview tab)
-    // ═══════════════════════════════════════════
-    function renderTaskBreakdown(stats, total) {
-      const c = document.getElementById('task-breakdown');
-      if (total === 0) { c.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No tasks yet.</p>'; return; }
-      const statuses = [
-        { key: 'done', label: 'Done' }, { key: 'in_progress', label: 'In Progress' },
-        { key: 'review', label: 'Review' }, { key: 'todo', label: 'To Do' }, { key: 'backlog', label: 'Backlog' }
-      ];
-      c.innerHTML = statuses.filter(s => (stats[s.key] || 0) > 0).map(s => {
-        const count = stats[s.key] || 0;
-        const pct = Math.round((count / total) * 100);
-        return `<div class="breakdown-row">
-          <span class="breakdown-label">${s.label}</span>
-          <div class="breakdown-bar-bg"><div class="breakdown-bar-fill ${s.key}" style="width: ${pct}%"></div></div>
-          <span class="breakdown-count">${count}</span>
-        </div>`;
-      }).join('');
-    }
-
-    // ═══════════════════════════════════════════
-    // KANBAN BOARD
-    // ═══════════════════════════════════════════
+    // ═══ KANBAN ═══
     async function loadTasks() {
-      try {
-        const token = localStorage.getItem('ple_token');
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const res = await fetch(`/api/tasks?projectId=${projectId}&view=kanban`, { headers });
-        const data = await res.json();
-        if (data.view === 'kanban') {
-          allTasks = data.columns;
-          renderKanban(data.columns);
-          const total = Object.values(data.columns).reduce((sum, col) => sum + col.length, 0);
-          document.getElementById('task-count').textContent = total;
-        }
-      } catch (e) { console.error('Failed to load tasks:', e); }
+      try { const r=await fetch(`/api/tasks?projectId=${projectId}&view=kanban`,{headers:authH()}); const d=await r.json();
+        if(d.view==='kanban'){allTasks=d.columns;renderKanban(d.columns);
+          document.getElementById('task-count').textContent=Object.values(d.columns).reduce((s,c)=>s+c.length,0);}
+      } catch(e){console.error('Tasks:',e);}
     }
-
-    function renderKanban(columns) {
-      const board = document.getElementById('kanban-board');
-      const columnDefs = [
-        { key: 'backlog', label: 'Backlog' }, { key: 'todo', label: 'To Do' },
-        { key: 'in_progress', label: 'In Progress' }, { key: 'review', label: 'Review' },
-        { key: 'done', label: 'Done' }
-      ];
-      board.innerHTML = columnDefs.map(col => `
-        <div class="kanban-column" data-status="${col.key}">
-          <div class="column-header">
-            <span class="column-title">${col.label}</span>
-            <span class="column-count">${columns[col.key]?.length || 0}</span>
-          </div>
-          <div class="task-list" data-status="${col.key}"
-            ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-            ${(columns[col.key] || []).map(renderTaskCard).join('')}
-          </div>
-          ${currentUser ? `<button class="add-task-inline" onclick="openTaskModal('${col.key}')">+ Add task</button>` : ''}
-        </div>
-      `).join('');
-      initDragHandlers();
-    }
-
-    function renderTaskCard(task) {
-      const initials = task.assignee?.name ? task.assignee.name.split(' ').map(n => n[0]).join('').toUpperCase() : '';
-      const dueStr = task.dueDate ? formatDate(task.dueDate) : '';
-      const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
-      return `
-        <div class="task-card" draggable="${currentUser ? 'true' : 'false'}" data-task-id="${task.id}" onclick="openTaskDetail('${task.id}')">
-          <div class="task-title">${escapeHtml(task.title)}</div>
-          ${task.milestone?.title ? `<div class="task-milestone-tag">${escapeHtml(task.milestone.title)}</div>` : ''}
-          <div class="task-meta">
-            <span class="task-priority priority-${task.priority}">${task.priority}</span>
-            <div style="display:flex; align-items:center; gap:0.5rem;">
-              ${dueStr ? `<span class="task-due ${isOverdue ? 'overdue' : ''}">${dueStr}</span>` : ''}
-              ${initials ? `<div class="task-assignee" title="${escapeHtml(task.assignee.name)}">${initials}</div>` : ''}
-            </div>
-          </div>
-        </div>`;
-    }
-
-    // ═══════════════════════════════════════════
-    // DRAG AND DROP
-    // ═══════════════════════════════════════════
-    function initDragHandlers() {
-      document.querySelectorAll('.task-card[draggable="true"]').forEach(card => {
-        card.addEventListener('dragstart', e => {
-          draggedTask = card;
-          card.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-          e.dataTransfer.setData('text/plain', card.dataset.taskId);
-        });
-        card.addEventListener('dragend', () => {
-          if (draggedTask) draggedTask.classList.remove('dragging');
-          draggedTask = null;
-          document.querySelectorAll('.task-list').forEach(l => l.classList.remove('drag-over'));
-        });
+    function renderKanban(cols) {
+      const b=document.getElementById('kanban-board');
+      const ds=[{k:'backlog',l:'Backlog'},{k:'todo',l:'To Do'},{k:'in_progress',l:'In Progress'},{k:'review',l:'Review'},{k:'done',l:'Done'}];
+      b.innerHTML=ds.map(c=>`<div class="kanban-column" data-status="${c.k}"><div class="column-header"><span class="column-title">${c.l}</span><span class="column-count">${cols[c.k]?.length||0}</span></div>
+        <div class="task-list" data-status="${c.k}" ondragover="event.preventDefault();event.dataTransfer.dropEffect='move'" ondragenter="event.preventDefault();event.currentTarget.classList.add('drag-over')" ondragleave="if(!event.currentTarget.contains(event.relatedTarget))event.currentTarget.classList.remove('drag-over')" ondrop="onDrop(event)">
+        ${(cols[c.k]||[]).map(taskCard).join('')}</div>
+        ${currentUser?`<button class="add-task-inline" onclick="openTaskModal('${c.k}')">+ Add task</button>`:''}</div>`).join('');
+      document.querySelectorAll('.task-card[draggable="true"]').forEach(c=>{
+        c.addEventListener('dragstart',e=>{draggedTask=c;c.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',c.dataset.taskId)});
+        c.addEventListener('dragend',()=>{if(draggedTask)draggedTask.classList.remove('dragging');draggedTask=null;document.querySelectorAll('.task-list').forEach(l=>l.classList.remove('drag-over'))});
       });
     }
-
-    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-    function handleDragEnter(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-    function handleDragLeave(e) {
-      if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.classList.remove('drag-over');
+    function taskCard(t) {
+      const ini=t.assignee?.name?t.assignee.name.split(' ').map(n=>n[0]).join(''):'';
+      const due=t.dueDate?fmtDate(t.dueDate):'', over=t.dueDate&&new Date(t.dueDate)<new Date()&&t.status!=='done';
+      return`<div class="task-card" draggable="${!!currentUser}" data-task-id="${t.id}" onclick="openTD('${t.id}')">
+        <div class="task-title">${esc(t.title)}</div>${t.milestone?.title?`<div class="task-milestone-tag">${esc(t.milestone.title)}</div>`:''}
+        <div class="task-meta"><span class="task-priority priority-${t.priority}">${t.priority}</span>
+        <div style="display:flex;align-items:center;gap:0.4rem">${due?`<span class="task-due ${over?'overdue':''}">${due}</span>`:''}${ini?`<div class="task-assignee" title="${esc(t.assignee.name)}">${ini}</div>`:''}</div></div></div>`;
+    }
+    async function onDrop(e) {
+      e.preventDefault(); const list=e.currentTarget; list.classList.remove('drag-over');
+      const tid=e.dataTransfer.getData('text/plain'), ns=list.dataset.status;
+      if(!tid||!ns||!currentUser)return;
+      const card=document.querySelector(`.task-card[data-task-id="${tid}"]`);
+      if(card){const af=[...list.querySelectorAll('.task-card:not(.dragging)')].reduce((cl,ch)=>{const off=e.clientY-ch.getBoundingClientRect().top-ch.getBoundingClientRect().height/2;return off<0&&off>cl.offset?{offset:off,element:ch}:cl},{offset:-Infinity}).element;
+        if(af)list.insertBefore(card,af);else list.appendChild(card);}
+      document.querySelectorAll('.kanban-column').forEach(c=>c.querySelector('.column-count').textContent=c.querySelectorAll('.task-card').length);
+      try{const idx=[...list.querySelectorAll('.task-card')].indexOf(card);
+        const r=await fetch('/api/tasks?action=move',{method:'POST',headers:authH(),body:JSON.stringify({id:tid,status:ns,order_index:idx})});
+        if(!r.ok)loadTasks();else loadProject();
+      }catch{loadTasks();}
     }
 
-    async function handleDrop(e) {
-      e.preventDefault();
-      const list = e.currentTarget;
-      list.classList.remove('drag-over');
-      const taskId = e.dataTransfer.getData('text/plain');
-      const newStatus = list.dataset.status;
-      if (!taskId || !newStatus || !currentUser) return;
-
-      // Optimistic UI: move the card
-      const card = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
-      if (card) {
-        // Determine drop position
-        const afterElement = getDragAfterElement(list, e.clientY);
-        if (afterElement) list.insertBefore(card, afterElement);
-        else list.appendChild(card);
-      }
-      updateColumnCounts();
-
-      // API call
-      try {
-        const cards = [...list.querySelectorAll('.task-card')];
-        const orderIndex = cards.indexOf(card);
-        const res = await fetch(`/api/tasks?action=move`, {
-          method: 'POST', headers: authHeaders(),
-          body: JSON.stringify({ id: taskId, status: newStatus, order_index: orderIndex })
-        });
-        if (!res.ok) { loadTasks(); return; } // revert on failure
-        // Refresh stats after move
-        loadProject();
-      } catch (err) { console.error('Move failed:', err); loadTasks(); }
+    // ═══ TASK DETAIL ═══
+    function findTask(id){for(const col of Object.values(allTasks)){const t=col.find(t=>t.id===id);if(t)return t;}return null;}
+    function openTD(id) {
+      const t=findTask(id);if(!t)return;const m=document.getElementById('task-detail-modal');
+      m.querySelector('.td-title').textContent=t.title;
+      m.querySelector('.td-desc').textContent=t.description||'No description.';
+      m.querySelector('.td-status').textContent=cap(t.status); m.querySelector('.td-status').className=`td-status status-badge status-${t.status}`;
+      m.querySelector('.td-priority').textContent=cap(t.priority); m.querySelector('.td-priority').className=`td-priority task-priority priority-${t.priority}`;
+      m.querySelector('.td-milestone').textContent=t.milestone?.title||'None';
+      m.querySelector('.td-assignee').textContent=t.assignee?.name||'Unassigned';
+      m.querySelector('.td-due').textContent=t.dueDate?fmtDate(t.dueDate):'No due date';
+      m.querySelector('.td-created').textContent=fmtRel(t.createdAt);
+      const bar=m.querySelector('.td-status-bar');
+      bar.innerHTML=currentUser?['backlog','todo','in_progress','review','done'].map(s=>`<button class="status-quick-btn ${s===t.status?'active':''}" onclick="quickStat('${t.id}','${s}')">${cap(s)}</button>`).join(''):'';
+      m.querySelector('.td-actions').innerHTML=currentUser?`<button class="btn btn-secondary" onclick="editTask('${t.id}')">Edit</button><button class="btn btn-danger" onclick="delTask('${t.id}')">Delete</button>`:'';
+      m.classList.add('active');
     }
+    async function quickStat(id,s){await fetch('/api/tasks',{method:'PUT',headers:authH(),body:JSON.stringify({id,status:s})});closeModal('task-detail-modal');loadTasks();loadProject();}
+    function editTask(id){const t=findTask(id);if(!t)return;closeModal('task-detail-modal');openTaskModal(t.status,t);}
+    async function delTask(id){if(!confirm('Delete this task?'))return;
+      const r=await fetch(`/api/tasks?id=${id}`,{method:'DELETE',headers:authH()});
+      if(r.ok){closeModal('task-detail-modal');toast('Task deleted');loadTasks();loadProject();}else{const e=await r.json();alert(e.error||'Failed');}}
 
-    function getDragAfterElement(list, y) {
-      const cards = [...list.querySelectorAll('.task-card:not(.dragging)')];
-      return cards.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) return { offset, element: child };
-        return closest;
-      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    // ═══ TASK MODAL ═══
+    function openTaskModal(status='todo',edit=null) {
+      const f=document.getElementById('task-form');f.reset();
+      document.getElementById('task-modal-title').textContent=edit?'Edit Task':'Add Task';
+      if(edit){document.getElementById('task-title').value=edit.title;document.getElementById('task-desc').value=edit.description||'';
+        document.getElementById('task-status').value=edit.status;document.getElementById('task-priority').value=edit.priority;
+        document.getElementById('task-ms').value=edit.milestone?.id||'';
+        document.getElementById('task-due').value=edit.dueDate?edit.dueDate.split('T')[0]:'';f.dataset.editId=edit.id;
+      }else{document.getElementById('task-status').value=status;delete f.dataset.editId;}
+      document.getElementById('task-modal').classList.add('active');
     }
+    async function submitTask(e){e.preventDefault();const f=e.target;const d=Object.fromEntries(new FormData(f));
+      d.project_id=projectId;if(!d.milestone_id)delete d.milestone_id;const eid=f.dataset.editId;
+      const r=await fetch('/api/tasks',{method:eid?'PUT':'POST',headers:authH(),body:JSON.stringify(eid?{...d,id:eid}:d)});
+      if(r.ok){closeModal('task-modal');toast(eid?'Task updated':'Task created');loadTasks();loadProject();}
+      else{const e=await r.json();alert(e.error||'Failed');}}
+    function populateMsSelect(ms){const s=document.getElementById('task-ms');
+      if(s)s.innerHTML='<option value="">None</option>'+ms.map(m=>`<option value="${m.id}">${esc(m.title)}</option>`).join('');}
 
-    function updateColumnCounts() {
-      document.querySelectorAll('.kanban-column').forEach(col => {
-        const count = col.querySelectorAll('.task-card').length;
-        col.querySelector('.column-count').textContent = count;
-      });
+    // ═══ MILESTONES ═══
+    function renderMilestones(ms) {
+      const list=document.getElementById('milestones-list');
+      if(!ms.length){list.innerHTML='<p style="color:var(--text-muted)">No milestones yet.</p>';return;}
+      list.innerHTML=ms.map(m=>{const pct=parseInt(m.task_count)>0?Math.round(parseInt(m.completed_tasks)/parseInt(m.task_count)*100):0;
+        return`<div class="milestone-card"><div class="milestone-header"><div style="flex:1"><h4 class="milestone-title">${esc(m.title)}</h4>
+        ${m.description?`<p style="color:var(--text-secondary);margin-top:0.4rem;font-size:0.9rem">${esc(m.description)}</p>`:''}</div>
+        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem">
+        <div class="milestone-date">${m.target_date?fmtDate(m.target_date):'No date'}</div>
+        <span class="timeline-status ${m.status}">${cap(m.status)}</span>
+        ${currentUser?`<div style="display:flex;gap:0.5rem;margin-top:0.25rem"><button class="btn-icon" onclick="editMs('${m.id}')" title="Edit">✏️</button><button class="btn-icon" onclick="delMs('${m.id}')" title="Delete">🗑️</button></div>`:''}</div></div>
+        <div class="milestone-progress"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <span class="progress-text">${m.status==='completed'?'Completed':`${m.completed_tasks||0} of ${m.task_count||0} tasks (${pct}%)`}</span></div></div>`;}).join('');
     }
-
-    // ═══════════════════════════════════════════
-    // TASK DETAIL MODAL
-    // ═══════════════════════════════════════════
-    function openTaskDetail(taskId) {
-      // Find the task in allTasks
-      let task = null;
-      for (const col of Object.values(allTasks)) {
-        task = col.find(t => t.id === taskId);
-        if (task) break;
-      }
-      if (!task) return;
-
-      const modal = document.getElementById('task-detail-modal');
-      const isEditable = !!currentUser;
-      
-      modal.querySelector('.task-detail-title').textContent = task.title;
-      modal.querySelector('.task-detail-description').textContent = task.description || 'No description provided.';
-      modal.querySelector('.task-detail-status').textContent = capitalizeFirst(task.status);
-      modal.querySelector('.task-detail-status').className = `task-detail-status status-badge status-${task.status}`;
-      modal.querySelector('.task-detail-priority').textContent = capitalizeFirst(task.priority);
-      modal.querySelector('.task-detail-priority').className = `task-detail-priority priority-${task.priority}`;
-      modal.querySelector('.task-detail-milestone').textContent = task.milestone?.title || 'None';
-      modal.querySelector('.task-detail-assignee').textContent = task.assignee?.name || 'Unassigned';
-      modal.querySelector('.task-detail-due').textContent = task.dueDate ? formatDate(task.dueDate) : 'No due date';
-      modal.querySelector('.task-detail-created').textContent = formatRelativeTime(task.createdAt);
-
-      // Edit/delete buttons
-      const actions = modal.querySelector('.task-detail-actions');
-      if (isEditable) {
-        actions.innerHTML = `
-          <button class="btn btn-secondary" onclick="editTaskFromDetail('${task.id}')">Edit</button>
-          <button class="btn btn-danger" onclick="deleteTask('${task.id}')">Delete</button>
-        `;
-      } else { actions.innerHTML = ''; }
-
-      // Quick status change buttons
-      const statusBar = modal.querySelector('.task-status-bar');
-      if (isEditable) {
-        const statuses = ['backlog','todo','in_progress','review','done'];
-        statusBar.innerHTML = statuses.map(s => `
-          <button class="status-quick-btn ${s === task.status ? 'active' : ''}" onclick="quickChangeStatus('${task.id}','${s}')">${capitalizeFirst(s)}</button>
-        `).join('');
-      } else { statusBar.innerHTML = ''; }
-
-      modal.classList.add('active');
-      modal.dataset.taskId = taskId;
+    function openMsModal(edit=null){const f=document.getElementById('ms-form');f.reset();
+      document.getElementById('ms-modal-title').textContent=edit?'Edit Milestone':'Add Milestone';
+      document.getElementById('ms-submit').textContent=edit?'Save Changes':'Create Milestone';
+      if(edit){document.getElementById('ms-title').value=edit.title;document.getElementById('ms-desc').value=edit.description||'';
+        document.getElementById('ms-target').value=edit.target_date?edit.target_date.split('T')[0]:'';
+        document.getElementById('ms-status').value=edit.status;f.dataset.editId=edit.id;
+      }else delete f.dataset.editId;
+      document.getElementById('ms-modal').classList.add('active');
     }
+    function editMs(id){const m=project.milestones.find(m=>m.id===id);if(m)openMsModal(m);}
+    async function submitMs(e){e.preventDefault();const f=e.target;const d=Object.fromEntries(new FormData(f));
+      d.project_id=projectId;const eid=f.dataset.editId;
+      const url=eid?`/api/milestones/${eid}`:'/api/milestones';
+      const r=await fetch(url,{method:eid?'PUT':'POST',headers:authH(),body:JSON.stringify(d)});
+      if(r.ok){closeModal('ms-modal');toast(eid?'Milestone updated':'Milestone created');loadProject();}
+      else{const e=await r.json();alert(e.error||'Failed');}}
+    async function delMs(id){if(!confirm('Delete this milestone?'))return;
+      const r=await fetch(`/api/milestones/${id}`,{method:'DELETE',headers:authH()});
+      if(r.ok){toast('Milestone deleted');loadProject();}else alert('Failed to delete');}
 
-    function closeTaskDetail() {
-      document.getElementById('task-detail-modal').classList.remove('active');
-    }
-
-    async function quickChangeStatus(taskId, newStatus) {
-      if (!currentUser) return;
-      try {
-        const res = await fetch('/api/tasks', {
-          method: 'PUT', headers: authHeaders(),
-          body: JSON.stringify({ id: taskId, status: newStatus })
-        });
-        if (res.ok) {
-          closeTaskDetail();
-          loadTasks();
-          loadProject(); // refresh stats
-        }
-      } catch (e) { console.error('Status change failed:', e); }
-    }
-
-    function editTaskFromDetail(taskId) {
-      let task = null;
-      for (const col of Object.values(allTasks)) {
-        task = col.find(t => t.id === taskId);
-        if (task) break;
-      }
-      if (!task) return;
-      closeTaskDetail();
-      openTaskModal(task.status, task);
-    }
-
-    async function deleteTask(taskId) {
-      if (!confirm('Delete this task? This cannot be undone.')) return;
-      try {
-        const res = await fetch(`/api/tasks?id=${taskId}`, {
-          method: 'DELETE', headers: authHeaders()
-        });
-        if (res.ok) {
-          closeTaskDetail();
-          loadTasks();
-          loadProject();
-        } else {
-          const err = await res.json();
-          alert(err.error || 'Failed to delete task');
-        }
-      } catch (e) { alert('Failed to delete task'); }
-    }
-
-    // ═══════════════════════════════════════════
-    // ADD/EDIT TASK MODAL
-    // ═══════════════════════════════════════════
-    function openTaskModal(status = 'todo', editTask = null) {
-      const modal = document.getElementById('task-modal');
-      const form = document.getElementById('task-form');
-      form.reset();
-      
-      if (editTask) {
-        modal.querySelector('h2').textContent = 'Edit Task';
-        document.getElementById('task-title').value = editTask.title;
-        document.getElementById('task-description').value = editTask.description || '';
-        document.getElementById('task-status').value = editTask.status;
-        document.getElementById('task-priority').value = editTask.priority;
-        document.getElementById('task-milestone-select').value = editTask.milestone?.id || '';
-        document.getElementById('task-due').value = editTask.dueDate ? editTask.dueDate.split('T')[0] : '';
-        form.dataset.editId = editTask.id;
-      } else {
-        modal.querySelector('h2').textContent = 'Add Task';
-        document.getElementById('task-status').value = status;
-        delete form.dataset.editId;
-      }
-      modal.classList.add('active');
-    }
-
-    function closeTaskModal() {
-      document.getElementById('task-modal').classList.remove('active');
-      document.getElementById('task-form').reset();
-    }
-
-    async function submitTask(e) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-      data.project_id = projectId;
-      if (!data.milestone_id) delete data.milestone_id;
-
-      const editId = form.dataset.editId;
-      try {
-        const res = await fetch('/api/tasks', {
-          method: editId ? 'PUT' : 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify(editId ? { ...data, id: editId } : data)
-        });
-        if (res.ok) {
-          closeTaskModal();
-          loadTasks();
-          loadProject();
-        } else {
-          const error = await res.json();
-          alert(error.error || 'Failed to save task');
-        }
-      } catch (e) { alert('Failed to save task'); }
-    }
-
-    function populateMilestoneSelect(milestones) {
-      const select = document.getElementById('task-milestone-select');
-      if (!select) return;
-      select.innerHTML = '<option value="">No milestone</option>' + 
-        milestones.map(m => `<option value="${m.id}">${escapeHtml(m.title)}</option>`).join('');
-    }
-
-    // ═══════════════════════════════════════════
-    // MILESTONES
-    // ═══════════════════════════════════════════
-    function renderMilestones(milestones) {
-      const list = document.getElementById('milestones-list');
-      if (milestones.length === 0) { list.innerHTML = '<p style="color: var(--text-muted);">No milestones yet.</p>'; return; }
-      list.innerHTML = milestones.map(m => {
-        const pct = parseInt(m.task_count) > 0 ? Math.round((parseInt(m.completed_tasks) / parseInt(m.task_count)) * 100) : 0;
-        return `
-          <div class="milestone-card">
-            <div class="milestone-header">
-              <div>
-                <h4 class="milestone-title">${escapeHtml(m.title)}</h4>
-                ${m.description ? `<p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">${escapeHtml(m.description)}</p>` : ''}
-              </div>
-              <div style="text-align: right;">
-                <div class="milestone-date">${m.target_date ? formatDate(m.target_date) : 'No date set'}</div>
-                <span class="timeline-status ${m.status}" style="margin-top: 0.5rem; display:inline-block;">${m.status === 'in_progress' ? 'In Progress' : capitalizeFirst(m.status)}</span>
-              </div>
-            </div>
-            <div class="milestone-progress">
-              <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
-              <span class="progress-text">${m.status === 'completed' ? 'Completed' : `${m.completed_tasks || 0} of ${m.task_count || 0} tasks (${pct}%)`}</span>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    function openMilestoneModal() {
-      document.getElementById('milestone-modal').classList.add('active');
-    }
-    function closeMilestoneModal() {
-      document.getElementById('milestone-modal').classList.remove('active');
-      document.getElementById('milestone-form').reset();
-    }
-
-    async function submitMilestone(e) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-      data.project_id = projectId;
-      try {
-        const res = await fetch('/api/milestones', {
-          method: 'POST', headers: authHeaders(),
-          body: JSON.stringify(data)
-        });
-        if (res.ok) {
-          closeMilestoneModal();
-          loadProject(); // refresh milestones
-        } else {
-          const error = await res.json();
-          alert(error.error || 'Failed to create milestone');
-        }
-      } catch (e) { alert('Failed to create milestone'); }
-    }
-
-    // ═══════════════════════════════════════════
-    // TEAM & ACTIVITY
-    // ═══════════════════════════════════════════
+    // ═══ WORKING GROUPS ═══
     function renderTeam(groups) {
-      const grid = document.getElementById('team-grid');
-      let html = `
-        <div class="member-card">
-          <div class="member-avatar">${(project.owner?.name || project.owner_name || 'O').split(' ').map(n => n[0]).join('').toUpperCase()}</div>
-          <div class="member-info">
-            <div class="member-name">${escapeHtml(project.owner?.name || project.owner_name || 'Unknown')}</div>
-            <div class="member-role">Project Owner</div>
-          </div>
-        </div>`;
-      if (groups.length > 0) {
-        html += groups.map(g => `
-          <div class="member-card">
-            <div class="member-avatar" style="background: var(--color-sage);">${g.member_count || 0}</div>
-            <div class="member-info">
-              <div class="member-name">${escapeHtml(g.name)}</div>
-              <div class="member-role">${g.member_count || 0} members · ${capitalizeFirst(g.status)}</div>
-            </div>
-          </div>`).join('');
-      }
-      grid.innerHTML = html;
+      const g=document.getElementById('team-grid');
+      let html=`<div class="member-card"><div class="member-avatar">${(project.owner?.name||'O').split(' ').map(n=>n[0]).join('').toUpperCase()}</div>
+        <div class="member-info"><div class="member-name">${esc(project.owner?.name||'Unknown')}</div><div class="member-role">Project Owner</div></div></div>`;
+      if(groups.length) html+=groups.map(gr=>`<div class="member-card">
+        <div class="member-avatar" style="background:var(--color-sage);font-size:0.85rem">${gr.member_count||0}</div>
+        <div class="member-info"><div class="member-name">${esc(gr.name)}</div><div class="member-role">${gr.member_count||0} members · ${cap(gr.status)}</div>
+        ${gr.description?`<div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem">${esc(gr.description)}</div>`:''}</div>
+        ${currentUser?`<div style="display:flex;gap:0.5rem"><button class="btn-icon" onclick="editGrp('${gr.id}')" title="Edit">✏️</button><button class="btn-icon" onclick="delGrp('${gr.id}')" title="Delete">🗑️</button></div>`:''}</div>`).join('');
+      g.innerHTML=html;
+    }
+    function openGrpModal(edit=null){const f=document.getElementById('grp-form');f.reset();
+      document.getElementById('grp-modal-title').textContent=edit?'Edit Working Group':'Add Working Group';
+      document.getElementById('grp-submit').textContent=edit?'Save Changes':'Create Group';
+      if(edit){document.getElementById('grp-name').value=edit.name;document.getElementById('grp-desc').value=edit.description||'';
+        document.getElementById('grp-vis').value=edit.visibility||'members';f.dataset.editId=edit.id;
+      }else delete f.dataset.editId;
+      document.getElementById('grp-modal').classList.add('active');
+    }
+    function editGrp(id){const g=project.workingGroups.find(g=>g.id===id);if(g)openGrpModal(g);}
+    async function submitGrp(e){e.preventDefault();const f=e.target;const d=Object.fromEntries(new FormData(f));
+      d.project_id=projectId;const eid=f.dataset.editId;
+      const url=eid?`/api/groups/${eid}`:'/api/groups';
+      const r=await fetch(url,{method:eid?'PUT':'POST',headers:authH(),body:JSON.stringify(d)});
+      if(r.ok){closeModal('grp-modal');toast(eid?'Group updated':'Working group created');loadProject();}
+      else{const e=await r.json();alert(e.error||'Failed');}}
+    async function delGrp(id){if(!confirm('Delete this working group?'))return;
+      const r=await fetch(`/api/groups/${id}`,{method:'DELETE',headers:authH()});
+      if(r.ok){toast('Group deleted');loadProject();}else alert('Failed to delete');}
+
+    // ═══ ACTIVITY ═══
+    function renderActivity(acts) {
+      const render=(el,items)=>{if(!items.length){el.innerHTML='<p style="color:var(--text-muted)">No activity yet.</p>';return;}
+        el.innerHTML=items.map(a=>`<div class="activity-item"><div class="activity-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+          <div class="activity-content"><div class="activity-text"><strong>${esc(a.user_name||'System')}</strong> ${a.action.replace(/_/g,' ')}</div><div class="activity-time">${fmtRel(a.created_at)}</div></div></div>`).join('');};
+      render(document.getElementById('recent-activity'),acts.slice(0,5));
+      render(document.getElementById('full-activity'),acts);
     }
 
-    function renderActivity(activities) {
-      const renderList = (container, items) => {
-        if (!items.length) { container.innerHTML = '<p style="color: var(--text-muted);">No activity yet.</p>'; return; }
-        container.innerHTML = items.slice(0, 15).map(a => `
-          <div class="activity-item">
-            <div class="activity-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></div>
-            <div class="activity-content">
-              <div class="activity-text"><strong>${escapeHtml(a.user_name || 'System')}</strong> ${a.action.replace(/_/g, ' ')}</div>
-              <div class="activity-time">${formatRelativeTime(a.created_at)}</div>
-            </div>
-          </div>`).join('');
-      };
-      renderList(document.getElementById('recent-activity'), activities.slice(0, 5));
-      renderList(document.getElementById('full-activity'), activities);
-    }
+    // ═══ SETTINGS ═══
+    function populateSettings(){if(!currentUser)return;
+      document.getElementById('set-title').value=project.title||'';document.getElementById('set-desc').value=project.description||'';
+      document.getElementById('set-status').value=project.status||'active';document.getElementById('set-priority').value=project.priority||'medium';
+      document.getElementById('set-visibility').value=project.visibility||'public';}
+    async function saveSettings(e){e.preventDefault();const d=Object.fromEntries(new FormData(e.target));d.id=projectId;
+      const r=await fetch('/api/projects',{method:'PUT',headers:authH(),body:JSON.stringify(d)});
+      if(r.ok){toast('Project updated');loadProject();}else{const e=await r.json();alert(e.error||'Failed');}}
+    async function archiveProject(){if(!confirm('Archive this project?'))return;
+      const r=await fetch(`/api/projects?id=${projectId}`,{method:'DELETE',headers:authH()});
+      if(r.ok){toast('Project archived');setTimeout(()=>window.location='/projects.html',1500);}else{const e=await r.json();alert(e.error||'Failed');}}
 
-    // ═══════════════════════════════════════════
-    // TAB SWITCHING
-    // ═══════════════════════════════════════════
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
-      });
-    });
+    // ── Tabs ──
+    document.querySelectorAll('.tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');});});
 
-    // ═══════════════════════════════════════════
-    // UTILS
-    // ═══════════════════════════════════════════
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-    function capitalizeFirst(str) {
-      if (!str) return '';
-      return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ');
-    }
-    function formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
-    function formatRelativeTime(dateStr) {
-      const diff = Date.now() - new Date(dateStr);
-      const m = Math.floor(diff / 60000), h = Math.floor(diff / 3600000), d = Math.floor(diff / 86400000);
-      if (m < 1) return 'Just now';
-      if (m < 60) return `${m}m ago`;
-      if (h < 24) return `${h}h ago`;
-      if (d < 7) return `${d}d ago`;
-      return formatDate(dateStr);
-    }
-
-    // Init
-    checkAuth();
-    loadProject();
+    // ── Init ──
+    checkAuth(); loadProject();
   </script>
 </body>
 </html>
