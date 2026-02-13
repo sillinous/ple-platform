@@ -38,7 +38,8 @@ async function listDiscussions(sql, params) {
   const limit = Math.min(parseInt(params.get('limit') || '20'), 100);
   const offset = parseInt(params.get('offset') || '0');
   
-  const discussions = await sql`
+  const [discussions, countResult] = await Promise.all([
+    sql`
     SELECT d.*, u.display_name as author_name, u.avatar_url as author_avatar,
            (SELECT COUNT(*) FROM discussions WHERE parent_id = d.id) as reply_count
     FROM discussions d LEFT JOIN users u ON d.author_id = u.id
@@ -47,9 +48,14 @@ async function listDiscussions(sql, params) {
       AND (${elementId}::uuid IS NULL OR d.element_id = ${elementId}::uuid)
     ORDER BY d.created_at DESC 
     LIMIT ${limit} OFFSET ${offset}
-  `;
+  `,
+    sql`SELECT COUNT(*) as count FROM discussions WHERE parent_id IS NULL AND status = 'active'
+      AND (${proposalId}::uuid IS NULL OR proposal_id = ${proposalId}::uuid)
+      AND (${elementId}::uuid IS NULL OR element_id = ${elementId}::uuid)`
+  ]);
   
-  return jsonResponse({ discussions: discussions.map(formatDiscussion), limit, offset });
+  const total = parseInt(countResult[0]?.count || 0);
+  return jsonResponse({ discussions: discussions.map(formatDiscussion), total, limit, offset });
 }
 
 async function getDiscussion(sql, id) {

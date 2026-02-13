@@ -417,6 +417,7 @@
         <span class="logo-text">Post-Labor Economics</span>
       </a>
       
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <nav class="nav-menu">
         <a href="projects.html" class="nav-link">Projects</a>
         <a href="content.html" class="nav-link active">Content</a>
@@ -446,6 +447,10 @@
           </svg>
           New Content
         </button>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <input type="text" id="content-search" placeholder="Search content..." style="width:100%;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterContent()">
       </div>
 
       <div class="content-tabs">
@@ -553,6 +558,8 @@
       }
     }
 
+    let allContentItems = [];
+
     // Load content
     async function loadContent() {
       const grid = document.getElementById('content-grid');
@@ -573,27 +580,23 @@
 
         const res = await fetch(url, { headers });
         const data = await res.json();
-
-        if (data.content && data.content.length > 0) {
-          grid.innerHTML = data.content.map(renderContentCard).join('');
-        } else {
-          grid.innerHTML = `
-            <div class="empty-state">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
-                <line x1="3" y1="9" x2="21" y2="9"/>
-                <line x1="9" y1="21" x2="9" y2="9"/>
-              </svg>
-              <h3>No content yet</h3>
-              <p>${currentFilter === 'drafts' ? 'Start writing your first draft.' : 'Content will appear here once created.'}</p>
-            </div>
-          `;
-        }
+        allContentItems = data.content || [];
+        renderFilteredContent();
       } catch (e) {
         console.error('Failed to load content:', e);
         grid.innerHTML = '<div class="error">Failed to load content</div>';
       }
     }
+
+    function renderFilteredContent() {
+      const grid = document.getElementById('content-grid');
+      const q = (document.getElementById('content-search')?.value || '').toLowerCase().trim();
+      let items = allContentItems;
+      if (q) items = items.filter(c => (c.title||'').toLowerCase().includes(q) || (c.excerpt||'').toLowerCase().includes(q) || (c.contentType||'').toLowerCase().includes(q));
+      if (items.length > 0) { grid.innerHTML = items.map(renderContentCard).join(''); }
+      else { grid.innerHTML = '<div class="empty-state"><h3>No content found</h3><p>' + (q ? 'Try a different search term.' : 'Content will appear here once created.') + '</p></div>'; }
+    }
+    window.filterContent = function() { renderFilteredContent(); };
 
     function renderContentCard(item) {
       const authorName = item.author?.name || 'Unknown';

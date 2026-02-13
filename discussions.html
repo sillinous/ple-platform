@@ -22,6 +22,7 @@
         <span class="logo-text">Post-Labor Economics</span>
       </a>
       
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <nav class="nav-menu">
         <a href="projects.html" class="nav-link">Projects</a>
         <a href="content.html" class="nav-link">Content</a>
@@ -61,6 +62,15 @@
         <div class="form-group">
           <label class="form-label required" for="discussion-content">Your Thoughts</label>
           <textarea id="discussion-content" class="form-textarea" rows="4" placeholder="Share your ideas, questions, or insights..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label" for="discussion-type">Type</label>
+          <select id="discussion-type" style="padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;">
+            <option value="general">General Discussion</option>
+            <option value="question">Question</option>
+            <option value="strategy">Strategy</option>
+            <option value="debate">Debate</option>
+          </select>
         </div>
         <div style="display: flex; gap: 1rem;">
           <button class="btn btn-primary" id="submit-discussion">Post Discussion</button>
@@ -103,7 +113,7 @@
       }
       
       try {
-        await discussions.create({ title, content, discussionType: 'general' });
+        await discussions.create({ title, content, discussionType: document.getElementById('discussion-type').value });
         showToast('Discussion posted!', 'success');
         document.getElementById('new-discussion-form').style.display = 'none';
         document.getElementById('discussion-title').value = '';
@@ -139,6 +149,9 @@
         
         container.innerHTML = data.discussions.map(d => `
           <div class="proposal-card">
+            <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+              <span class="proposal-type-badge" style="font-size:0.7rem;text-transform:capitalize;">${d.type || 'general'}</span>
+            </div>
             <h3 class="proposal-title" style="margin-bottom: 0.75rem;">
               <a href="discussion-view.html?id=${d.id}">${d.title || 'Untitled Discussion'}</a>
             </h3>

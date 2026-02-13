@@ -379,6 +379,7 @@
         <span class="logo-text">Post-Labor Economics</span>
       </a>
       
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <nav class="nav-menu">
         <a href="projects.html" class="nav-link active">Projects</a>
         <a href="content.html" class="nav-link">Content</a>
@@ -408,6 +409,10 @@
           </svg>
           New Project
         </button>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <input type="text" id="project-search" placeholder="Search projects..." style="width:100%;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterProjects()">
       </div>
 
       <div class="filters-bar">
@@ -534,6 +539,8 @@
       }
     }
 
+    let allProjectItems = [];
+
     // Load projects
     async function loadProjects() {
       const grid = document.getElementById('projects-grid');
@@ -548,25 +555,23 @@
 
         const res = await fetch(url, { headers });
         const data = await res.json();
-
-        if (data.projects && data.projects.length > 0) {
-          grid.innerHTML = data.projects.map(renderProjectCard).join('');
-        } else {
-          grid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-              </svg>
-              <h3>No projects yet</h3>
-              <p>Create your first project to start organizing work.</p>
-            </div>
-          `;
-        }
+        allProjectItems = data.projects || [];
+        renderFilteredProjects();
       } catch (e) {
         console.error('Failed to load projects:', e);
         grid.innerHTML = '<div class="error">Failed to load projects</div>';
       }
     }
+
+    function renderFilteredProjects() {
+      const grid = document.getElementById('projects-grid');
+      const q = (document.getElementById('project-search')?.value || '').toLowerCase().trim();
+      let items = allProjectItems;
+      if (q) items = items.filter(p => (p.title||'').toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q));
+      if (items.length > 0) { grid.innerHTML = items.map(renderProjectCard).join(''); }
+      else { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h3>No projects found</h3><p>' + (q ? 'Try a different search.' : 'Create your first project.') + '</p></div>'; }
+    }
+    window.filterProjects = function() { renderFilteredProjects(); };
 
     function renderProjectCard(project) {
       const ownerName = project.owner?.name || 'Unknown';
