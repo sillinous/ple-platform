@@ -23,6 +23,12 @@ export default async (req, context) => {
       if (action === 'seed-projects') {
         return await seedProjectsAndContent(sql);
       }
+      if (action === 'fix-content') {
+        return await fixContentData(sql);
+      }
+      if (action === 'fix-community') {
+        return await fixCommunityData(sql);
+      }
     
     return await getGATOFramework(sql);
     }
@@ -347,12 +353,18 @@ Disagreements are resolved through discussion aimed at consensus. When consensus
   ];
 
   let contentCount = 0;
+  // Find the first admin/editor user to assign as author
+  const admins = await sql`SELECT id FROM users WHERE role IN ('admin','editor') LIMIT 1`;
+  const authorId = admins.length > 0 ? admins[0].id : null;
+
   for (const item of contentItems) {
     const id = crypto.randomUUID();
     await sql`
-      INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, version, published_at)
-      VALUES (${id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, 1, ${item.status === 'published' ? sql`CURRENT_TIMESTAMP` : null})
+      INSERT INTO content_items (id, title, slug, content_type, body, excerpt, status, visibility, author_id, version, published_at)
+      VALUES (${id}, ${item.title}, ${item.slug}, ${item.content_type}, ${item.body}, ${item.excerpt}, ${item.status}, ${item.visibility}, ${authorId}, 1, ${item.status === 'published' ? sql`CURRENT_TIMESTAMP` : null})
     `;
+    // Store id and tag hints for linking
+    item._id = id;
     contentCount++;
   }
 
@@ -368,6 +380,25 @@ Disagreements are resolved through discussion aimed at consensus. When consensus
   ];
   for (const tag of tags) {
     await sql`INSERT INTO tags (name, slug) VALUES (${tag.name}, ${tag.slug}) ON CONFLICT DO NOTHING`;
+  }
+
+  // Link content items to tags based on content
+  const tagMap = {
+    'intro-to-ple': ['economics', 'policy'],
+    'case-for-ubi': ['ubi', 'economics', 'policy'],
+    'understanding-gato': ['gato', 'ai-alignment'],
+    'automation-tax-guide': ['automation', 'policy', 'economics'],
+    'worker-transition-programs': ['policy', 'governance']
+  };
+  for (const item of contentItems) {
+    const slugTags = tagMap[item.slug] || [];
+    for (const tagSlug of slugTags) {
+      await sql`
+        INSERT INTO content_tags (content_id, tag_id)
+        SELECT ${item._id}, id FROM tags WHERE slug = ${tagSlug}
+        ON CONFLICT DO NOTHING
+      `;
+    }
   }
 
   return jsonResponse({
@@ -1113,6 +1144,114 @@ async function getGATOFramework(sql) {
       note: 'Use ?action=prime to get THE PRIME with full training content'
     }
   });
+}
+
+async function fixContentData(sql) {
+  let fixed = 0;
+
+  // Fix author: assign first admin/editor to any content without an author
+  const admins = await sql`SELECT id FROM users WHERE role IN ('admin','editor') LIMIT 1`;
+  if (admins.length > 0) {
+    const result = await sql`UPDATE content_items SET author_id = ${admins[0].id} WHERE author_id IS NULL`;
+    fixed += result.count || 0;
+  }
+
+  // Ensure tags exist
+  const tags = [
+    { name: 'UBI', slug: 'ubi' }, { name: 'Automation', slug: 'automation' },
+    { name: 'Policy', slug: 'policy' }, { name: 'GATO', slug: 'gato' },
+    { name: 'Economics', slug: 'economics' }, { name: 'AI Alignment', slug: 'ai-alignment' },
+    { name: 'Governance', slug: 'governance' }
+  ];
+  for (const t of tags) {
+    await sql`INSERT INTO tags (name, slug) VALUES (${t.name}, ${t.slug}) ON CONFLICT DO NOTHING`;
+  }
+
+  // Link content to tags based on slug patterns
+  const tagMap = {
+    'intro-to-ple': ['economics', 'policy'],
+    'case-for-ubi': ['ubi', 'economics', 'policy'],
+    'understanding-gato': ['gato', 'ai-alignment'],
+    'automation-tax-guide': ['automation', 'policy', 'economics'],
+    'worker-transition-programs': ['policy', 'governance']
+  };
+  let tagged = 0;
+  for (const [slug, tagSlugs] of Object.entries(tagMap)) {
+    const items = await sql`SELECT id FROM content_items WHERE slug = ${slug}`;
+    if (items.length === 0) continue;
+    for (const ts of tagSlugs) {
+      await sql`INSERT INTO content_tags (content_id, tag_id) SELECT ${items[0].id}, id FROM tags WHERE slug = ${ts} ON CONFLICT DO NOTHING`;
+      tagged++;
+    }
+  }
+
+  return jsonResponse({ success: true, message: 'Content data fixed', authorFixed: fixed, tagsLinked: tagged });
+}
+
+async function fixCommunityData(sql) {
+  const admins = await sql`SELECT id FROM users WHERE role IN ('admin','editor') ORDER BY created_at ASC LIMIT 1`;
+  const authorId = admins.length > 0 ? admins[0].id : null;
+  let fixes = { discussionAuthors: 0, proposalAuthors: 0, replies: 0 };
+
+  // Fix discussion authors
+  if (authorId) {
+    const r1 = await sql`UPDATE discussions SET author_id = ${authorId} WHERE author_id IS NULL`;
+    fixes.discussionAuthors = r1.count || 0;
+    const r2 = await sql`UPDATE proposals SET author_id = ${authorId} WHERE author_id IS NULL`;
+    fixes.proposalAuthors = r2.count || 0;
+  }
+
+  // Add seed replies to discussions that have none
+  const discs = await sql`
+    SELECT d.id, d.title FROM discussions d
+    WHERE d.parent_id IS NULL AND d.status = 'active'
+    AND NOT EXISTS (SELECT 1 FROM discussions r WHERE r.parent_id = d.id)
+    LIMIT 8
+  `;
+
+  const replyTemplates = [
+    { pattern: 'Heuristic Imperatives', replies: [
+      'Great question. I think the key is the time horizon — reducing suffering is urgent, but we need prosperity-building policies running in parallel. A phased UBI that starts with the most vulnerable and expands could address both imperatives simultaneously.',
+      'The Increase Understanding imperative is often overlooked here. We need better economic literacy programs so people can participate meaningfully in policy discussions about their own economic futures.'
+    ]},
+    { pattern: 'Corporate Adoption', replies: [
+      'I\'ve been researching B-Corp models and stakeholder capitalism frameworks. Companies like Patagonia show that profitability and social responsibility aren\'t mutually exclusive, but we need structural incentives to scale this beyond mission-driven companies.',
+      'Automation impact assessments are interesting. We could model them on environmental impact assessments — required before major automation deployments, with public comment periods and mitigation plans.'
+    ]},
+    { pattern: 'automation skeptics', replies: [
+      'I find the "jobs created vs jobs transformed" framing works better than "jobs lost." Most people can relate to how their own work has changed with technology. The question becomes: are the transformations benefiting workers or just shareholders?',
+      'Historical parallels are tricky because the pace of change is unprecedented. I like pointing to specific industries — like how self-checkout didn\'t eliminate cashiers overnight but fundamentally changed the economics of retail employment.'
+    ]},
+    { pattern: 'UBI pilot', replies: [
+      'Don\'t forget the Alaska Permanent Fund — it\'s the longest-running quasi-UBI and has great longitudinal data. Also worth tracking the upcoming pilots in Wales and several U.S. cities.',
+      'For metrics, I\'d prioritize subjective wellbeing alongside economic indicators. Finland\'s pilot showed employment effects were modest, but participants reported significantly better wellbeing and trust.'
+    ]},
+    { pattern: 'Attractor State', replies: [
+      'Love this idea. An attractor analysis template could include: proximity scores for each state, feedback loops created by the policy, and reversibility assessments. Would make proposals much stronger.',
+    ]},
+    { pattern: 'AI governance', replies: [
+      'I think algorithmic auditing is essential. The EU AI Act is a start, but we need frameworks specifically for economic AI systems. Credit scoring algorithms and hiring AI should be as transparent as financial reporting.',
+    ]},
+    { pattern: 'Welcome', replies: [
+      'Welcome everyone! I\'m particularly interested in the intersection of AI alignment and economic policy. Excited to see this community growing. Don\'t hesitate to jump into any discussion — every perspective enriches our thinking.',
+    ]},
+    { pattern: 'Data ownership', replies: [
+      'Data cooperatives are fascinating. The Barcelona Data Commons is a real-world experiment worth studying. They\'re trying to create a data governance model where citizens collectively control how their data is used by the city.',
+      'I think we need to distinguish between data types. Health data, behavioral data, and creative data all have different economic values and privacy implications. A one-size-fits-all approach won\'t work.'
+    ]}
+  ];
+
+  for (const disc of discs) {
+    const template = replyTemplates.find(t => disc.title.includes(t.pattern));
+    if (!template) continue;
+    for (const replyContent of template.replies) {
+      const id = crypto.randomUUID();
+      await sql`INSERT INTO discussions (id, content, parent_id, author_id, discussion_type, status) VALUES (${id}, ${replyContent}, ${disc.id}, ${authorId}, 'general', 'active')`;
+      fixes.replies++;
+    }
+  }
+
+  return jsonResponse({ success: true, message: 'Community data fixed', fixes });
 }
 
 export const config = { path: '/api/gato' };
