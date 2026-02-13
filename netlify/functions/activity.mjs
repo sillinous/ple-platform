@@ -16,7 +16,14 @@ export default async (req, context) => {
     const entityType = url.searchParams.get('entityType') || null;
     
     const activities = await sql`
-      SELECT a.*, u.display_name as user_name, u.avatar_url as user_avatar
+      SELECT a.*, u.display_name as user_name, u.avatar_url as user_avatar,
+        COALESCE(
+          (SELECT title FROM proposals WHERE id = a.entity_id AND a.entity_type = 'proposal'),
+          (SELECT title FROM discussions WHERE id = a.entity_id AND a.entity_type = 'discussion'),
+          (SELECT title FROM tasks WHERE id = a.entity_id AND a.entity_type = 'task'),
+          (SELECT title FROM projects WHERE id = a.entity_id AND a.entity_type = 'project'),
+          (SELECT title FROM content WHERE id = a.entity_id AND a.entity_type = 'content')
+        ) as entity_title
       FROM activity_log a LEFT JOIN users u ON a.user_id = u.id
       WHERE (${userId}::uuid IS NULL OR a.user_id = ${userId}::uuid)
         AND (${entityType}::text IS NULL OR a.entity_type = ${entityType})
@@ -46,34 +53,36 @@ export default async (req, context) => {
 function formatActivityDescription(activity) {
   const userName = activity.user_name || 'Someone';
   const details = activity.details || {};
+  const entityTitle = activity.entity_title || details.title || '';
+  const quoted = entityTitle ? `: "${entityTitle}"` : '';
   
   const descriptions = {
     'user_registered': `${userName} joined the community`,
     'user_login': `${userName} signed in`,
-    'proposal_created': `${userName} created a new proposal: "${details.title || 'Untitled'}"`,
-    'proposal_updated': `${userName} updated a proposal`,
+    'proposal_created': `${userName} created a proposal${quoted}`,
+    'proposal_updated': `${userName} updated a proposal${quoted}`,
     'proposal_deleted': `${userName} deleted a proposal`,
-    'vote_cast': `${userName} voted ${details.voteType || ''} on a proposal`,
+    'vote_cast': `${userName} voted ${details.voteType || ''} on a proposal${quoted}`,
     'vote_removed': `${userName} removed their vote`,
-    'discussion_created': `${userName} started a new discussion`,
-    'reply_created': `${userName} replied to a discussion`,
-    'element_created': `${userName} created a new architecture element`,
+    'discussion_created': `${userName} started a discussion${quoted}`,
+    'reply_created': `${userName} replied to a discussion${quoted}`,
+    'element_created': `${userName} created an architecture element`,
     'element_updated': `${userName} updated an architecture element`,
-    'content_created': `${userName} drafted new content: "${details.title || 'Untitled'}"`,
-    'content_updated': `${userName} updated content`,
-    'content_submitted': `${userName} submitted content for review`,
-    'content_approved': `${userName} approved content`,
-    'content_published': `${userName} published content`,
-    'content_archived': `${userName} archived "${details.title || 'content'}"`,
-    'task_created': `${userName} created a task`,
-    'task_updated': `${userName} updated a task`,
-    'task_moved': `${userName} moved a task to ${details.status || 'a new status'}`,
+    'content_created': `${userName} drafted${quoted}`,
+    'content_updated': `${userName} updated${quoted || ' content'}`,
+    'content_submitted': `${userName} submitted${quoted} for review`,
+    'content_approved': `${userName} approved${quoted}`,
+    'content_published': `${userName} published${quoted}`,
+    'content_archived': `${userName} archived${quoted || ' content'}`,
+    'task_created': `${userName} created a task${quoted}`,
+    'task_updated': `${userName} updated a task${quoted}`,
+    'task_moved': `${userName} moved${quoted || ' a task'} to ${details.status || 'a new status'}`,
     'task_deleted': `${userName} removed a task`,
-    'milestone_created': `${userName} created a milestone`,
-    'milestone_updated': `${userName} updated a milestone`,
-    'project_created': `${userName} created a new project`,
-    'project_updated': `${userName} updated a project`,
-    'project_archived': `${userName} archived a project`,
+    'milestone_created': `${userName} created a milestone${quoted}`,
+    'milestone_updated': `${userName} updated a milestone${quoted}`,
+    'project_created': `${userName} created a project${quoted}`,
+    'project_updated': `${userName} updated a project${quoted}`,
+    'project_archived': `${userName} archived a project${quoted}`,
     'commented': `${userName} commented on ${details.entity_type || 'an item'}`,
     'replied': `${userName} replied to a comment`,
     'created': `${userName} created a ${details.name ? 'group: "' + details.name + '"' : 'working group'}`,

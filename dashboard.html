@@ -223,7 +223,7 @@
           lucide.createIcons(); checkAttention(d.content); return;
         }
         el.innerHTML = myItems.map(c => `
-          <a href="content-view.html?id=${c.id}" class="item-card">
+          <a href="content-view.html?id=${c.slug||c.id}" class="item-card">
             <div class="item-row"><div style="flex:1">
               <div class="item-title">${esc(c.title)}</div>
               <div class="item-meta">
@@ -333,7 +333,7 @@
       const isEditor = currentUser.role==='admin'||currentUser.role==='editor';
       const items = [];
       if (isEditor) {
-        allContent.filter(c=>c.status==='in_review').forEach(c=>items.push({label:c.title, href:`content-view.html?id=${c.id}`, action:'Review'}));
+        allContent.filter(c=>c.status==='in_review').forEach(c=>items.push({label:c.title, href:`content-view.html?id=${c.slug||c.id}`, action:'Review'}));
       }
       allContent.filter(c=>c.author?.id===currentUser.id&&c.status==='draft').forEach(c=>items.push({label:c.title, href:`content-editor.html?id=${c.id}`, action:'Continue'}));
       const card=document.getElementById('attention-card');

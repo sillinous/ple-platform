@@ -252,7 +252,7 @@
           const words=(c.body||'').split(/\s+/).length;
           const readTime=Math.max(1,Math.ceil(words/200));
           return `
-          <a href="content-view.html?id=${c.id}" class="element-card" style="text-decoration:none;color:inherit;cursor:pointer;transition:box-shadow 0.2s;">
+          <a href="content-view.html?id=${c.slug||c.id}" class="element-card" style="text-decoration:none;color:inherit;cursor:pointer;transition:box-shadow 0.2s;">
             <div class="element-card-header" style="display:flex;justify-content:space-between;align-items:center;">
               <span class="element-code goal" style="font-size:0.7rem">${(c.contentType||'article').replace('_',' ').toUpperCase()}</span>
               <span style="font-size:0.7rem;color:var(--text-muted,#888)">${readTime} min read</span>
