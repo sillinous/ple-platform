@@ -335,6 +335,13 @@ async function runMigrations() {
 }
 
 async function seedProjects() {
+  // Always deduplicate tasks first (fixes historical seed bugs)
+  try {
+    await sql`DELETE FROM tasks WHERE id NOT IN (
+      SELECT DISTINCT ON (project_id, title) id FROM tasks ORDER BY project_id, title, created_at ASC
+    )`;
+  } catch(e) { console.log('Dedup skipped:', e.message); }
+
   // Version-based seed check — increment SEED_VERSION constant to force re-seed
   const versionCheck = await sql`SELECT COUNT(*) as count FROM users WHERE email = 'system@postlaboreconomics.com' AND bio LIKE ${'%v' + SEED_VERSION + '%'}`;
   if (parseInt(versionCheck[0]?.count) > 0) return;
