@@ -68,6 +68,7 @@
         <div class="disc-header">
           <h1 class="disc-title" id="disc-title"></h1>
           <div class="disc-meta">
+            <span id="disc-type-badge" style="padding:0.15rem 0.5rem;border-radius:100px;font-size:0.7rem;font-weight:600;text-transform:capitalize;background:rgba(27,77,62,0.1);color:var(--color-horizon,#1B4D3E)"></span>
             <div class="disc-meta-item"><div class="avatar" id="disc-avatar"></div><span id="disc-author"></span></div>
             <div class="disc-meta-item"><i data-lucide="clock" style="width:14px;height:14px"></i><span id="disc-date"></span></div>
             <div class="disc-meta-item"><i data-lucide="message-square" style="width:14px;height:14px"></i><span id="disc-reply-count"></span></div>
@@ -130,6 +131,7 @@
       const name=disc.author?.name||'Anonymous';
       document.getElementById('disc-avatar').textContent=initials(name);
       document.getElementById('disc-author').textContent=name;
+      document.getElementById('disc-type-badge').textContent=disc.type||'general';
       document.getElementById('disc-date').textContent=fmtDate(disc.createdAt);
       document.getElementById('disc-reply-count').textContent=`${replies.length} repl${replies.length===1?'y':'ies'}`;
       document.getElementById('disc-body').textContent=disc.content;

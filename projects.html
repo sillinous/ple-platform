@@ -529,9 +529,8 @@
         });
         if (res.ok) {
           currentUser = await res.json();
-          document.getElementById('nav-user').innerHTML = `
-            <span class="user-name">${currentUser.display_name}</span>
-          `;
+          document.querySelectorAll('[data-auth="logged-in"]').forEach(el => el.style.display = '');
+          document.querySelectorAll('[data-auth="logged-out"]').forEach(el => el.style.display = 'none');
           document.getElementById('create-btn').style.display = 'flex';
         }
       } catch (e) {

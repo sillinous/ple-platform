@@ -51,8 +51,12 @@
           for a world where human dignity and economic security exist independent of labor markets.
         </p>
         <div class="hero-actions">
-          <a href="register.html" class="btn btn-primary btn-lg">
+          <a href="register.html" class="btn btn-primary btn-lg" data-auth="logged-out">
             Join the Movement
+            <i data-lucide="arrow-right"></i>
+          </a>
+          <a href="dashboard.html" class="btn btn-primary btn-lg" data-auth="logged-in" style="display:none">
+            Go to Dashboard
             <i data-lucide="arrow-right"></i>
           </a>
           <a href="about.html" class="btn btn-outline btn-lg">
@@ -81,7 +85,7 @@
         </div>
         <div class="stat-item">
           <div class="stat-value" id="elements-count">-</div>
-          <div class="stat-label">Architecture Elements</div>
+          <div class="stat-label">Discussions</div>
         </div>
       </div>
     </div>
@@ -147,8 +151,11 @@
           economic systems that serve human flourishing.
         </p>
         <div class="cta-actions">
-          <a href="register.html" class="btn btn-light btn-lg">
+          <a href="register.html" class="btn btn-light btn-lg" data-auth="logged-out">
             Create Your Account
+          </a>
+          <a href="content-editor.html" class="btn btn-light btn-lg" data-auth="logged-in" style="display:none">
+            Write Something
           </a>
           <a href="proposals.html" class="btn btn-outline-light btn-lg">
             Browse Proposals
@@ -205,16 +212,16 @@
     // Load live stats
     async function loadStats() {
       try {
-        const [cR, pR, prR, archR] = await Promise.allSettled([
-          fetch('/api/content?limit=1').then(r=>r.json()),
+        const [cR, pR, prR, dR] = await Promise.allSettled([
+          fetch('/api/content?limit=1&status=published').then(r=>r.json()),
           fetch('/api/projects?limit=1').then(r=>r.json()),
           proposals.list({limit:1}),
-          fetch('/api/architecture').then(r=>r.json())
+          fetch('/api/discussions?limit=1').then(r=>r.json())
         ]);
         if(cR.status==='fulfilled') document.getElementById('content-count').textContent = cR.value.total||0;
         if(pR.status==='fulfilled') document.getElementById('projects-count').textContent = pR.value.total||0;
         if(prR.status==='fulfilled') document.getElementById('proposals-count').textContent = prR.value.total||0;
-        if(archR.status==='fulfilled') document.getElementById('elements-count').textContent = archR.value.total||0;
+        if(dR.status==='fulfilled') document.getElementById('elements-count').textContent = dR.value.total||0;
       } catch(e) { console.error('Stats:', e); }
     }
 
