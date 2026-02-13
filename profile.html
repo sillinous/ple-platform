@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Manage your Post-Labor Economics profile and view your contributions.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile | Post-Labor Economics</title>
   <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
@@ -13,32 +12,35 @@
   <link rel="stylesheet" href="src/styles/app.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    .profile-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-    .profile-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; }
-    .profile-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; }
-    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--color-horizon); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 600; flex-shrink: 0; }
-    .profile-info h1 { font-family: var(--font-display); font-size: 1.75rem; margin: 0; }
-    .profile-info .role-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; background: rgba(27,77,62,0.1); color: var(--color-horizon); margin-top: 0.35rem; }
-    .profile-info .member-since { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
-    .profile-form { display: grid; gap: 1.25rem; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.35rem; color: var(--text-secondary); }
-    .form-group input, .form-group textarea { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 0.95rem; background: var(--bg-primary); }
-    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--color-horizon); }
-    .form-group input[disabled] { background: var(--color-gray-50); color: var(--text-muted); cursor: not-allowed; }
-    .form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem; }
-    .section-label { font-family: var(--font-display); font-size: 1.15rem; margin: 0 0 1rem; }
-    .contrib-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 2rem; }
-    .contrib-stat { text-align: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-primary); }
-    .contrib-stat-value { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; color: var(--color-horizon); }
-    .contrib-stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
-    .contrib-list { border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
-    .contrib-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-gray-50); background: var(--bg-primary); text-decoration: none; color: inherit; transition: background 0.1s; }
-    .contrib-item:last-child { border-bottom: none; }
-    .contrib-item:hover { background: var(--bg-secondary); }
-    .contrib-item-title { font-weight: 500; font-size: 0.9rem; }
-    .contrib-item-meta { font-size: 0.8rem; color: var(--text-muted); }
-    .contrib-item-badge { padding: 0.15rem 0.5rem; border-radius: 100px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }    @media(max-width:600px){ .form-row{grid-template-columns:1fr;} .contrib-grid{grid-template-columns:1fr 1fr;} .profile-header{flex-direction:column;text-align:center;} }
+    .profile-container{max-width:800px;margin:0 auto;padding:2rem 1.5rem 4rem}
+    .profile-card{background:var(--bg-secondary,#f5f3f0);border:1px solid var(--border-color,#e5e2dd);border-radius:16px;padding:2rem;margin-bottom:2rem}
+    .profile-header{display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem}
+    .profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--color-horizon,#1B4D3E);color:white;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:600;flex-shrink:0}
+    .profile-info h1{font-family:'Fraunces',serif;font-size:1.75rem;margin:0}
+    .profile-bio{font-size:0.95rem;color:var(--text-secondary,#555);line-height:1.6;margin-top:0.75rem}
+    .role-badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:100px;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;background:rgba(27,77,62,0.1);color:var(--color-horizon,#1B4D3E);margin-top:0.35rem}
+    .member-since{font-size:0.85rem;color:var(--text-muted,#888);margin-top:0.25rem}
+    .profile-form{display:grid;gap:1.25rem}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .form-group label{display:block;font-size:0.85rem;font-weight:500;margin-bottom:0.35rem;color:var(--text-secondary,#555)}
+    .form-group input,.form-group textarea{width:100%;padding:0.6rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.95rem;background:var(--bg-primary,#fff)}
+    .form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--color-horizon,#1B4D3E)}
+    .form-group input[disabled]{background:#f0eeeb;color:var(--text-muted,#888);cursor:not-allowed}
+    .form-actions{display:flex;justify-content:flex-end;gap:0.75rem;margin-top:0.5rem}
+    .section-label{font-family:'Fraunces',serif;font-size:1.15rem;margin:0 0 1rem}
+    .contrib-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:2rem}
+    .contrib-stat{text-align:center;padding:1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:10px;background:var(--bg-primary,#fff)}
+    .contrib-stat-value{font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;color:var(--color-horizon,#1B4D3E)}
+    .contrib-stat-label{font-size:0.75rem;color:var(--text-muted,#888);margin-top:0.15rem}
+    .contrib-list{border:1px solid var(--border-color,#e5e2dd);border-radius:10px;overflow:hidden;margin-bottom:2rem}
+    .contrib-item{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-bottom:1px solid #f0eeeb;background:var(--bg-primary,#fff);text-decoration:none;color:inherit;transition:background 0.1s}
+    .contrib-item:last-child{border-bottom:none}
+    .contrib-item:hover{background:var(--bg-secondary,#f5f3f0)}
+    .contrib-item-title{font-weight:500;font-size:0.9rem}
+    .contrib-item-meta{font-size:0.8rem;color:var(--text-muted,#888)}
+    .contrib-item-badge{padding:0.15rem 0.5rem;border-radius:100px;font-size:0.65rem;font-weight:600;text-transform:uppercase;background:rgba(27,77,62,0.08);color:var(--color-horizon,#1B4D3E)}
+    .empty-note{padding:2rem;text-align:center;color:var(--text-muted,#888);font-size:0.9rem}
+    @media(max-width:600px){.form-row{grid-template-columns:1fr}.contrib-grid{grid-template-columns:1fr 1fr}.profile-header{flex-direction:column;text-align:center}}
   </style>
 </head>
 <body>
@@ -55,150 +57,165 @@
       </nav>
       <div class="header-actions">
         <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
-        <span class="nav-link" data-user-name></span>
-        <button class="btn btn-ghost" id="logout-btn">Sign Out</button>
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
       </div>
     </div>
   </header>
 
   <main>
     <div class="profile-container">
-      <!-- Profile Card -->
-      <div class="profile-card">
-        <div class="profile-header">
-          <div class="profile-avatar" id="avatar"></div>
-          <div class="profile-info">
-            <h1 id="display-name"></h1>
-            <div class="role-badge" id="role-badge"></div>
-            <div class="member-since" id="member-since"></div>
+      <div id="loading" class="empty-note">Loading profile...</div>
+      <div id="error" style="display:none" class="empty-note">
+        <p>User not found.</p>
+        <a href="index.html" class="btn btn-primary" style="margin-top:1rem">Go Home</a>
+      </div>
+
+      <div id="profile-content" style="display:none">
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar" id="avatar"></div>
+            <div class="profile-info">
+              <h1 id="display-name"></h1>
+              <div class="role-badge" id="role-badge"></div>
+              <div class="member-since" id="member-since"></div>
+            </div>
           </div>
+          <div class="profile-bio" id="bio-display" style="display:none"></div>
+          <form id="profile-form" style="display:none;margin-top:1.5rem;border-top:1px solid var(--border-color,#e5e2dd);padding-top:1.5rem;">
+            <div class="profile-form">
+              <div class="form-row">
+                <div class="form-group"><label>Display Name</label><input type="text" id="f-name"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="f-email" disabled></div>
+              </div>
+              <div class="form-group"><label>Bio</label><textarea id="f-bio" rows="3" placeholder="Tell the community about yourself..."></textarea></div>
+              <div class="form-actions"><button type="submit" class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </form>
         </div>
 
-        <form id="profile-form">
-          <div class="profile-form">
-            <div class="form-row">
-              <div class="form-group"><label>Display Name</label><input type="text" id="f-name" placeholder="Your name"></div>
-              <div class="form-group"><label>Email</label><input type="email" id="f-email" disabled></div>
-            </div>
-            <div class="form-group"><label>Bio</label><textarea id="f-bio" rows="3" placeholder="Tell the community about yourself..."></textarea></div>
-            <div class="form-actions">
-              <button type="button" class="btn btn-ghost" id="cancel-btn" style="display:none">Cancel</button>
-              <button type="submit" class="btn btn-primary" id="save-btn">Save Changes</button>
-            </div>
-          </div>
-        </form>
-      </div>
+        <h3 class="section-label" id="contrib-label">Contributions</h3>
+        <div class="contrib-grid">
+          <div class="contrib-stat"><div class="contrib-stat-value" id="c-content">0</div><div class="contrib-stat-label">Published</div></div>
+          <div class="contrib-stat"><div class="contrib-stat-value" id="c-proposals">0</div><div class="contrib-stat-label">Proposals</div></div>
+          <div class="contrib-stat"><div class="contrib-stat-value" id="c-discussions">0</div><div class="contrib-stat-label">Discussions</div></div>
+        </div>
 
-      <!-- Contributions -->
-      <h3 class="section-label">Your Contributions</h3>
-      <div class="contrib-grid">
-        <div class="contrib-stat"><div class="contrib-stat-value" id="c-content">0</div><div class="contrib-stat-label">Content</div></div>
-        <div class="contrib-stat"><div class="contrib-stat-value" id="c-proposals">0</div><div class="contrib-stat-label">Proposals</div></div>
-        <div class="contrib-stat"><div class="contrib-stat-value" id="c-discussions">0</div><div class="contrib-stat-label">Discussions</div></div>
-        <div class="contrib-stat"><div class="contrib-stat-value" id="c-votes">0</div><div class="contrib-stat-label">Votes Cast</div></div>
-      </div>
+        <div id="published-section" style="display:none">
+          <h3 class="section-label">Published Content</h3>
+          <div class="contrib-list" id="published-list"></div>
+        </div>
 
-      <!-- Recent Contributions -->
-      <h3 class="section-label">Recent Activity</h3>
-      <div class="contrib-list" id="activity-list">
-        <div style="padding:2rem;text-align:center;color:var(--text-muted)">Loading...</div>
-      </div>
+        <h3 class="section-label">Recent Activity</h3>
+        <div class="contrib-list" id="activity-list"><div class="empty-note">Loading...</div></div>
 
-      <!-- Danger Zone -->
-      <div style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color);">
-        <h3 class="section-label" style="color:#991B1B;">Account</h3>
-        <div style="display:flex;gap:1rem;">
-          <button class="btn btn-ghost" id="logout-btn-2">Sign Out</button>
+        <div id="account-section" style="display:none;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color,#e5e2dd);">
+          <h3 class="section-label" style="color:#991B1B;">Account</h3>
+          <button class="btn btn-ghost" id="logout-btn">Sign Out</button>
         </div>
       </div>
     </div>
   </main>
 
+  <footer style="margin-top:4rem;padding:2rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);">
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+      <a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics &middot; Prosperity Beyond Work
+    </div>
+  </footer>
+
   <script>
-    let currentUser = null, originalData = {};
-    const authH = () => { const h={'Content-Type':'application/json'}; const t=localStorage.getItem('ple_token'); if(t) h['Authorization']=`Bearer ${t}`; return h; };
-    function toast(m,e){const t=document.createElement('div');t.className='toast'+(e?' toast-error':'');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000);}
-    function initials(n){return(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase();}
+    let profileUser=null, currentUser=null, isOwn=false;
+    const viewId = new URLSearchParams(window.location.search).get('id');
+    const authH=()=>{const h={'Content-Type':'application/json'};const t=localStorage.getItem('ple_token');if(t)h['Authorization']='Bearer '+t;return h;};
+    const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+    const initials=n=>(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase();
     const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):'';
+    function fmtRel(d){if(!d)return '';const ms=Date.now()-new Date(d).getTime();if(ms<60000)return 'just now';if(ms<3600000)return Math.floor(ms/60000)+'m ago';if(ms<86400000)return Math.floor(ms/3600000)+'h ago';if(ms<604800000)return Math.floor(ms/86400000)+'d ago';return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+    function toast(m,e){const t=document.createElement('div');t.className='toast'+(e?' toast-error':'');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000);}
 
     async function init(){
       const token=localStorage.getItem('ple_token');
-      if(!token){window.location='login.html?redirect=profile.html';return;}
-      try{
-        const r=await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});
-        if(!r.ok){window.location='login.html?redirect=profile.html';return;}
-        const d=await r.json(); currentUser=d.user||d;
-        renderProfile();
-        loadContributions();
-        loadActivity();
-      }catch(e){window.location='login.html?redirect=profile.html';}
+      if(token){try{const r=await fetch('/api/auth?action=me',{headers:{'Authorization':'Bearer '+token}});if(r.ok){const d=await r.json();currentUser=d.user||d;document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');}}catch(e){}}
+
+      if(viewId && (!currentUser || viewId!==currentUser.id)){
+        isOwn=false; await loadPublicProfile(viewId);
+      } else if(currentUser && (!viewId || viewId===currentUser.id)){
+        isOwn=true; profileUser=currentUser; render(); loadOwnStats(); loadPublished(currentUser.id); loadActivity(currentUser.id);
+      } else if(viewId){
+        isOwn=false; await loadPublicProfile(viewId);
+      } else { window.location='login.html?redirect=profile.html'; }
     }
 
-    function renderProfile(){
-      document.getElementById('avatar').textContent=initials(currentUser.displayName);
-      document.getElementById('display-name').textContent=currentUser.displayName;
-      document.getElementById('role-badge').textContent=cap(currentUser.role||'member');
-      document.getElementById('member-since').textContent='Member since '+new Date(currentUser.createdAt).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-      document.getElementById('f-name').value=currentUser.displayName||'';
-      document.getElementById('f-email').value=currentUser.email||'';
-      document.getElementById('f-bio').value=currentUser.bio||'';
-      originalData={name:currentUser.displayName,bio:currentUser.bio||''};
-      document.querySelectorAll('[data-user-name]').forEach(el=>el.textContent=currentUser.displayName);
+    async function loadPublicProfile(uid){
+      try{const r=await fetch('/api/auth?action=profile&id='+uid);if(!r.ok){showErr();return;}
+        const data=await r.json(); profileUser=data.user; render();
+        document.getElementById('c-content').textContent=data.stats?.content||0;
+        document.getElementById('c-proposals').textContent=data.stats?.proposals||0;
+        document.getElementById('c-discussions').textContent=data.stats?.discussions||0;
+        loadPublished(uid); loadActivity(uid);
+      }catch(e){showErr();}
     }
 
-    async function loadContributions(){
-      try{
-        const [cR,pR]=await Promise.allSettled([
-          fetch('/api/content?limit=50',{headers:authH()}).then(r=>r.json()),
-          fetch('/api/proposals?limit=50',{headers:authH()}).then(r=>r.json())
-        ]);
-        if(cR.status==='fulfilled'){
-          const my=cR.value.content.filter(c=>c.author?.id===currentUser.id);
-          document.getElementById('c-content').textContent=my.length;
-        }
-        if(pR.status==='fulfilled'){
-          const my=pR.value.proposals.filter(p=>p.author?.id===currentUser.id);
-          document.getElementById('c-proposals').textContent=my.length;
+    function render(){
+      document.title=(profileUser.displayName||'Profile')+' | PLE';
+      document.getElementById('avatar').textContent=initials(profileUser.displayName);
+      document.getElementById('display-name').textContent=profileUser.displayName;
+      document.getElementById('role-badge').textContent=cap(profileUser.role||'member');
+      document.getElementById('member-since').textContent='Member since '+new Date(profileUser.createdAt).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+      const bio=document.getElementById('bio-display');
+      if(profileUser.bio){bio.textContent=profileUser.bio;bio.style.display='block';}
+      if(isOwn){
+        document.getElementById('profile-form').style.display='block';
+        document.getElementById('f-name').value=profileUser.displayName||'';
+        document.getElementById('f-email').value=profileUser.email||'';
+        document.getElementById('f-bio').value=profileUser.bio||'';
+        document.getElementById('account-section').style.display='block';
+        document.getElementById('contrib-label').textContent='Your Contributions';
+      }
+      document.getElementById('loading').style.display='none';
+      document.getElementById('profile-content').style.display='block';
+    }
+
+    async function loadOwnStats(){
+      try{const [cR,pR]=await Promise.allSettled([
+        fetch('/api/content?limit=50',{headers:authH()}).then(r=>r.json()),
+        fetch('/api/proposals?limit=50',{headers:authH()}).then(r=>r.json())
+      ]);
+      if(cR.status==='fulfilled'){document.getElementById('c-content').textContent=cR.value.content.filter(c=>c.author?.id===currentUser.id).length;}
+      if(pR.status==='fulfilled'){document.getElementById('c-proposals').textContent=pR.value.proposals.filter(p=>p.author?.id===currentUser.id).length;}
+      }catch(e){}
+    }
+
+    async function loadPublished(uid){
+      try{const r=await fetch('/api/content?limit=20&status=published&author='+uid);const d=await r.json();
+        if(d.content?.length>0){
+          document.getElementById('published-section').style.display='block';
+          document.getElementById('published-list').innerHTML=d.content.slice(0,10).map(c=>'<a href="content-view.html?id='+c.id+'" class="contrib-item"><div><div class="contrib-item-title">'+esc(c.title)+'</div><div class="contrib-item-meta">'+cap(c.contentType||'article')+' &middot; '+fmtRel(c.publishedAt||c.createdAt)+'</div></div><span class="contrib-item-badge">'+cap(c.contentType||'article')+'</span></a>').join('');
         }
       }catch(e){}
     }
 
-    async function loadActivity(){
-      try{
-        const r=await fetch(`/api/activity?userId=${currentUser.id}&limit=10`,{headers:authH()});
-        const d=await r.json();
+    async function loadActivity(uid){
+      try{const r=await fetch('/api/activity?userId='+uid+'&limit=10',{headers:authH()});const d=await r.json();
         const el=document.getElementById('activity-list');
-        if(!d.activities?.length){el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-muted)">No activity yet. Start contributing!</div>';return;}
-        el.innerHTML=d.activities.map(a=>`<div class="contrib-item"><div><div class="contrib-item-title">${a.description}</div></div><div class="contrib-item-meta">${fmtRel(a.createdAt)}</div></div>`).join('');
-      }catch(e){document.getElementById('activity-list').innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-muted)">Unable to load activity</div>';}
+        if(!d.activities?.length){el.innerHTML='<div class="empty-note">No activity yet.</div>';return;}
+        el.innerHTML=d.activities.map(a=>'<div class="contrib-item"><div class="contrib-item-title">'+esc(a.description)+'</div><div class="contrib-item-meta">'+fmtRel(a.createdAt)+'</div></div>').join('');
+      }catch(e){document.getElementById('activity-list').innerHTML='<div class="empty-note">Unable to load activity.</div>';}
     }
 
-    function fmtRel(d){if(!d)return '';const ms=Date.now()-new Date(d).getTime();if(ms<60000)return 'just now';if(ms<3600000)return Math.floor(ms/60000)+'m ago';if(ms<86400000)return Math.floor(ms/3600000)+'h ago';if(ms<604800000)return Math.floor(ms/86400000)+'d ago';return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+    function showErr(){document.getElementById('loading').style.display='none';document.getElementById('error').style.display='block';}
 
-    // Save profile
     document.getElementById('profile-form').addEventListener('submit',async e=>{
-      e.preventDefault();
-      const name=document.getElementById('f-name').value.trim();
-      const bio=document.getElementById('f-bio').value.trim();
+      e.preventDefault();const name=document.getElementById('f-name').value.trim();const bio=document.getElementById('f-bio').value.trim();
       if(!name){toast('Display name is required',true);return;}
-      try{
-        const r=await fetch('/api/auth?action=update-profile',{method:'POST',headers:authH(),body:JSON.stringify({displayName:name,bio})});
-        if(r.ok){toast('Profile updated');currentUser.displayName=name;currentUser.bio=bio;renderProfile();}
+      try{const r=await fetch('/api/auth?action=update-profile',{method:'POST',headers:authH(),body:JSON.stringify({displayName:name,bio})});
+        if(r.ok){toast('Profile updated');profileUser.displayName=name;profileUser.bio=bio;render();}
         else{const d=await r.json();toast(d.error||'Update failed',true);}
-      }catch(e){toast('Failed to update profile',true);}
+      }catch(e){toast('Failed to update',true);}
     });
 
-    // Logout
     document.getElementById('logout-btn').addEventListener('click',()=>{localStorage.removeItem('ple_token');window.location='index.html';});
-    document.getElementById('logout-btn-2').addEventListener('click',()=>{localStorage.removeItem('ple_token');window.location='index.html';});
-
-    init();
-    lucide.createIcons();
+    init(); lucide.createIcons();
   </script>
-  <footer style="margin-top:4rem;padding:2rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);">
-    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
-      <a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · Prosperity Beyond Work
-    </div>
-  </footer>
 </body>
 </html>

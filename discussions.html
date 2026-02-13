@@ -187,7 +187,7 @@
           </h3>
           <p class="proposal-excerpt">${truncate(d.content, 200)}</p>
           <div class="proposal-meta">
-            <span class="proposal-meta-item"><i data-lucide="user"></i>${d.author?.name || 'Anonymous'}</span>
+            <span class="proposal-meta-item"><i data-lucide="user"></i><a href="profile.html?id=${d.author?.id}" style="color:inherit;text-decoration:none;border-bottom:1px dashed #ccc">${d.author?.name || 'Anonymous'}</a></span>
             <span class="proposal-meta-item"><i data-lucide="message-square"></i>${d.replyCount} replies</span>
             <span class="proposal-meta-item"><i data-lucide="clock"></i>${formatDate(d.createdAt)}</span>
           </div>

@@ -87,6 +87,7 @@
     <div class="meta-field meta-title"><label>Title</label><input type="text" id="ed-title" placeholder="Enter title..."></div>
     <div class="meta-field"><label>Type</label><select id="ed-type"><option value="article">Article</option><option value="report">Report</option><option value="policy_brief">Policy Brief</option><option value="case_study">Case Study</option><option value="blog">Blog Post</option></select></div>
     <div class="meta-field"><label>Visibility</label><select id="ed-vis"><option value="public">Public</option><option value="internal" selected>Internal</option><option value="private">Private</option></select></div>
+    <div class="meta-field"><label>Project</label><select id="ed-project"><option value="">None</option></select></div>
     <div class="meta-field"><label>Excerpt</label><input type="text" id="ed-excerpt" placeholder="Brief summary..." style="min-width:200px"></div>
   </div>
 
@@ -159,9 +160,16 @@
       const token=localStorage.getItem('ple_token');
       if(!token){window.location='/login.html?redirect='+encodeURIComponent(window.location.pathname+window.location.search);return;}
       try{const r=await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});
-        if(r.ok){currentUser=await r.json();document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');}
+        if(r.ok){currentUser=await r.json();document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');loadProjectOptions();}
         else{window.location='/login.html?redirect='+encodeURIComponent(window.location.pathname+window.location.search);}
       }catch{window.location='/login.html?redirect='+encodeURIComponent(window.location.pathname+window.location.search);}
+    }
+
+    async function loadProjectOptions(){
+      try{const r=await fetch('/api/projects?limit=50',{headers:authH()});const d=await r.json();
+        const sel=document.getElementById('ed-project');
+        (d.projects||[]).forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.title;sel.appendChild(o);});
+      }catch(e){}
     }
 
     // Load content for editing
@@ -176,6 +184,7 @@
         document.getElementById('ed-excerpt').value=contentData.excerpt||'';
         document.getElementById('ed-body').value=contentData.body||'';
         tags=d.tags||[]; renderTags(); updatePreview(); updateWordCount();
+        if(contentData.projectId) document.getElementById('ed-project').value=contentData.projectId;
         updateStatusUI(contentData.status);
         document.getElementById('version-info').textContent=`v${contentData.version}${d.versionCount>0?` · ${d.versionCount} versions`:''}`;
         document.title=`Edit: ${contentData.title} | PLE`;
@@ -234,8 +243,10 @@
       const body=document.getElementById('ed-body').value;
       if(!title){toast('Title is required','error');return;}
       if(!body){toast('Content body is required','error');return;}
+      const projVal=document.getElementById('ed-project').value;
       const data={title,body,content_type:document.getElementById('ed-type').value,
         visibility:document.getElementById('ed-vis').value,excerpt:document.getElementById('ed-excerpt').value,tags};
+      if(projVal) data.project_id=projVal;
       try{
         if(contentId){data.id=contentId;
           const r=await fetch('/api/content',{method:'PUT',headers:authH(),body:JSON.stringify(data)});

@@ -288,6 +288,10 @@
           <i data-lucide="clock" style="width: 16px; height: 16px;"></i>
           <span id="read-time">— min read</span>
         </div>
+        <div class="content-meta-item" id="project-link" style="display:none">
+          <i data-lucide="folder" style="width: 16px; height: 16px;"></i>
+          <a id="project-link-text" href="#" style="color:inherit;text-decoration:none;border-bottom:1px dashed #ccc"></a>
+        </div>
       </div>
     </div>
   </div>
@@ -320,6 +324,12 @@
           <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
           Edit
         </button>
+      </div>
+
+      <!-- Related Content -->
+      <div id="related-section" style="display:none;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color);">
+        <h3 style="font-family:var(--font-display);font-size:1.15rem;margin-bottom:1rem;">Related Content</h3>
+        <div id="related-list" style="display:grid;gap:0.75rem;"></div>
       </div>
 
       <!-- Comments Section -->
@@ -397,11 +407,12 @@
       document.getElementById('content-title').textContent=item.title;
       const authorName=item.author?.name||'Unknown';
       document.getElementById('author-avatar').textContent=authorName.split(' ').map(n=>n[0]).join('').toUpperCase();
-      document.getElementById('author-name').textContent=authorName;
+      document.getElementById('author-name').innerHTML=item.author?.id ? '<a href="profile.html?id='+item.author.id+'" style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--border-color,#ccc)">'+authorName+'</a>' : authorName;
       const pubDate=item.publishedAt||item.createdAt;
       if(pubDate) document.getElementById('publish-date').textContent=new Date(pubDate).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
       const words=(item.body||'').split(/\s+/).length;
       document.getElementById('read-time').textContent=`${Math.max(1,Math.ceil(words/200))} min read`;
+      if(item.project?.id){const pl=document.getElementById('project-link');pl.style.display='flex';const a=document.getElementById('project-link-text');a.href='project-view.html?id='+item.project.id;a.textContent=item.project.title;}
       document.getElementById('content-html').innerHTML=marked.parse(item.body||'');
       if(item.tags?.length){const tc=document.getElementById('content-tags');
         tc.innerHTML=item.tags.map(t=>`<span class="content-tag"><i data-lucide="tag" style="width:12px;height:12px"></i> ${escapeHtml(t)}</span>`).join('');
@@ -415,6 +426,7 @@
       document.getElementById('loading-state').style.display='none';
       document.getElementById('content-body').style.display='';
       lucide.createIcons();
+      loadRelated(item.id, item.tags||[]);
     }
 
     function renderWorkflow(item, canEdit) {
@@ -492,6 +504,19 @@
     }
 
     function showError(){document.getElementById('loading-state').style.display='none';document.getElementById('error-state').style.display='';}
+
+    async function loadRelated(currentId, tags) {
+      if(!tags?.length) return;
+      try{
+        const r=await fetch('/api/content?limit=20&status=published');const d=await r.json();
+        const related=(d.content||[]).filter(c=>c.id!==currentId&&(c.tags||[]).some(t=>tags.includes(t))).slice(0,3);
+        if(!related.length) return;
+        document.getElementById('related-section').style.display='block';
+        document.getElementById('related-list').innerHTML=related.map(c=>
+          `<a href="content-view.html?id=${c.id}" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:inherit;transition:background 0.1s;"><div><div style="font-weight:500;font-size:0.9rem;">${c.title}</div><div style="font-size:0.8rem;color:var(--text-muted,#888);margin-top:0.15rem;">${(c.tags||[]).join(', ')}</div></div><span style="font-size:0.75rem;color:var(--color-horizon,#1B4D3E);">Read &rarr;</span></a>`
+        ).join('');
+      }catch(e){}
+    }
     function editContent(){if(currentContent)window.location=`/content-editor.html?id=${currentContent.id}`;}
     function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
   </script>

@@ -27,6 +27,8 @@ export default async (req, context) => {
       }
     } else if (req.method === 'GET' && action === 'me') {
       return await handleGetCurrentUser(sql, req);
+    } else if (req.method === 'GET' && action === 'profile') {
+      return await handleGetPublicProfile(sql, url.searchParams.get('id'));
     }
     
     return jsonResponse({ error: 'Invalid action' }, 400);
@@ -173,6 +175,32 @@ async function handleUpdateProfile(sql, req, body) {
   await sql`UPDATE users SET display_name = ${displayName.trim()}, bio = ${(bio||'').trim()}, updated_at = CURRENT_TIMESTAMP WHERE id = ${user.id}`;
   
   return jsonResponse({ success: true, user: { ...user, displayName: displayName.trim(), bio: (bio||'').trim() } });
+}
+
+async function handleGetPublicProfile(sql, userId) {
+  if (!userId) return jsonResponse({ error: 'User ID required' }, 400);
+  
+  const users = await sql`SELECT id, display_name, role, avatar_url, bio, created_at FROM users WHERE id = ${userId} AND is_active = true`;
+  if (users.length === 0) return jsonResponse({ error: 'User not found' }, 404);
+  
+  const u = users[0];
+  const [contentCount, proposalCount, discussionCount] = await Promise.all([
+    sql`SELECT COUNT(*) as c FROM content_items WHERE author_id = ${userId} AND status = 'published'`,
+    sql`SELECT COUNT(*) as c FROM proposals WHERE author_id = ${userId}`,
+    sql`SELECT COUNT(*) as c FROM discussions WHERE author_id = ${userId} AND parent_id IS NULL AND status = 'active'`
+  ]);
+  
+  return jsonResponse({
+    user: {
+      id: u.id, displayName: u.display_name, role: u.role,
+      avatarUrl: u.avatar_url, bio: u.bio, createdAt: u.created_at
+    },
+    stats: {
+      content: parseInt(contentCount[0].c),
+      proposals: parseInt(proposalCount[0].c),
+      discussions: parseInt(discussionCount[0].c)
+    }
+  });
 }
 
 export const config = { path: '/api/auth' };

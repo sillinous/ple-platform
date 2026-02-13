@@ -667,7 +667,7 @@
             <div class="content-meta">
               <div class="content-author">
                 <div class="author-avatar">${initials}</div>
-                <span>${escapeHtml(authorName)}</span>
+                <a href="profile.html?id=${item.author?.id}" style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--border-color,#ccc)">${escapeHtml(authorName)}</a>
               </div>
               <div class="content-status">
                 <span class="status-indicator status-${item.status}"></span>
