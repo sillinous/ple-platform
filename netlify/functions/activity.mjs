@@ -58,7 +58,29 @@ function formatActivityDescription(activity) {
     'discussion_created': `${userName} started a new discussion`,
     'reply_created': `${userName} replied to a discussion`,
     'element_created': `${userName} created a new architecture element`,
-    'element_updated': `${userName} updated an architecture element`
+    'element_updated': `${userName} updated an architecture element`,
+    'content_created': `${userName} drafted new content: "${details.title || 'Untitled'}"`,
+    'content_updated': `${userName} updated content`,
+    'content_submitted': `${userName} submitted content for review`,
+    'content_approved': `${userName} approved content`,
+    'content_published': `${userName} published content`,
+    'content_archived': `${userName} archived "${details.title || 'content'}"`,
+    'task_created': `${userName} created a task`,
+    'task_updated': `${userName} updated a task`,
+    'task_moved': `${userName} moved a task to ${details.status || 'a new status'}`,
+    'task_deleted': `${userName} removed a task`,
+    'milestone_created': `${userName} created a milestone`,
+    'milestone_updated': `${userName} updated a milestone`,
+    'project_created': `${userName} created a new project`,
+    'project_updated': `${userName} updated a project`,
+    'project_archived': `${userName} archived a project`,
+    'commented': `${userName} commented on ${details.entity_type || 'an item'}`,
+    'replied': `${userName} replied to a comment`,
+    'created': `${userName} created a ${details.name ? 'group: "' + details.name + '"' : 'working group'}`,
+    'updated': `${userName} updated a working group`,
+    'joined': `${userName} joined ${details.group_name || 'a working group'}`,
+    'left': `${userName} left a working group`,
+    'added_member': `${userName} added a member to a working group`
   };
   
   return descriptions[activity.action] || `${userName} performed an action`;
