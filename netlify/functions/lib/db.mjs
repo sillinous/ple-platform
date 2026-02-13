@@ -9,7 +9,7 @@ const sql = neon();
 
 // Migration status tracking (per-instance, runs once per cold start)
 let migrationChecked = false;
-const SEED_VERSION = 9; // Increment to force re-seed
+const SEED_VERSION = 10; // Increment to force re-seed
 
 /**
  * Ensure database is initialized before any query
