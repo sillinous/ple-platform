@@ -79,8 +79,23 @@ async function listContent(sql, params, user) {
       AND (c.status = 'published' AND c.visibility = 'public' OR ${user?.id}::uuid IS NOT NULL)
   `;
 
+  // Fetch tags for all content items in batch
+  const contentIds = content.map(c => c.id);
+  let tagMap = {};
+  if (contentIds.length > 0) {
+    const allTags = await sql`
+      SELECT ct.content_id, t.name FROM content_tags ct
+      JOIN tags t ON ct.tag_id = t.id
+      WHERE ct.content_id = ANY(${contentIds})
+    `;
+    for (const row of allTags) {
+      if (!tagMap[row.content_id]) tagMap[row.content_id] = [];
+      tagMap[row.content_id].push(row.name);
+    }
+  }
+
   return jsonResponse({
-    content: content.map(formatContent),
+    content: content.map(c => ({ ...formatContent(c), tags: tagMap[c.id] || [] })),
     total: parseInt(countResult[0]?.total || 0),
     limit, offset
   });
