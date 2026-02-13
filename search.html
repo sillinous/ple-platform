@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .search-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .search-bar { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+    .search-input { flex: 1; padding: 0.75rem 1rem; border: 2px solid var(--border-color, #e5e2dd); border-radius: 10px; font-family: inherit; font-size: 1rem; transition: border-color 0.15s; }
+    .search-input:focus { outline: none; border-color: var(--color-horizon, #1B4D3E); }
+    .search-btn { padding: 0.75rem 1.25rem; background: var(--color-horizon, #1B4D3E); color: white; border: none; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: 0.9rem; font-weight: 500; }
+    .search-btn:hover { opacity: 0.9; }
+    .result-section { margin-bottom: 2rem; }
+    .result-section-title { font-family: var(--font-display, serif); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+    .result-count { font-size: 0.8rem; font-weight: 400; color: var(--text-muted, #888); }
+    .result-item { display: block; padding: 0.75rem 1rem; border: 1px solid var(--color-gray-50, #eee); border-radius: 8px; margin-bottom: 0.5rem; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
+    .result-item:hover { border-color: var(--color-horizon, #1B4D3E); background: rgba(27,77,62,0.02); }
+    .result-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .result-excerpt { font-size: 0.85rem; color: var(--text-muted, #888); line-height: 1.5; }
+    .result-meta { font-size: 0.75rem; color: var(--text-muted, #999); margin-top: 0.35rem; display: flex; gap: 0.75rem; }
+    .result-badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 100px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; background: rgba(27,77,62,0.1); color: var(--color-horizon, #1B4D3E); }
+    .no-results { text-align: center; padding: 3rem; color: var(--text-muted, #888); }
+    .searching { text-align: center; padding: 2rem; color: var(--text-muted, #888); }
+    .search-hint { text-align: center; padding: 3rem; color: var(--text-muted, #888); }
+    .search-hint p { margin-bottom: 0.5rem; }
+    mark { background: rgba(244,162,97,0.3); border-radius: 2px; padding: 0 1px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <nav class="nav-menu">
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+      </nav>
+      <div class="header-actions">
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="search-container">
+      <h1 style="font-family:var(--font-display,serif);font-size:1.75rem;margin-bottom:1.5rem;">Search</h1>
+      
+      <div class="search-bar">
+        <input type="text" class="search-input" id="q" placeholder="Search content, projects, proposals, discussions..." autofocus>
+        <button class="search-btn" onclick="doSearch()">Search</button>
+      </div>
+
+      <div id="results">
+        <div class="search-hint">
+          <i data-lucide="search" style="width:48px;height:48px;opacity:0.15;margin-bottom:1rem;display:block;margin-left:auto;margin-right:auto;"></i>
+          <p>Search across all platform content</p>
+          <p style="font-size:0.85rem;">Try searching for topics like "UBI", "automation", or "governance"</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+    function highlight(text,q){if(!q||!text)return esc(text||'');const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');return esc(text).replace(re,'<mark>$1</mark>');}
+    function trunc(s,n){return(s||'').length>n?(s||'').substring(0,n)+'...':s||'';}
+    function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' '):''}
+
+    document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+    // Check URL for query param
+    const urlQ=new URLSearchParams(window.location.search).get('q');
+    if(urlQ){document.getElementById('q').value=urlQ;doSearch();}
+
+    async function doSearch(){
+      const q=document.getElementById('q').value.trim();
+      if(!q){return;}
+      
+      // Update URL
+      history.replaceState(null,'',`?q=${encodeURIComponent(q)}`);
+      
+      const el=document.getElementById('results');
+      el.innerHTML='<div class="searching">Searching...</div>';
+
+      const token=localStorage.getItem('ple_token');
+      const headers=token?{'Authorization':`Bearer ${token}`}:{};
+
+      try{
+        const [contentR,projectsR,proposalsR,discussionsR]=await Promise.allSettled([
+          fetch(`/api/content?limit=20`,{headers}).then(r=>r.json()),
+          fetch(`/api/projects?limit=20`,{headers}).then(r=>r.json()),
+          fetch(`/api/proposals?limit=20`,{headers}).then(r=>r.json()),
+          fetch(`/api/discussions?limit=20`,{headers}).then(r=>r.json())
+        ]);
+
+        const ql=q.toLowerCase();
+        const content=(contentR.status==='fulfilled'?contentR.value.content||[]:[]).filter(c=>(c.title||'').toLowerCase().includes(ql)||(c.excerpt||'').toLowerCase().includes(ql)||(c.body||'').toLowerCase().includes(ql));
+        const projects=(projectsR.status==='fulfilled'?projectsR.value.projects||[]:[]).filter(p=>(p.title||'').toLowerCase().includes(ql)||(p.description||'').toLowerCase().includes(ql));
+        const proposals=(proposalsR.status==='fulfilled'?proposalsR.value.proposals||[]:[]).filter(p=>(p.title||'').toLowerCase().includes(ql)||(p.content||'').toLowerCase().includes(ql));
+        const discussions=(discussionsR.status==='fulfilled'?discussionsR.value.discussions||[]:[]).filter(d=>(d.title||'').toLowerCase().includes(ql)||(d.content||'').toLowerCase().includes(ql));
+
+        const total=content.length+projects.length+proposals.length+discussions.length;
+        
+        if(total===0){el.innerHTML='<div class="no-results"><p>No results found for "'+esc(q)+'"</p><p style="font-size:0.85rem;margin-top:0.5rem;">Try different keywords or browse the platform sections above.</p></div>';return;}
+
+        let html='';
+        if(content.length){
+          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="file-text" style="width:18px;height:18px"></i>Content <span class="result-count">(${content.length})</span></div>`;
+          html+=content.map(c=>`<a href="content-view.html?id=${c.id}" class="result-item"><div class="result-title">${highlight(c.title,q)}</div><div class="result-excerpt">${highlight(trunc(c.excerpt||c.body,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(c.contentType||'article')}</span><span>${cap(c.status)}</span></div></a>`).join('');
+          html+='</div>';
+        }
+        if(projects.length){
+          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="folder" style="width:18px;height:18px"></i>Projects <span class="result-count">(${projects.length})</span></div>`;
+          html+=projects.map(p=>`<a href="project-view.html?id=${p.id}" class="result-item"><div class="result-title">${highlight(p.title,q)}</div><div class="result-excerpt">${highlight(trunc(p.description,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(p.projectType||'project')}</span><span>${cap(p.status)}</span></div></a>`).join('');
+          html+='</div>';
+        }
+        if(proposals.length){
+          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="vote" style="width:18px;height:18px"></i>Proposals <span class="result-count">(${proposals.length})</span></div>`;
+          html+=proposals.map(p=>`<a href="proposal-view.html?id=${p.id}" class="result-item"><div class="result-title">${highlight(p.title,q)}</div><div class="result-excerpt">${highlight(trunc(p.content,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(p.proposalType)}</span><span>${cap(p.status)}</span></div></a>`).join('');
+          html+='</div>';
+        }
+        if(discussions.length){
+          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="message-square" style="width:18px;height:18px"></i>Discussions <span class="result-count">(${discussions.length})</span></div>`;
+          html+=discussions.map(d=>`<a href="discussion-view.html?id=${d.id}" class="result-item"><div class="result-title">${highlight(d.title||'Untitled',q)}</div><div class="result-excerpt">${highlight(trunc(d.content,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(d.type||'general')}</span><span>${d.replyCount||0} replies</span></div></a>`).join('');
+          html+='</div>';
+        }
+        
+        el.innerHTML=html;
+        lucide.createIcons();
+      }catch(e){
+        console.error(e);
+        el.innerHTML='<div class="no-results"><p>Search failed. Please try again.</p></div>';
+      }
+    }
+
+    // Init auth UI
+    (async()=>{
+      const token=localStorage.getItem('ple_token');
+      if(token){try{const r=await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});if(r.ok){document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');}}catch(e){}}
+      lucide.createIcons();
+    })();
+  </script>
+</body>
+</html>

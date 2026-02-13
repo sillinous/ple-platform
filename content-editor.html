@@ -75,6 +75,7 @@
         <a href="architecture.html" class="nav-link">Architecture</a>
       </nav>
       <div class="header-actions">
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
         <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
         <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
       </div>
@@ -156,11 +157,11 @@
     // Auth
     async function checkAuth() {
       const token=localStorage.getItem('ple_token');
-      if(!token){window.location='/login.html';return;}
+      if(!token){window.location='/login.html?redirect='+encodeURIComponent(window.location.pathname+window.location.search);return;}
       try{const r=await fetch('/api/auth?action=me',{headers:{'Authorization':`Bearer ${token}`}});
         if(r.ok){currentUser=await r.json();document.querySelectorAll('[data-auth="logged-in"]').forEach(el=>el.style.display='');document.querySelectorAll('[data-auth="logged-out"]').forEach(el=>el.style.display='none');}
-        else{window.location='/login.html';}
-      }catch{window.location='/login.html';}
+        else{window.location='/login.html?redirect='+encodeURIComponent(window.location.pathname+window.location.search);}
+      }catch{window.location='/login.html?redirect='+encodeURIComponent(window.location.pathname+window.location.search);}
     }
 
     // Load content for editing

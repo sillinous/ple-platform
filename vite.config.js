@@ -28,6 +28,7 @@ export default defineConfig({
         'discussion-view': 'discussion-view.html',
         profile: 'profile.html',
         '404': '404.html',
+        search: 'search.html',
       }
     }
   }
