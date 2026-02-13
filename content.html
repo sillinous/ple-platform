@@ -461,6 +461,8 @@
         <button class="content-tab" data-filter="in_review">In Review</button>
       </div>
 
+      <div id="tag-filters" style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:1.25rem;"></div>
+
       <div class="content-grid" id="content-grid">
         <div class="loading">Loading content...</div>
       </div>
@@ -588,15 +590,27 @@
       }
     }
 
+    let currentTag = '';
     function renderFilteredContent() {
       const grid = document.getElementById('content-grid');
       const q = (document.getElementById('content-search')?.value || '').toLowerCase().trim();
       let items = allContentItems;
       if (q) items = items.filter(c => (c.title||'').toLowerCase().includes(q) || (c.excerpt||'').toLowerCase().includes(q) || (c.contentType||'').toLowerCase().includes(q));
+      if (currentTag) items = items.filter(c => (c.tags||[]).includes(currentTag));
       if (items.length > 0) { grid.innerHTML = items.map(renderContentCard).join(''); }
-      else { grid.innerHTML = '<div class="empty-state"><h3>No content found</h3><p>' + (q ? 'Try a different search term.' : 'Content will appear here once created.') + '</p></div>'; }
+      else { grid.innerHTML = '<div class="empty-state"><h3>No content found</h3><p>' + (q||currentTag ? 'Try a different search or filter.' : 'Content will appear here once created.') + '</p></div>'; }
+
+      // Build tag filter buttons from available tags
+      const allTags = new Set();
+      allContentItems.forEach(c => (c.tags||[]).forEach(t => allTags.add(t)));
+      const tf = document.getElementById('tag-filters');
+      if (allTags.size > 0) {
+        tf.innerHTML = `<button onclick="setTagFilter('')" style="padding:0.2rem 0.6rem;border-radius:100px;border:1px solid ${!currentTag?'var(--color-horizon,#1B4D3E)':'var(--border-color,#e5e2dd)'};background:${!currentTag?'rgba(27,77,62,0.08)':'transparent'};color:${!currentTag?'var(--color-horizon,#1B4D3E)':'var(--text-muted,#888)'};font-size:0.75rem;cursor:pointer;font-family:inherit">All Tags</button>` +
+          [...allTags].sort().map(t => `<button onclick="setTagFilter('${t}')" style="padding:0.2rem 0.6rem;border-radius:100px;border:1px solid ${currentTag===t?'var(--color-horizon,#1B4D3E)':'var(--border-color,#e5e2dd)'};background:${currentTag===t?'rgba(27,77,62,0.08)':'transparent'};color:${currentTag===t?'var(--color-horizon,#1B4D3E)':'var(--text-muted,#888)'};font-size:0.75rem;cursor:pointer;font-family:inherit">${t}</button>`).join('');
+      } else { tf.innerHTML = ''; }
     }
     window.filterContent = function() { renderFilteredContent(); };
+    window.setTagFilter = function(tag) { currentTag = tag; renderFilteredContent(); };
 
     function renderContentCard(item) {
       const authorName = item.author?.name || 'Unknown';
