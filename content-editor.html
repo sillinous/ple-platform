@@ -55,12 +55,7 @@
     .tag-input { border: none; outline: none; padding: 0.25rem; font-size: 0.85rem; flex: 1; min-width: 100px; background: transparent; }
     .tag-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
-    .word-count { font-size: 0.8rem; color: var(--text-muted); }
-    .toast { position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:#1B4D3E;color:white;padding:0.75rem 1.5rem;border-radius:8px;font-size:0.9rem;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:10000;transition:transform 0.3s;pointer-events:none; }
-    .toast.show { transform:translateX(-50%) translateY(0); }
-    .toast-error { background:#991B1B; }
-
-    @media (max-width: 768px) {
+    .word-count { font-size: 0.8rem; color: var(--text-muted); }    @media (max-width: 768px) {
       .editor-layout { grid-template-columns: 1fr; }
       .preview-panel { display: none; }
       .preview-panel.mobile-show { display: flex; position: fixed; inset: 0; z-index: 100; }
