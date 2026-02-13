@@ -388,7 +388,7 @@ Disagreements are resolved through discussion aimed at consensus. When consensus
     'case-for-ubi': ['ubi', 'economics', 'policy'],
     'understanding-gato': ['gato', 'ai-alignment'],
     'automation-tax-guide': ['automation', 'policy', 'economics'],
-    'worker-transition-programs': ['policy', 'governance']
+    'worker-transition-support': ['policy', 'governance']
   };
   for (const item of contentItems) {
     const slugTags = tagMap[item.slug] || [];
@@ -1173,7 +1173,7 @@ async function fixContentData(sql) {
     'case-for-ubi': ['ubi', 'economics', 'policy'],
     'understanding-gato': ['gato', 'ai-alignment'],
     'automation-tax-guide': ['automation', 'policy', 'economics'],
-    'worker-transition-programs': ['policy', 'governance']
+    'worker-transition-support': ['policy', 'governance']
   };
   let tagged = 0;
   for (const [slug, tagSlugs] of Object.entries(tagMap)) {
