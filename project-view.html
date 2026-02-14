@@ -830,6 +830,7 @@
         <button class="tab-btn active" data-tab="overview">Overview</button>
         <button class="tab-btn" data-tab="tasks">Tasks <span class="tab-count" id="task-count">0</span></button>
         <button class="tab-btn" data-tab="milestones">Milestones <span class="tab-count" id="milestone-count">0</span></button>
+        <button class="tab-btn" data-tab="content">Content <span class="tab-count" id="content-count">0</span></button>
         <button class="tab-btn" data-tab="team">Team <span class="tab-count" id="team-count">0</span></button>
         <button class="tab-btn" data-tab="activity">Activity</button>
         <button class="tab-btn auth-only" data-tab="settings" style="display:none;">Settings</button>
@@ -866,6 +867,15 @@
       <div class="tab-content" id="tab-milestones">
         <div style="margin-bottom:1rem;display:flex;justify-content:flex-end"><button class="btn btn-primary auth-only" onclick="openMsModal()" id="add-milestone-btn" style="display:none">+ Add Milestone</button></div>
         <div class="milestones-list" id="milestones-list"><div class="loading">Loading milestones...</div></div>
+      </div>
+
+      <!-- Content Tab -->
+      <div class="tab-content" id="tab-content">
+        <div style="margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+          <p style="font-size:0.9rem;color:var(--text-muted);">Articles and documents linked to this project</p>
+          <a href="content-editor.html" class="btn btn-primary auth-only" style="display:none;">+ Write Content</a>
+        </div>
+        <div id="project-content-list"><div class="loading">Loading content...</div></div>
       </div>
 
       <!-- Team Tab -->
@@ -996,7 +1006,7 @@
         const d = await r.json(); project = d.project||d;
         project.milestones=d.milestones||[]; project.workingGroups=d.workingGroups||[];
         project.activity=d.activity||[]; project.taskStats=d.taskStats||{};
-        renderProject(); loadTasks();
+        renderProject(); loadTasks(); loadProjectContent();
       } catch(e) { console.error(e); document.getElementById('project-title').textContent='Project not found';
         document.querySelectorAll('.loading').forEach(el=>el.style.display='none'); }
     }
@@ -1056,6 +1066,24 @@
         if(d.view==='kanban'){allTasks=d.columns;renderKanban(d.columns);
           document.getElementById('task-count').textContent=Object.values(d.columns).reduce((s,c)=>s+c.length,0);}
       } catch(e){console.error('Tasks:',e);}
+    }
+
+    async function loadProjectContent() {
+      try {
+        const r=await fetch(`/api/content?limit=20&projectId=${projectId}`,{headers:authH()});
+        const d=await r.json(); const items=d.content||[];
+        document.getElementById('content-count').textContent=items.length;
+        const el=document.getElementById('project-content-list');
+        if(items.length===0){el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-muted);">No content linked to this project yet.</div>';return;}
+        el.innerHTML=items.map(c=>{
+          const status=c.status||'draft';
+          const colors={draft:'#6B7280',in_review:'#D97706',approved:'#059669',published:'#1B4D3E'};
+          return `<a href="content-view.html?id=${c.id}" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:inherit;margin-bottom:0.5rem;transition:background 0.1s;">
+            <div><div style="font-weight:500;font-size:0.9rem;">${c.title}</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.15rem;">${c.author?.name||'Unknown'} · ${(c.contentType||'article').replace('_',' ')}</div></div>
+            <span style="padding:0.15rem 0.5rem;border-radius:100px;font-size:0.65rem;font-weight:600;text-transform:uppercase;background:${colors[status]||'#6B7280'}20;color:${colors[status]||'#6B7280'}">${status.replace('_',' ')}</span>
+          </a>`;
+        }).join('');
+      } catch(e){document.getElementById('project-content-list').innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-muted);">Unable to load content.</div>';}
     }
     function renderKanban(cols) {
       const b=document.getElementById('kanban-board');

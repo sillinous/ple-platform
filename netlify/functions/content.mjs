@@ -46,6 +46,7 @@ async function listContent(sql, params, user) {
   const type = params.get('type') || null;
   const author = params.get('author') || null;
   const visibility = params.get('visibility') || null;
+  const projectId = params.get('projectId') || null;
   const limit = Math.min(parseInt(params.get('limit') || '50'), 100);
   const offset = parseInt(params.get('offset') || '0');
 
@@ -64,6 +65,7 @@ async function listContent(sql, params, user) {
       AND (${type}::text IS NULL OR c.content_type = ${type})
       AND (${authorFilter}::uuid IS NULL OR c.author_id = ${authorFilter}::uuid)
       AND (${visibility}::text IS NULL OR c.visibility = ${visibility})
+      AND (${projectId}::uuid IS NULL OR c.project_id = ${projectId}::uuid)
       AND (
         c.status = 'published' AND c.visibility = 'public'
         OR ${user?.id}::uuid IS NOT NULL

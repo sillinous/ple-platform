@@ -113,6 +113,23 @@
         <p>Here's your workspace</p>
       </div>
 
+      <!-- Onboarding Banner (shown to new users) -->
+      <div id="welcome-banner" style="display:none;background:linear-gradient(135deg,rgba(27,77,62,0.06),rgba(244,162,97,0.06));border:1px solid rgba(27,77,62,0.15);border-radius:12px;padding:1.5rem 2rem;margin-bottom:2rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <h3 style="font-family:'Fraunces',serif;font-size:1.15rem;margin:0 0 0.5rem;">Welcome to Post-Labor Economics!</h3>
+            <p style="font-size:0.9rem;color:var(--text-secondary,#555);margin:0 0 1rem;max-width:550px;">You're part of a community building frameworks for prosperity beyond work. Here are some ways to get started:</p>
+          </div>
+          <button onclick="dismissWelcome()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.25rem;line-height:1;">&times;</button>
+        </div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+          <a href="content.html" style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:var(--text-primary);font-size:0.85rem;font-weight:500;"><i data-lucide="book-open" style="width:16px;height:16px;color:var(--color-horizon,#1B4D3E)"></i> Read community content</a>
+          <a href="projects.html" style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:var(--text-primary);font-size:0.85rem;font-weight:500;"><i data-lucide="folder" style="width:16px;height:16px;color:var(--color-horizon,#1B4D3E)"></i> Browse active projects</a>
+          <a href="proposals.html" style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:var(--text-primary);font-size:0.85rem;font-weight:500;"><i data-lucide="vote" style="width:16px;height:16px;color:var(--color-horizon,#1B4D3E)"></i> Vote on proposals</a>
+          <a href="about.html" style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:var(--text-primary);font-size:0.85rem;font-weight:500;"><i data-lucide="info" style="width:16px;height:16px;color:var(--color-horizon,#1B4D3E)"></i> Learn about our mission</a>
+        </div>
+      </div>
+
       <div class="create-bar">
         <a href="content-editor.html" class="create-btn"><i data-lucide="pen-line"></i> Write Content</a>
         <a href="#" class="create-btn" id="new-project-btn"><i data-lucide="folder-plus"></i> New Project</a>
@@ -207,7 +224,24 @@
 
     async function loadAll() {
       await Promise.allSettled([loadContent(), loadProjects(), loadTasks(), loadProposals(), loadStats(), loadActivity()]);
+      showWelcomeIfNew();
     }
+
+    function showWelcomeIfNew() {
+      if (localStorage.getItem('ple_welcome_dismissed')) return;
+      // Show welcome if user has no content, no proposals, and account is <7 days old
+      const age = Date.now() - new Date(currentUser.createdAt).getTime();
+      const contentCount = parseInt(document.getElementById('cnt-content')?.textContent) || 0;
+      const proposalCount = parseInt(document.getElementById('cnt-proposals')?.textContent) || 0;
+      if (age < 7*24*60*60*1000 || (contentCount === 0 && proposalCount === 0)) {
+        document.getElementById('welcome-banner').style.display = 'block';
+        lucide.createIcons();
+      }
+    }
+    window.dismissWelcome = function() {
+      document.getElementById('welcome-banner').style.display = 'none';
+      localStorage.setItem('ple_welcome_dismissed', '1');
+    };
 
     // My Content
     async function loadContent() {

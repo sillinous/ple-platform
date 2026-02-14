@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="src/styles/brand.css">
   <link rel="stylesheet" href="src/styles/app.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     .disc-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
     .back-link { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 1.5rem; }
@@ -21,7 +22,12 @@
     .disc-meta-item { display: flex; align-items: center; gap: 0.35rem; }
     .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--color-horizon); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
     .avatar-sm { width: 28px; height: 28px; font-size: 0.65rem; }
-    .disc-body { font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 2.5rem; white-space: pre-wrap; }
+    .disc-body { font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 2.5rem; }
+    .disc-body a { color: var(--color-horizon,#1B4D3E); }
+    .disc-body code { background: rgba(0,0,0,0.04); padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.9em; }
+    .disc-body pre { background: rgba(0,0,0,0.04); padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; }
+    .disc-body blockquote { border-left: 3px solid var(--color-horizon,#1B4D3E); padding-left: 1rem; margin: 1rem 0; color: var(--text-muted); }
+    .disc-body ul, .disc-body ol { margin: 0.75rem 0; padding-left: 1.5rem; }
     .disc-body p { margin-bottom: 1rem; }
     .replies-section { border-top: 1px solid var(--border-color); padding-top: 2rem; }
     .replies-header { font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 1.5rem; }
@@ -30,7 +36,9 @@
     .reply-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
     .reply-author { font-weight: 600; font-size: 0.9rem; }
     .reply-time { font-size: 0.8rem; color: var(--text-muted); }
-    .reply-body { font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; padding-left: 2.5rem; }
+    .reply-body { font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); padding-left: 2.5rem; }
+    .reply-body p { margin-bottom: 0.5rem; }
+    .reply-body a { color: var(--color-horizon,#1B4D3E); }
     .reply-form { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
     .reply-form textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 0.95rem; resize: vertical; min-height: 100px; background: var(--bg-secondary); }
     .reply-form textarea:focus { outline: none; border-color: var(--color-horizon); }
@@ -135,13 +143,13 @@
       document.getElementById('disc-type-badge').textContent=disc.type||'general';
       document.getElementById('disc-date').textContent=fmtDate(disc.createdAt);
       document.getElementById('disc-reply-count').textContent=`${replies.length} repl${replies.length===1?'y':'ies'}`;
-      document.getElementById('disc-body').textContent=disc.content;
+      document.getElementById('disc-body').innerHTML=typeof marked!=='undefined'?marked.parse(disc.content||''):esc(disc.content);
       document.getElementById('replies-header').textContent=`${replies.length} Repl${replies.length===1?'y':'ies'}`;
       const list=document.getElementById('replies-list');
       if(replies.length===0){list.innerHTML='<p style="color:var(--text-muted);font-size:0.9rem;padding:1rem 0">No replies yet. Be the first to respond.</p>';}
       else{list.innerHTML=replies.map(r=>{
         const rn=r.author?.name||'Anonymous';
-        return`<div class="reply-card"><div class="reply-head"><div class="avatar avatar-sm">${initials(rn)}</div><span class="reply-author">${esc(rn)}</span><span class="reply-time">${fmtRel(r.createdAt)}</span></div><div class="reply-body">${esc(r.content)}</div></div>`;
+        return`<div class="reply-card"><div class="reply-head"><div class="avatar avatar-sm">${initials(rn)}</div><span class="reply-author"><a href="profile.html?id=${r.author?.id}" style="color:inherit;text-decoration:none">${esc(rn)}</a></span><span class="reply-time">${fmtRel(r.createdAt)}</span></div><div class="reply-body">${typeof marked!=='undefined'?marked.parse(r.content||''):esc(r.content)}</div></div>`;
       }).join('');}
       document.getElementById('loading').style.display='none';
       document.getElementById('discussion').style.display='block';
