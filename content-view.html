@@ -11,8 +11,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/styles/brand.css">
   <link rel="stylesheet" href="src/styles/app.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
     .content-view-header {
       background: linear-gradient(135deg, var(--color-horizon) 0%, var(--color-horizon-dark, #153d31) 100%);
@@ -238,9 +240,20 @@
     .back-link:hover {
       color: var(--color-horizon);
     }
+
+    @media print {
+      .header, .back-link, #reading-progress, #related-section, .comments-section,
+      #workflow-banner, footer, button, .content-meta-item:last-child { display: none !important; }
+      .content-view-header { background: none !important; color: #000 !important; padding: 1rem 0; }
+      .content-view-header h1 { color: #000 !important; font-size: 1.75rem; }
+      body { font-size: 12pt; }
+      .content-body-wrapper { padding: 0; max-width: 100%; }
+      a { color: #1B4D3E; }
+    }
   </style>
 </head>
 <body>
+  <div id="reading-progress" style="position:fixed;top:0;left:0;height:3px;background:var(--color-horizon,#1B4D3E);width:0;z-index:9999;transition:width 0.1s;"></div>
   <!-- Header -->
   <header class="header">
     <div class="header-container">
@@ -432,6 +445,8 @@
       document.getElementById('content-body').style.display='';
       lucide.createIcons();
       loadRelated(item.id, item.tags||[]);
+      generateTOC();
+      if(typeof hljs!=='undefined') document.querySelectorAll('#content-html pre code').forEach(el=>hljs.highlightElement(el));
     }
 
     function renderWorkflow(item, canEdit) {
@@ -534,6 +549,36 @@
     }
     function editContent(){if(currentContent)window.location=`/content-editor.html?id=${currentContent.id}`;}
     function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+    // Reading progress bar
+    window.addEventListener('scroll',()=>{
+      const h=document.documentElement.scrollHeight-window.innerHeight;
+      const p=h>0?Math.min(100,(window.scrollY/h)*100):0;
+      document.getElementById('reading-progress').style.width=p+'%';
+    });
+
+    // Auto-generate table of contents for long articles
+    function generateTOC(){
+      const html=document.getElementById('content-html');
+      if(!html)return;
+      const headings=html.querySelectorAll('h2,h3');
+      if(headings.length<3)return;
+      const toc=document.createElement('nav');
+      toc.style.cssText='background:var(--bg-secondary,#f5f3f0);border:1px solid var(--border-color,#e5e2dd);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:2rem;';
+      toc.innerHTML='<div style="font-weight:600;font-size:0.85rem;margin-bottom:0.75rem;color:var(--text-muted,#888);text-transform:uppercase;letter-spacing:0.5px;">Contents</div>';
+      const list=document.createElement('div');
+      list.style.cssText='display:flex;flex-direction:column;gap:0.35rem;';
+      headings.forEach((h,i)=>{
+        const id='section-'+i;h.id=id;
+        const a=document.createElement('a');
+        a.href='#'+id;a.textContent=h.textContent;
+        a.style.cssText='color:var(--color-horizon,#1B4D3E);text-decoration:none;font-size:0.85rem;padding:'+(h.tagName==='H3'?'0 0 0 1rem':'0')+';';
+        a.addEventListener('click',e=>{e.preventDefault();h.scrollIntoView({behavior:'smooth',block:'start'});});
+        list.appendChild(a);
+      });
+      toc.appendChild(list);
+      html.insertBefore(toc,html.firstChild);
+    }
   </script>
 </body>
 </html>

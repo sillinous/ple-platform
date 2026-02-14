@@ -157,6 +157,16 @@
     @media(max-width:900px) { [style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr !important; } }
   </style>
 
+  <!-- Community Preview -->
+  <section class="section" style="padding-bottom:0;">
+    <div class="container" style="text-align:center;">
+      <h2 class="section-title">Built By Community</h2>
+      <p class="section-description">Contributors shaping the post-labor future</p>
+      <div id="member-preview" style="display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;margin:1.5rem 0 1rem;"></div>
+      <a href="community.html" style="font-size:0.9rem;color:var(--color-horizon,#1B4D3E);">Meet the full community &rarr;</a>
+    </div>
+  </section>
+
   <!-- CTA Section -->
   <section class="section section-primary">
     <div class="container">
@@ -200,19 +210,21 @@
           <a href="proposals.html">Proposals</a>
           <a href="discussions.html">Discussions</a>
           <a href="architecture.html">Architecture</a>
+          <a href="search.html">Search</a>
         </div>
         
         <div class="footer-links">
           <h4>Resources</h4>
           <a href="about.html">About</a>
+          <a href="community.html">Community</a>
           <a href="gato.html">GATO Framework</a>
           <a href="prime.html">THE PRIME</a>
         </div>
         
         <div class="footer-links">
-          <h4>Community</h4>
+          <h4>Connect</h4>
           <a href="https://discord.gg/postlabor" target="_blank">Discord</a>
-          <a href="https://github.com/daveshap" target="_blank">GitHub</a>
+          <a href="https://github.com/sillinous/ple-platform" target="_blank">GitHub</a>
         </div>
       </div>
       
@@ -337,12 +349,27 @@
       return {'user_registered':'user-plus','proposal_created':'file-plus','vote_cast':'vote','discussion_created':'message-square','reply_created':'reply'}[a]||'activity';
     }
     
+    async function loadMembers() {
+      try {
+        const r = await fetch('/api/auth?action=members');
+        const data = await r.json();
+        const el = document.getElementById('member-preview');
+        if (!el) return;
+        const members = (data.members || []).slice(0, 8);
+        el.innerHTML = members.map(m => {
+          const ini = (m.displayName||'?').split(' ').map(w=>w[0]).join('').toUpperCase();
+          return `<a href="profile.html?id=${m.id}" title="${m.displayName}" style="width:48px;height:48px;border-radius:50%;background:var(--color-horizon,#1B4D3E);color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;text-decoration:none;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">${ini}</a>`;
+        }).join('');
+      } catch(e) {}
+    }
+    
     await initPage();
     loadStats();
     loadContent();
     loadProposals();
     loadDiscussions();
     loadActivity();
+    loadMembers();
     lucide.createIcons();
   </script>
 </body>

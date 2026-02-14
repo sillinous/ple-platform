@@ -81,6 +81,9 @@
             <div class="disc-meta-item"><div class="avatar" id="disc-avatar"></div><span id="disc-author"></span></div>
             <div class="disc-meta-item"><i data-lucide="clock" style="width:14px;height:14px"></i><span id="disc-date"></span></div>
             <div class="disc-meta-item"><i data-lucide="message-square" style="width:14px;height:14px"></i><span id="disc-reply-count"></span></div>
+            <div class="disc-meta-item" style="margin-left:auto;">
+              <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>{const t=document.createElement('div');t.className='toast';t.textContent='Link copied';document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000)})" style="background:none;border:1px solid var(--border-color,#e5e2dd);padding:0.25rem 0.5rem;border-radius:6px;cursor:pointer;font-size:0.75rem;color:var(--text-muted);font-family:inherit;display:flex;align-items:center;gap:0.25rem;"><i data-lucide="link" style="width:12px;height:12px"></i> Share</button>
+            </div>
           </div>
         </div>
         <div class="disc-body" id="disc-body"></div>
