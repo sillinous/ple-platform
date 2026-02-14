@@ -94,8 +94,8 @@
       document.getElementById('total-contributions').textContent=totalContribs;
 
       const grid=document.getElementById('member-grid');
-      if(!members.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">No members yet. <a href="register.html">Be the first!</a></div>';return;}
-
+      if(!members.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">No members yet.</div>';
+      } else {
       grid.innerHTML=members.map(m=>{
         const total=(m.stats?.content||0)+(m.stats?.proposals||0)+(m.stats?.discussions||0);
         return `<a href="profile.html?id=${m.id}" class="member-card">
@@ -116,6 +116,7 @@
           </div>
         </a>`;
       }).join('');
+      }
       lucide.createIcons();
     } catch(e) { document.getElementById('member-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Unable to load community.</div>'; }
   </script>
