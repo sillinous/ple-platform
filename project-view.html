@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="src/styles/brand.css">
   <link rel="stylesheet" href="src/styles/app.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     .project-hero {
       background: linear-gradient(135deg, var(--color-horizon) 0%, var(--color-horizon-dark) 100%);
@@ -276,23 +277,20 @@
       font-weight: 600;
     }
 
-    .add-task-inline {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px dashed var(--color-gray-300);
-      background: transparent;
-      border-radius: 8px;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-      margin-top: 0.75rem;
+    .quick-add-row { margin-top:0.5rem; }
+    .quick-add-input {
+      width: 100%; padding: 0.5rem 0.6rem; border: 1px dashed var(--color-gray-300,#ddd);
+      background: transparent; border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem;
+      font-family: inherit; transition: all 0.15s;
     }
-
-    .add-task-inline:hover {
-      border-color: var(--color-horizon);
-      color: var(--color-horizon);
+    .quick-add-input:focus { outline: none; border-color: var(--color-horizon); border-style:solid; background: white; }
+    .quick-add-input::placeholder { color: var(--text-muted,#aaa); }
+    .column-add-btn {
+      width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border-color,#ddd);
+      background: transparent; cursor: pointer; font-size: 0.85rem; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
     }
+    .column-add-btn:hover { border-color: var(--color-horizon); color: var(--color-horizon); background: rgba(27,77,62,0.05); }
 
     /* Drag and Drop */
     .task-list.drag-over {
@@ -842,7 +840,8 @@
           <div class="stat-card"><div class="stat-icon" style="background:rgba(27,77,62,0.1);color:var(--color-horizon)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-total-tasks">—</div><div class="stat-label">Total Tasks</div></div></div>
           <div class="stat-card"><div class="stat-icon" style="background:rgba(42,157,143,0.1);color:#2a9d8f"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-done-tasks">—</div><div class="stat-label">Completed</div></div></div>
           <div class="stat-card"><div class="stat-icon" style="background:rgba(244,162,97,0.1);color:var(--color-dawn)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-in-progress">—</div><div class="stat-label">In Progress</div></div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:rgba(108,99,255,0.1);color:#6c63ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-teams">—</div><div class="stat-label">Working Groups</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(220,38,38,0.08);color:#DC2626"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-overdue">—</div><div class="stat-label">Overdue</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(108,99,255,0.1);color:#6c63ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="stat-info"><div class="stat-value" id="stat-hours">—</div><div class="stat-label">Est. Hours</div></div></div>
         </div>
         <div class="overview-grid">
           <div>
@@ -918,31 +917,42 @@
     <div class="modal-header"><h2 id="task-modal-title">Add Task</h2><button class="modal-close" onclick="closeModal('task-modal')">✕</button></div>
     <form id="task-form" onsubmit="submitTask(event)"><div class="task-modal-body">
       <div class="form-group"><label>Title *</label><input type="text" id="task-title" name="title" required placeholder="What needs to be done?"></div>
-      <div class="form-group"><label>Description</label><textarea id="task-desc" name="description" rows="3" placeholder="Add details..."></textarea></div>
+      <div class="form-group"><label>Description</label><textarea id="task-desc" name="description" rows="3" placeholder="Add details, context, acceptance criteria..."></textarea>
+        <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.25rem;">Supports markdown</div></div>
       <div class="form-row">
         <div class="form-group"><label>Status</label><select id="task-status" name="status"><option value="backlog">Backlog</option><option value="todo" selected>To Do</option><option value="in_progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div>
         <div class="form-group"><label>Priority</label><select id="task-priority" name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
       </div>
       <div class="form-row">
+        <div class="form-group"><label>Assignee</label><select id="task-assignee" name="assigned_to"><option value="">Unassigned</option></select></div>
         <div class="form-group"><label>Milestone</label><select id="task-ms" name="milestone_id"><option value="">None</option></select></div>
-        <div class="form-group"><label>Due Date</label><input type="date" id="task-due" name="due_date"></div>
       </div>
-    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('task-modal')">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div></form>
+      <div class="form-row">
+        <div class="form-group"><label>Due Date</label><input type="date" id="task-due" name="due_date"></div>
+        <div class="form-group"><label>Estimated Hours</label><input type="number" id="task-hours" name="estimated_hours" min="0" step="0.5" placeholder="e.g. 4"></div>
+      </div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('task-modal')">Cancel</button><button type="submit" class="btn btn-primary" id="task-submit-btn">Save</button></div></form>
   </div></div>
 
   <!-- Task Detail Modal -->
-  <div class="modal-overlay" id="task-detail-modal"><div class="modal-content" style="max-width:560px">
+  <div class="modal-overlay" id="task-detail-modal"><div class="modal-content" style="max-width:600px">
     <div class="modal-header"><h2 class="td-title" style="font-size:1.25rem">Task</h2><button class="modal-close" onclick="closeModal('task-detail-modal')">✕</button></div>
     <div class="task-modal-body">
       <div class="td-status-bar" style="display:flex;gap:0.5rem;margin-bottom:1.25rem;flex-wrap:wrap"></div>
       <div class="td-desc" style="color:var(--text-secondary);margin-bottom:1.5rem;line-height:1.6"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem 1.5rem;margin-bottom:1.5rem">
         <div><span class="detail-label">Status</span><span class="td-status"></span></div>
         <div><span class="detail-label">Priority</span><span class="td-priority"></span></div>
-        <div><span class="detail-label">Milestone</span><span class="td-milestone"></span></div>
         <div><span class="detail-label">Assignee</span><span class="td-assignee"></span></div>
+        <div><span class="detail-label">Milestone</span><span class="td-milestone"></span></div>
         <div><span class="detail-label">Due Date</span><span class="td-due"></span></div>
+        <div><span class="detail-label">Estimated</span><span class="td-est-hours"></span></div>
         <div><span class="detail-label">Created</span><span class="td-created"></span></div>
+        <div><span class="detail-label">Subtasks</span><span class="td-subtasks"></span></div>
+      </div>
+      <div class="td-subtask-section" style="display:none;margin-bottom:1rem">
+        <div style="font-size:0.8rem;font-weight:600;margin-bottom:0.5rem;color:var(--text-muted)">Subtask Progress</div>
+        <div style="background:var(--bg-secondary,#f5f3f0);border-radius:8px;height:6px;overflow:hidden"><div class="td-subtask-bar" style="height:100%;background:var(--color-horizon,#1B4D3E);border-radius:8px;transition:width 0.3s"></div></div>
       </div>
     </div>
     <div class="modal-footer td-actions"></div>
@@ -952,10 +962,11 @@
   <div class="modal-overlay" id="ms-modal"><div class="modal-content">
     <div class="modal-header"><h2 id="ms-modal-title">Add Milestone</h2><button class="modal-close" onclick="closeModal('ms-modal')">✕</button></div>
     <form id="ms-form" onsubmit="submitMs(event)"><div class="task-modal-body">
-      <div class="form-group"><label>Title *</label><input type="text" id="ms-title" name="title" required placeholder="e.g., Beta Launch"></div>
-      <div class="form-group"><label>Description</label><textarea id="ms-desc" name="description" rows="3" placeholder="What does this milestone represent?"></textarea></div>
+      <div class="form-group"><label>Title *</label><input type="text" id="ms-title" name="title" required placeholder="e.g., Beta Launch, Phase 1 Complete"></div>
+      <div class="form-group"><label>Description</label><textarea id="ms-desc" name="description" rows="3" placeholder="What does achieving this milestone represent? What are the success criteria?"></textarea></div>
       <div class="form-row">
-        <div class="form-group"><label>Target Date</label><input type="date" id="ms-target" name="target_date"></div>
+        <div class="form-group"><label>Target Date</label><input type="date" id="ms-target" name="target_date">
+          <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.2rem" id="ms-date-hint"></div></div>
         <div class="form-group"><label>Status</label><select id="ms-status" name="status"><option value="upcoming" selected>Upcoming</option><option value="in_progress">In Progress</option><option value="completed">Completed</option></select></div>
       </div>
     </div><div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('ms-modal')">Cancel</button><button type="submit" class="btn btn-primary" id="ms-submit">Create Milestone</button></div></form>
@@ -1038,7 +1049,15 @@
       document.getElementById('stat-total-tasks').textContent=tot;
       document.getElementById('stat-done-tasks').textContent=ts.done||0;
       document.getElementById('stat-in-progress').textContent=ts.in_progress||0;
-      document.getElementById('stat-teams').textContent=tc;
+      // Compute overdue and hours from loaded tasks
+      let overdue=0, totalHours=0;
+      Object.values(allTasks).flat().forEach(t=>{
+        if(t.dueDate&&new Date(t.dueDate)<new Date()&&t.status!=='done')overdue++;
+        if(t.estimatedHours)totalHours+=parseFloat(t.estimatedHours);
+      });
+      document.getElementById('stat-overdue').textContent=overdue;
+      document.getElementById('stat-overdue').parentElement.parentElement.style.display=overdue>0||tot>0?'':'none';
+      document.getElementById('stat-hours').textContent=totalHours>0?totalHours+'h':'—';
       renderBreakdown(ts,tot); renderActivity(project.activity);
       populateMsSelect(project.milestones); populateSettings();
     }
@@ -1088,10 +1107,10 @@
     function renderKanban(cols) {
       const b=document.getElementById('kanban-board');
       const ds=[{k:'backlog',l:'Backlog'},{k:'todo',l:'To Do'},{k:'in_progress',l:'In Progress'},{k:'review',l:'Review'},{k:'done',l:'Done'}];
-      b.innerHTML=ds.map(c=>`<div class="kanban-column" data-status="${c.k}"><div class="column-header"><span class="column-title">${c.l}</span><span class="column-count">${cols[c.k]?.length||0}</span></div>
+      b.innerHTML=ds.map(c=>`<div class="kanban-column" data-status="${c.k}"><div class="column-header"><span class="column-title">${c.l}</span><span class="column-count">${cols[c.k]?.length||0}</span>${currentUser?`<button class="column-add-btn" onclick="openTaskModal('${c.k}')" title="Add task with details">+</button>`:''}</div>
         <div class="task-list" data-status="${c.k}" ondragover="event.preventDefault();event.dataTransfer.dropEffect='move'" ondragenter="event.preventDefault();event.currentTarget.classList.add('drag-over')" ondragleave="if(!event.currentTarget.contains(event.relatedTarget))event.currentTarget.classList.remove('drag-over')" ondrop="onDrop(event)">
         ${(cols[c.k]||[]).map(taskCard).join('')}</div>
-        ${currentUser?`<button class="add-task-inline" onclick="openTaskModal('${c.k}')">+ Add task</button>`:''}</div>`).join('');
+        ${currentUser?`<div class="quick-add-row"><input class="quick-add-input" placeholder="+ Quick add..." data-status="${c.k}" onkeydown="if(event.key==='Enter'&&this.value.trim()){quickAddTask(this.value.trim(),'${c.k}');this.value='';}"></div>`:''}</div>`).join('');
       document.querySelectorAll('.task-card[draggable="true"]').forEach(c=>{
         c.addEventListener('dragstart',e=>{draggedTask=c;c.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',c.dataset.taskId)});
         c.addEventListener('dragend',()=>{if(draggedTask)draggedTask.classList.remove('dragging');draggedTask=null;document.querySelectorAll('.task-list').forEach(l=>l.classList.remove('drag-over'))});
@@ -1100,9 +1119,11 @@
     function taskCard(t) {
       const ini=t.assignee?.name?t.assignee.name.split(' ').map(n=>n[0]).join(''):'';
       const due=t.dueDate?fmtDate(t.dueDate):'', over=t.dueDate&&new Date(t.dueDate)<new Date()&&t.status!=='done';
+      const sub=t.subtaskCount>0?`<span style="font-size:0.65rem;color:var(--text-muted);display:flex;align-items:center;gap:0.2rem"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V8l-5-5z"/><polyline points="14,3 14,8 19,8"/></svg>${t.completedSubtasks}/${t.subtaskCount}</span>`:'';
+      const hrs=t.estimatedHours?`<span style="font-size:0.6rem;background:rgba(27,77,62,0.08);color:var(--color-horizon);padding:0.1rem 0.3rem;border-radius:4px;">${t.estimatedHours}h</span>`:'';
       return`<div class="task-card" draggable="${!!currentUser}" data-task-id="${t.id}" onclick="openTD('${t.id}')">
         <div class="task-title">${esc(t.title)}</div>${t.milestone?.title?`<div class="task-milestone-tag">${esc(t.milestone.title)}</div>`:''}
-        <div class="task-meta"><span class="task-priority priority-${t.priority}">${t.priority}</span>
+        <div class="task-meta"><span class="task-priority priority-${t.priority}">${t.priority}</span>${hrs}${sub}
         <div style="display:flex;align-items:center;gap:0.4rem">${due?`<span class="task-due ${over?'overdue':''}">${due}</span>`:''}${ini?`<div class="task-assignee" title="${esc(t.assignee.name)}">${ini}</div>`:''}</div></div></div>`;
     }
     async function onDrop(e) {
@@ -1118,19 +1139,37 @@
         if(!r.ok)loadTasks();else loadProject();
       }catch{loadTasks();}
     }
+    async function quickAddTask(title,status) {
+      try{const r=await fetch('/api/tasks',{method:'POST',headers:authH(),body:JSON.stringify({project_id:projectId,title,status})});
+        if(r.ok){toast('Task added');loadTasks();loadProject();}
+        else{const e=await r.json();toast(e.error||'Failed to add task','error');}
+      }catch(e){toast('Failed to add task','error');}
+    }
 
     // ═══ TASK DETAIL ═══
     function findTask(id){for(const col of Object.values(allTasks)){const t=col.find(t=>t.id===id);if(t)return t;}return null;}
     function openTD(id) {
       const t=findTask(id);if(!t)return;const m=document.getElementById('task-detail-modal');
       m.querySelector('.td-title').textContent=t.title;
-      m.querySelector('.td-desc').textContent=t.description||'No description.';
+      m.querySelector('.td-desc').innerHTML=t.description?(typeof marked!=='undefined'?marked.parse(t.description):esc(t.description)):'<em style="color:var(--text-muted)">No description.</em>';
       m.querySelector('.td-status').textContent=cap(t.status); m.querySelector('.td-status').className=`td-status status-badge status-${t.status}`;
       m.querySelector('.td-priority').textContent=cap(t.priority); m.querySelector('.td-priority').className=`td-priority task-priority priority-${t.priority}`;
       m.querySelector('.td-milestone').textContent=t.milestone?.title||'None';
-      m.querySelector('.td-assignee').textContent=t.assignee?.name||'Unassigned';
-      m.querySelector('.td-due').textContent=t.dueDate?fmtDate(t.dueDate):'No due date';
+      m.querySelector('.td-assignee').innerHTML=t.assignee?`<span style="display:inline-flex;align-items:center;gap:0.35rem"><span style="width:20px;height:20px;border-radius:50%;background:var(--color-horizon);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:0.55rem;font-weight:600">${t.assignee.name.split(' ').map(n=>n[0]).join('')}</span>${esc(t.assignee.name)}</span>`:'<em style="color:var(--text-muted)">Unassigned</em>';
+      m.querySelector('.td-due').innerHTML=t.dueDate?`${fmtDate(t.dueDate)}${t.dueDate&&new Date(t.dueDate)<new Date()&&t.status!=='done'?' <span style="color:#DC2626;font-size:0.75rem;font-weight:600">OVERDUE</span>':''}`:'<em style="color:var(--text-muted)">No due date</em>';
+      m.querySelector('.td-est-hours').textContent=t.estimatedHours?`${t.estimatedHours} hours`:'—';
       m.querySelector('.td-created').textContent=fmtRel(t.createdAt);
+      // Subtasks
+      const subSec=m.querySelector('.td-subtask-section');
+      if(t.subtaskCount>0){
+        m.querySelector('.td-subtasks').textContent=`${t.completedSubtasks} / ${t.subtaskCount} done`;
+        const pct=Math.round(t.completedSubtasks/t.subtaskCount*100);
+        m.querySelector('.td-subtask-bar').style.width=pct+'%';
+        subSec.style.display='block';
+      }else{
+        m.querySelector('.td-subtasks').textContent='None';
+        subSec.style.display='none';
+      }
       const bar=m.querySelector('.td-status-bar');
       bar.innerHTML=currentUser?['backlog','todo','in_progress','review','done'].map(s=>`<button class="status-quick-btn ${s===t.status?'active':''}" onclick="quickStat('${t.id}','${s}')">${cap(s)}</button>`).join(''):'';
       m.querySelector('.td-actions').innerHTML=currentUser?`<button class="btn btn-secondary" onclick="editTask('${t.id}')">Edit</button><button class="btn btn-danger" onclick="delTask('${t.id}')">Delete</button>`:'';
@@ -1143,37 +1182,60 @@
       if(r.ok){closeModal('task-detail-modal');toast('Task deleted');loadTasks();loadProject();}else{const e=await r.json();alert(e.error||'Failed');}}
 
     // ═══ TASK MODAL ═══
+    let projectMembers = [];
+    async function loadMembers() {
+      try{const r=await fetch('/api/auth?action=members');const d=await r.json();projectMembers=d.members||[];
+        populateAssigneeSelect();}catch(e){}
+    }
+    function populateAssigneeSelect(){
+      const s=document.getElementById('task-assignee');
+      if(!s)return;s.innerHTML='<option value="">Unassigned</option>'+projectMembers.map(m=>`<option value="${m.id}">${esc(m.displayName)}</option>`).join('');
+    }
     function openTaskModal(status='todo',edit=null) {
       const f=document.getElementById('task-form');f.reset();
       document.getElementById('task-modal-title').textContent=edit?'Edit Task':'Add Task';
+      document.getElementById('task-submit-btn').textContent=edit?'Save Changes':'Create Task';
       if(edit){document.getElementById('task-title').value=edit.title;document.getElementById('task-desc').value=edit.description||'';
         document.getElementById('task-status').value=edit.status;document.getElementById('task-priority').value=edit.priority;
         document.getElementById('task-ms').value=edit.milestone?.id||'';
-        document.getElementById('task-due').value=edit.dueDate?edit.dueDate.split('T')[0]:'';f.dataset.editId=edit.id;
+        document.getElementById('task-assignee').value=edit.assignee?.id||'';
+        document.getElementById('task-due').value=edit.dueDate?edit.dueDate.split('T')[0]:'';
+        document.getElementById('task-hours').value=edit.estimatedHours||'';
+        f.dataset.editId=edit.id;
       }else{document.getElementById('task-status').value=status;delete f.dataset.editId;}
       document.getElementById('task-modal').classList.add('active');
     }
-    async function submitTask(e){e.preventDefault();const f=e.target;const d=Object.fromEntries(new FormData(f));
-      d.project_id=projectId;if(!d.milestone_id)delete d.milestone_id;const eid=f.dataset.editId;
-      const r=await fetch('/api/tasks',{method:eid?'PUT':'POST',headers:authH(),body:JSON.stringify(eid?{...d,id:eid}:d)});
-      if(r.ok){closeModal('task-modal');toast(eid?'Task updated':'Task created');loadTasks();loadProject();}
-      else{const e=await r.json();alert(e.error||'Failed');}}
+    async function submitTask(e){e.preventDefault();const f=e.target;const btn=document.getElementById('task-submit-btn');
+      btn.disabled=true;btn.textContent='Saving...';
+      const d=Object.fromEntries(new FormData(f));
+      d.project_id=projectId;
+      if(!d.milestone_id)delete d.milestone_id;
+      if(!d.assigned_to)delete d.assigned_to;
+      if(!d.estimated_hours)delete d.estimated_hours;else d.estimated_hours=parseFloat(d.estimated_hours);
+      const eid=f.dataset.editId;
+      try{const r=await fetch('/api/tasks',{method:eid?'PUT':'POST',headers:authH(),body:JSON.stringify(eid?{...d,id:eid}:d)});
+        if(r.ok){closeModal('task-modal');toast(eid?'Task updated':'Task created');loadTasks();loadProject();}
+        else{const e=await r.json();alert(e.error||'Failed');}}
+      finally{btn.disabled=false;btn.textContent=eid?'Save Changes':'Create Task';}}
     function populateMsSelect(ms){const s=document.getElementById('task-ms');
       if(s)s.innerHTML='<option value="">None</option>'+ms.map(m=>`<option value="${m.id}">${esc(m.title)}</option>`).join('');}
 
     // ═══ MILESTONES ═══
     function renderMilestones(ms) {
       const list=document.getElementById('milestones-list');
-      if(!ms.length){list.innerHTML='<p style="color:var(--text-muted)">No milestones yet.</p>';return;}
+      if(!ms.length){list.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-muted)"><p>No milestones yet.</p><p style="font-size:0.85rem;margin-top:0.5rem">Milestones help track major project goals and deadlines.</p></div>';return;}
       list.innerHTML=ms.map(m=>{const pct=parseInt(m.task_count)>0?Math.round(parseInt(m.completed_tasks)/parseInt(m.task_count)*100):0;
-        return`<div class="milestone-card"><div class="milestone-header"><div style="flex:1"><h4 class="milestone-title">${esc(m.title)}</h4>
+        const isOverdue=m.target_date&&m.status!=='completed'&&new Date(m.target_date)<new Date();
+        const daysUntil=m.target_date?Math.ceil((new Date(m.target_date)-new Date())/(1000*60*60*24)):null;
+        const dateHint=isOverdue?`<span style="color:#DC2626;font-size:0.7rem;font-weight:600">${Math.abs(daysUntil)}d overdue</span>`:daysUntil!==null&&daysUntil<=14&&daysUntil>0&&m.status!=='completed'?`<span style="color:#D97706;font-size:0.7rem">${daysUntil}d left</span>`:'';
+        return`<div class="milestone-card" style="${isOverdue?'border-left:3px solid #DC2626;':''}"><div class="milestone-header"><div style="flex:1"><h4 class="milestone-title">${esc(m.title)}</h4>
         ${m.description?`<p style="color:var(--text-secondary);margin-top:0.4rem;font-size:0.9rem">${esc(m.description)}</p>`:''}</div>
         <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem">
-        <div class="milestone-date">${m.target_date?fmtDate(m.target_date):'No date'}</div>
+        <div class="milestone-date">${m.target_date?fmtDate(m.target_date):'No date'} ${dateHint}</div>
         <span class="timeline-status ${m.status}">${cap(m.status)}</span>
         ${currentUser?`<div style="display:flex;gap:0.5rem;margin-top:0.25rem"><button class="btn-icon" onclick="editMs('${m.id}')" title="Edit">✏️</button><button class="btn-icon" onclick="delMs('${m.id}')" title="Delete">🗑️</button></div>`:''}</div></div>
-        <div class="milestone-progress"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        <span class="progress-text">${m.status==='completed'?'Completed':`${m.completed_tasks||0} of ${m.task_count||0} tasks (${pct}%)`}</span></div></div>`;}).join('');
+        <div class="milestone-progress"><div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:${pct}%;${pct===100?'background:#065F46':''}"></div></div>
+        <span class="progress-text">${m.status==='completed'?'✓ Completed':`${m.completed_tasks||0} of ${m.task_count||0} tasks (${pct}%)`}</span></div></div>`;}).join('');
     }
     function openMsModal(edit=null){const f=document.getElementById('ms-form');f.reset();
       document.getElementById('ms-modal-title').textContent=edit?'Edit Milestone':'Add Milestone';
@@ -1254,7 +1316,15 @@
       btn.classList.add('active');document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');});});
 
     // ── Init ──
-    checkAuth(); loadProject();
+    checkAuth(); loadProject(); loadMembers();
+    // Milestone date hint
+    document.getElementById('ms-target')?.addEventListener('change',function(){
+      const hint=document.getElementById('ms-date-hint');if(!hint)return;
+      if(!this.value){hint.textContent='';return;}
+      const d=Math.ceil((new Date(this.value)-new Date())/(86400000));
+      hint.textContent=d>0?`${d} days from today`:d===0?'Today':`${Math.abs(d)} days ago`;
+      hint.style.color=d<0?'#DC2626':'var(--text-muted)';
+    });
   </script>
 <footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
 </body>

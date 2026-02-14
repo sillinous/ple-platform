@@ -325,7 +325,9 @@
               <div class="item-title">${esc(t.title)}</div>
               <div class="item-meta">
                 <span class="item-badge badge-${t.status}">${cap(t.status)}</span>
-                ${t.priority?`<span class="item-type">${cap(t.priority)}</span>`:''}
+                ${t.priority?`<span class="item-type priority-${t.priority||''}">${cap(t.priority)}</span>`:''}
+                ${t.project?.title?`<span style="font-size:0.7rem;color:var(--color-horizon)">${esc(t.project.title)}</span>`:''}
+                ${t.estimatedHours?`<span style="font-size:0.7rem">${t.estimatedHours}h</span>`:''}
                 ${t.dueDate?`<span${new Date(t.dueDate)<new Date()&&t.status!=='done'?' style="color:#DC2626;font-weight:500"':''}>${new Date(t.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
               </div>
             </div></div>
