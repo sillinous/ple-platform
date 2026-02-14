@@ -307,6 +307,20 @@ export async function initPage() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+
+  // Mobile: close nav menu when clicking a link
+  const navMenu = document.querySelector('.nav-menu');
+  if (navMenu) {
+    navMenu.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => navMenu.classList.remove('open'));
+    });
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (navMenu.classList.contains('open') && !navMenu.contains(e.target) && !e.target.closest('.nav-toggle')) {
+        navMenu.classList.remove('open');
+      }
+    });
+  }
 }
 
 export function updateAuthUI() {

@@ -84,6 +84,12 @@
       <!-- Filters -->
       <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
         <input type="text" id="disc-search" placeholder="Search discussions..." oninput="filterDiscussions()" style="flex:1;min-width:200px;max-width:300px;padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.875rem;">
+        <select id="disc-sort" onchange="filterDiscussions()" style="padding:0.45rem 0.65rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.8rem;color:var(--text-secondary,#555);">
+          <option value="newest">Newest</option>
+          <option value="active">Most active</option>
+          <option value="replies">Most replies</option>
+          <option value="oldest">Oldest</option>
+        </select>
         <div style="display:flex;gap:0.25rem;flex-wrap:wrap;" id="type-filters">
           <button class="btn btn-ghost btn-sm disc-type-btn active" data-type="" style="font-size:0.8rem">All</button>
           <button class="btn btn-ghost btn-sm disc-type-btn" data-type="general" style="font-size:0.8rem">General</button>
@@ -170,9 +176,16 @@
     function renderDiscussions() {
       const container = document.getElementById('discussions-list');
       const q = (document.getElementById('disc-search')?.value||'').toLowerCase().trim();
+      const sort = document.getElementById('disc-sort')?.value || 'newest';
       let items = allDiscussions;
       if (currentType) items = items.filter(d => d.type === currentType);
       if (q) items = items.filter(d => (d.title||'').toLowerCase().includes(q) || (d.content||'').toLowerCase().includes(q));
+      items = [...items].sort((a,b) => {
+        if (sort==='active') return new Date(b.updatedAt||b.createdAt)-new Date(a.updatedAt||a.createdAt);
+        if (sort==='replies') return (b.replyCount||0)-(a.replyCount||0);
+        if (sort==='oldest') return new Date(a.createdAt)-new Date(b.createdAt);
+        return new Date(b.createdAt)-new Date(a.createdAt);
+      });
 
       if (items.length === 0) {
         container.innerHTML = `<div class="empty-state"><i data-lucide="message-square" class="empty-state-icon"></i><h4 class="empty-state-title">${q||currentType ? 'No matching discussions' : 'No Discussions Yet'}</h4><p class="empty-state-description">${q||currentType ? 'Try different search or filter.' : 'Be the first to start a conversation!'}</p></div>`;
@@ -212,5 +225,6 @@
     loadDiscussions();
     lucide.createIcons();
   </script>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
 </body>
 </html>

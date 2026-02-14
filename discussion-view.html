@@ -87,6 +87,9 @@
           </div>
         </div>
         <div class="disc-body" id="disc-body"></div>
+        <div id="disc-actions" style="display:none;margin-bottom:1.5rem;">
+          <button onclick="deleteDiscussion()" style="background:none;border:1px solid #991B1B;color:#991B1B;padding:0.35rem 0.75rem;border-radius:6px;font-size:0.8rem;cursor:pointer;font-family:inherit;">Delete Discussion</button>
+        </div>
 
         <div class="replies-section">
           <h3 class="replies-header" id="replies-header">Replies</h3>
@@ -128,6 +131,14 @@
     }
     function showLoginUI(){document.getElementById('login-prompt').style.display='block';}
 
+    window.deleteDiscussion = async function(){
+      if(!confirm('Delete this discussion? This cannot be undone.'))return;
+      try{const r=await fetch(`/api/discussions?id=${discId}`,{method:'DELETE',headers:authH()});
+        if(r.ok){toast('Discussion deleted');setTimeout(()=>window.location='/discussions.html',1000);}
+        else{const d=await r.json();toast(d.error||'Failed to delete',true);}
+      }catch(e){toast('Failed to delete',true);}
+    };
+
     async function loadDiscussion(){
       if(!discId){showError();return;}
       try{const r=await fetch(`/api/discussions?id=${discId}`,{headers:authH()});
@@ -148,6 +159,10 @@
       document.getElementById('disc-date').textContent=fmtDate(disc.createdAt);
       document.getElementById('disc-reply-count').textContent=`${replies.length} repl${replies.length===1?'y':'ies'}`;
       document.getElementById('disc-body').innerHTML=typeof marked!=='undefined'?marked.parse(disc.content||''):esc(disc.content);
+      // Show delete button for author/admin
+      if(currentUser && (disc.author?.id===currentUser.id || currentUser.role==='admin')){
+        document.getElementById('disc-actions').style.display='block';
+      }
       document.getElementById('replies-header').textContent=`${replies.length} Repl${replies.length===1?'y':'ies'}`;
       const list=document.getElementById('replies-list');
       if(replies.length===0){list.innerHTML='<p style="color:var(--text-muted);font-size:0.9rem;padding:1rem 0">No replies yet. Be the first to respond.</p>';}

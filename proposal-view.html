@@ -315,12 +315,17 @@
       if (s === 'accepted' && isAdmin) btns.push({label:'Mark Implemented', status:'implemented', color:'#0369A1'});
       if ((s === 'open' || s === 'draft') && isAuthor) btns.push({label:'Withdraw', status:'withdrawn', color:'#6B7280'});
       
+      // Always add delete for author/admin
+      btns.push({label:'Delete', action:'delete', color:'#991B1B'});
+      
       if (btns.length === 0) return;
       
       const el = document.getElementById('lifecycle-actions');
       el.style.display = 'block';
       document.getElementById('lifecycle-btns').innerHTML = btns.map(b => 
-        `<button onclick="changeProposalStatus('${b.status}')" style="padding:0.5rem 1rem;border:1px solid ${b.color};color:${b.color};background:transparent;border-radius:8px;font-size:0.85rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='${b.color}';this.style.color='white'" onmouseout="this.style.background='transparent';this.style.color='${b.color}'">${b.label}</button>`
+        b.action === 'delete' 
+          ? `<button onclick="deleteProposal()" style="padding:0.5rem 1rem;border:1px solid ${b.color};color:${b.color};background:transparent;border-radius:8px;font-size:0.85rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='${b.color}';this.style.color='white'" onmouseout="this.style.background='transparent';this.style.color='${b.color}'">${b.label}</button>`
+          : `<button onclick="changeProposalStatus('${b.status}')" style="padding:0.5rem 1rem;border:1px solid ${b.color};color:${b.color};background:transparent;border-radius:8px;font-size:0.85rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='${b.color}';this.style.color='white'" onmouseout="this.style.background='transparent';this.style.color='${b.color}'">${b.label}</button>`
       ).join('');
     }
     
@@ -336,6 +341,19 @@
         if (r.ok) { showToast('Proposal status updated'); loadProposal(); }
         else { const d = await r.json(); showToast(d.error || 'Failed to update', true); }
       } catch(e) { showToast('Failed to update status', true); }
+    };
+
+    window.deleteProposal = async function() {
+      if (!confirm('Delete this proposal? This cannot be undone.')) return;
+      try {
+        const token = localStorage.getItem('ple_token');
+        const r = await fetch(`/api/proposals?id=${proposalId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (r.ok) { showToast('Proposal deleted'); setTimeout(() => window.location = '/proposals.html', 1000); }
+        else { const d = await r.json(); showToast(d.error || 'Failed to delete', true); }
+      } catch(e) { showToast('Failed to delete', true); }
     };
 
     function formatType(type) {
@@ -359,5 +377,6 @@
     loadProposal();
     lucide.createIcons();
   </script>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
 </body>
 </html>

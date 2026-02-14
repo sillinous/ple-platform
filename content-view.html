@@ -342,6 +342,10 @@
           <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
           Edit
         </button>
+        <button class="btn btn-ghost" onclick="deleteContent()" style="color:#991B1B;">
+          <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+          Delete
+        </button>
       </div>
 
       <!-- Related Content -->
@@ -508,10 +512,16 @@
     async function postComment() {
       const body=document.getElementById('comment-body').value.trim();
       if(!body){toast('Write something first','error');return;}
-      const r=await fetch('/api/comments',{method:'POST',headers:authH(),
-        body:JSON.stringify({entity_type:'content',entity_id:currentContent.id,body})});
-      if(r.ok){document.getElementById('comment-body').value='';toast('Comment posted');loadContent();}
-      else{const e=await r.json();toast(e.error||'Failed','error');}
+      const btn=document.querySelector('#comment-form-area .btn');
+      if(btn){btn.disabled=true;btn.textContent='Posting...';}
+      try{
+        const r=await fetch('/api/comments',{method:'POST',headers:authH(),
+          body:JSON.stringify({entity_type:'content',entity_id:currentContent.id,body})});
+        if(r.ok){document.getElementById('comment-body').value='';toast('Comment posted');loadContent();
+          setTimeout(()=>{const cl=document.getElementById('comments-list');if(cl)cl.scrollIntoView({behavior:'smooth',block:'start'});},500);
+        }else{const e=await r.json();toast(e.error||'Failed','error');}
+      }catch(e){toast('Failed to post comment','error');}
+      finally{if(btn){btn.disabled=false;btn.textContent='Post Comment';}}
     }
 
     async function postReply(parentId) {
@@ -548,6 +558,15 @@
       }catch(e){}
     }
     function editContent(){if(currentContent)window.location=`/content-editor.html?id=${currentContent.id}`;}
+    async function deleteContent(){
+      if(!currentContent)return;
+      if(!confirm('Delete this content? This cannot be undone.'))return;
+      try{const token=localStorage.getItem('ple_token');
+        const r=await fetch(`/api/content?id=${currentContent.id}`,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+        if(r.ok){toast('Content deleted');setTimeout(()=>window.location='/content.html',1000);}
+        else{const d=await r.json();toast(d.error||'Failed to delete','error');}
+      }catch(e){toast('Failed to delete','error');}
+    }
     function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
     // Reading progress bar
