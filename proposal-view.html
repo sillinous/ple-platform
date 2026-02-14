@@ -164,6 +164,11 @@
                   ${currentProposal.element.code}: ${currentProposal.element.title}
                 </span>
               ` : ''}
+              <span class="proposal-meta-item" style="margin-left:auto;">
+                <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>showToast('Link copied'));void(0)" style="background:none;border:1px solid var(--border-color,#e5e2dd);padding:0.25rem 0.5rem;border-radius:6px;cursor:pointer;font-size:0.75rem;color:var(--text-muted);font-family:inherit;display:flex;align-items:center;gap:0.25rem;">
+                  <i data-lucide="link" style="width:12px;height:12px;"></i> Share
+                </button>
+              </span>
             </div>
             <div style="line-height: 1.8; color: var(--color-text-secondary);">
               ${typeof marked!=='undefined'?marked.parse(currentProposal.content||''):escapeHtml(currentProposal.content)}

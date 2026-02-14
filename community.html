@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .community-container{max-width:1000px;margin:0 auto;padding:2rem 1.5rem 4rem}
+    .member-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+    .member-card{border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1.25rem;background:var(--bg-primary,#fff);transition:border-color 0.15s,box-shadow 0.15s;text-decoration:none;color:inherit;display:block}
+    .member-card:hover{border-color:var(--color-horizon,#1B4D3E);box-shadow:0 2px 12px rgba(27,77,62,0.08)}
+    .member-header{display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem}
+    .member-avatar{width:48px;height:48px;border-radius:50%;background:var(--color-horizon,#1B4D3E);color:white;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:600;flex-shrink:0}
+    .member-name{font-weight:600;font-size:0.95rem}
+    .member-role{display:inline-block;padding:0.1rem 0.45rem;border-radius:100px;font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;background:rgba(27,77,62,0.08);color:var(--color-horizon,#1B4D3E);margin-top:0.15rem}
+    .member-bio{font-size:0.85rem;color:var(--text-muted,#888);margin-bottom:0.75rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .member-stats{display:flex;gap:1rem;font-size:0.75rem;color:var(--text-muted,#888)}
+    .member-stats span{display:flex;align-items:center;gap:0.25rem}
+    .member-since{font-size:0.7rem;color:var(--text-muted,#888);margin-top:0.15rem}
+    .community-hero{text-align:center;margin-bottom:2.5rem}
+    .community-hero h1{font-family:'Fraunces',serif;font-size:2rem;margin-bottom:0.5rem}
+    .community-hero p{color:var(--text-muted,#888);font-size:1rem}
+    .community-summary{display:flex;justify-content:center;gap:2rem;margin:1.5rem 0}
+    .summary-stat{text-align:center}
+    .summary-stat-value{font-family:'Fraunces',serif;font-size:2rem;font-weight:600;color:var(--color-horizon,#1B4D3E)}
+    .summary-stat-label{font-size:0.75rem;color:var(--text-muted)}
+    @media(max-width:600px){.member-grid{grid-template-columns:1fr}.community-summary{flex-wrap:wrap;gap:1rem}}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <nav class="nav-menu">
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+      </nav>
+      <div class="header-actions">
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="community-container">
+      <div class="community-hero">
+        <h1>Our Community</h1>
+        <p>The people building frameworks for prosperity beyond work</p>
+        <div class="community-summary">
+          <div class="summary-stat"><div class="summary-stat-value" id="total-members">—</div><div class="summary-stat-label">Members</div></div>
+          <div class="summary-stat"><div class="summary-stat-value" id="total-contributions">—</div><div class="summary-stat-label">Contributions</div></div>
+        </div>
+      </div>
+      <div class="member-grid" id="member-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Loading community...</div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="margin-top:4rem;padding:2rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);">
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+      <a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics &middot; Prosperity Beyond Work
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initPage, updateAuthUI } from './src/scripts/api.js';
+    await initPage(); updateAuthUI(); lucide.createIcons();
+
+    const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+    const initials=n=>(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase();
+    const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):'';
+
+    try {
+      const r=await fetch('/api/auth?action=members');
+      const data=await r.json();
+      const members=data.members||[];
+
+      document.getElementById('total-members').textContent=members.length;
+      const totalContribs=members.reduce((s,m)=>(m.stats?.content||0)+(m.stats?.proposals||0)+(m.stats?.discussions||0)+s,0);
+      document.getElementById('total-contributions').textContent=totalContribs;
+
+      const grid=document.getElementById('member-grid');
+      if(!members.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">No members yet. <a href="register.html">Be the first!</a></div>';return;}
+
+      grid.innerHTML=members.map(m=>{
+        const total=(m.stats?.content||0)+(m.stats?.proposals||0)+(m.stats?.discussions||0);
+        return `<a href="profile.html?id=${m.id}" class="member-card">
+          <div class="member-header">
+            <div class="member-avatar">${initials(m.displayName)}</div>
+            <div>
+              <div class="member-name">${esc(m.displayName)}</div>
+              <span class="member-role">${cap(m.role||'member')}</span>
+              <div class="member-since">Joined ${new Date(m.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'})}</div>
+            </div>
+          </div>
+          ${m.bio?`<div class="member-bio">${esc(m.bio)}</div>`:''}
+          <div class="member-stats">
+            ${m.stats?.content?`<span><i data-lucide="file-text" style="width:12px;height:12px"></i>${m.stats.content} published</span>`:''}
+            ${m.stats?.proposals?`<span><i data-lucide="vote" style="width:12px;height:12px"></i>${m.stats.proposals} proposals</span>`:''}
+            ${m.stats?.discussions?`<span><i data-lucide="message-square" style="width:12px;height:12px"></i>${m.stats.discussions} discussions</span>`:''}
+            ${total===0?'<span style="color:var(--text-muted)">New member</span>':''}
+          </div>
+        </a>`;
+      }).join('');
+      lucide.createIcons();
+    } catch(e) { document.getElementById('member-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Unable to load community.</div>'; }
+  </script>
+</body>
+</html>

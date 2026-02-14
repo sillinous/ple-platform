@@ -451,8 +451,14 @@
         </button>
       </div>
 
-      <div style="margin-bottom:1rem;">
-        <input type="text" id="content-search" placeholder="Search content..." style="width:100%;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterContent()">
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="content-search" placeholder="Search content..." style="flex:1;min-width:200px;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterContent()">
+        <select id="content-sort" onchange="sortContent()" style="padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.85rem;color:var(--text-secondary,#555);">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="az">A → Z</option>
+          <option value="za">Z → A</option>
+        </select>
       </div>
 
       <div class="content-tabs">
@@ -613,9 +619,17 @@
     function renderFilteredContent() {
       const grid = document.getElementById('content-grid');
       const q = (document.getElementById('content-search')?.value || '').toLowerCase().trim();
+      const sort = document.getElementById('content-sort')?.value || 'newest';
       let items = allContentItems;
       if (q) items = items.filter(c => (c.title||'').toLowerCase().includes(q) || (c.excerpt||'').toLowerCase().includes(q) || (c.contentType||'').toLowerCase().includes(q));
       if (currentTag) items = items.filter(c => (c.tags||[]).includes(currentTag));
+      // Sort
+      items = [...items].sort((a,b) => {
+        if (sort==='oldest') return new Date(a.createdAt)-new Date(b.createdAt);
+        if (sort==='az') return (a.title||'').localeCompare(b.title||'');
+        if (sort==='za') return (b.title||'').localeCompare(a.title||'');
+        return new Date(b.createdAt)-new Date(a.createdAt); // newest
+      });
       if (items.length > 0) { grid.innerHTML = items.map(renderContentCard).join(''); }
       else { grid.innerHTML = '<div class="empty-state"><h3>No content found</h3><p>' + (q||currentTag ? 'Try a different search or filter.' : 'Content will appear here once created.') + '</p></div>'; }
 
@@ -629,6 +643,7 @@
       } else { tf.innerHTML = ''; }
     }
     window.filterContent = function() { renderFilteredContent(); };
+    window.sortContent = function() { renderFilteredContent(); };
     window.setTagFilter = function(tag) { currentTag = tag; renderFilteredContent(); };
 
     function renderContentCard(item) {

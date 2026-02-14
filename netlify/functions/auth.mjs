@@ -29,6 +29,8 @@ export default async (req, context) => {
       return await handleGetCurrentUser(sql, req);
     } else if (req.method === 'GET' && action === 'profile') {
       return await handleGetPublicProfile(sql, url.searchParams.get('id'));
+    } else if (req.method === 'GET' && action === 'members') {
+      return await handleListMembers(sql);
     }
     
     return jsonResponse({ error: 'Invalid action' }, 400);
@@ -175,6 +177,26 @@ async function handleUpdateProfile(sql, req, body) {
   await sql`UPDATE users SET display_name = ${displayName.trim()}, bio = ${(bio||'').trim()}, updated_at = CURRENT_TIMESTAMP WHERE id = ${user.id}`;
   
   return jsonResponse({ success: true, user: { ...user, displayName: displayName.trim(), bio: (bio||'').trim() } });
+}
+
+async function handleListMembers(sql) {
+  const members = await sql`
+    SELECT u.id, u.display_name, u.role, u.avatar_url, u.bio, u.created_at,
+      (SELECT COUNT(*) FROM content_items WHERE author_id = u.id AND status = 'published') as content_count,
+      (SELECT COUNT(*) FROM proposals WHERE author_id = u.id) as proposal_count,
+      (SELECT COUNT(*) FROM discussions WHERE author_id = u.id AND parent_id IS NULL) as discussion_count
+    FROM users u WHERE u.is_active = true
+    ORDER BY u.created_at ASC
+    LIMIT 100
+  `;
+  return jsonResponse({
+    members: members.map(m => ({
+      id: m.id, displayName: m.display_name, role: m.role,
+      avatarUrl: m.avatar_url, bio: m.bio, createdAt: m.created_at,
+      stats: { content: parseInt(m.content_count), proposals: parseInt(m.proposal_count), discussions: parseInt(m.discussion_count) }
+    })),
+    total: members.length
+  });
 }
 
 async function handleGetPublicProfile(sql, userId) {

@@ -413,8 +413,14 @@
         </button>
       </div>
 
-      <div style="margin-bottom:1rem;">
-        <input type="text" id="project-search" placeholder="Search projects..." style="width:100%;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterProjects()">
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="project-search" placeholder="Search projects..." style="flex:1;min-width:200px;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterProjects()">
+        <select id="project-sort" onchange="sortProjects()" style="padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.85rem;color:var(--text-secondary,#555);">
+          <option value="newest">Newest first</option>
+          <option value="active">Recently active</option>
+          <option value="az">A → Z</option>
+          <option value="progress">Most progress</option>
+        </select>
       </div>
 
       <div class="filters-bar">
@@ -567,12 +573,20 @@
     function renderFilteredProjects() {
       const grid = document.getElementById('projects-grid');
       const q = (document.getElementById('project-search')?.value || '').toLowerCase().trim();
+      const sort = document.getElementById('project-sort')?.value || 'newest';
       let items = allProjectItems;
       if (q) items = items.filter(p => (p.title||'').toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q));
+      items = [...items].sort((a,b) => {
+        if (sort==='active') return new Date(b.updatedAt||b.createdAt)-new Date(a.updatedAt||a.createdAt);
+        if (sort==='az') return (a.title||'').localeCompare(b.title||'');
+        if (sort==='progress') return (b.progress||0)-(a.progress||0);
+        return new Date(b.createdAt)-new Date(a.createdAt);
+      });
       if (items.length > 0) { grid.innerHTML = items.map(renderProjectCard).join(''); }
       else { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h3>No projects found</h3><p>' + (q ? 'Try a different search.' : 'Create your first project.') + '</p></div>'; }
     }
     window.filterProjects = function() { renderFilteredProjects(); };
+    window.sortProjects = function() { renderFilteredProjects(); };
 
     function renderProjectCard(project) {
       const ownerName = project.owner?.name || 'Unknown';
