@@ -250,10 +250,10 @@
       try{
         if(contentId){data.id=contentId;
           const r=await fetch('/api/content',{method:'PUT',headers:authH(),body:JSON.stringify(data)});
-          if(r.ok){toast('Saved');loadContent();}else{const e=await r.json();toast(e.error||'Failed','error');}
+          if(r.ok){toast('Saved');isDirty=false;loadContent();}else{const e=await r.json();toast(e.error||'Failed','error');}
         }else{
           const r=await fetch('/api/content',{method:'POST',headers:authH(),body:JSON.stringify(data)});
-          if(r.ok){const d=await r.json();contentId=d.id;contentData={status:'draft',author:{id:currentUser.id}};
+          if(r.ok){const d=await r.json();contentId=d.id;contentData={status:'draft',author:{id:currentUser.id}};isDirty=false;
             history.replaceState(null,'',`/content-editor.html?id=${contentId}`);
             updateStatusUI('draft');toast('Created');loadContent();}
           else{const e=await r.json();toast(e.error||'Failed','error');}
@@ -288,6 +288,12 @@
       if((e.ctrlKey||e.metaKey)&&e.key==='b'){e.preventDefault();ins('**','**');}
       if((e.ctrlKey||e.metaKey)&&e.key==='i'){e.preventDefault();ins('*','*');}
     });
+
+    // Unsaved changes warning
+    let isDirty=false;
+    document.getElementById('ed-title').addEventListener('input',()=>isDirty=true);
+    document.getElementById('ed-body').addEventListener('input',()=>isDirty=true);
+    window.addEventListener('beforeunload',e=>{if(isDirty){e.preventDefault();e.returnValue='';}});
 
     // Init
     checkAuth().then(()=>{if(editId)loadContent();else updateStatusUI('draft');});

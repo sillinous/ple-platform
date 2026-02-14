@@ -142,10 +142,16 @@
         <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">
           Whether you're a researcher, policymaker, advocate, or curious citizen—there's a place for you here.
         </p>
+        <div id="about-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.5rem;max-width:500px;margin-left:auto;margin-right:auto;">
+          <div style="text-align:center;"><div id="s-content" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;color:var(--color-horizon,#1B4D3E);">—</div><div style="font-size:0.7rem;color:var(--text-muted);">Articles</div></div>
+          <div style="text-align:center;"><div id="s-projects" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;color:var(--color-horizon,#1B4D3E);">—</div><div style="font-size:0.7rem;color:var(--text-muted);">Projects</div></div>
+          <div style="text-align:center;"><div id="s-proposals" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;color:var(--color-horizon,#1B4D3E);">—</div><div style="font-size:0.7rem;color:var(--text-muted);">Proposals</div></div>
+          <div style="text-align:center;"><div id="s-discussions" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;color:var(--color-horizon,#1B4D3E);">—</div><div style="font-size:0.7rem;color:var(--text-muted);">Discussions</div></div>
+        </div>
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
           <a href="register.html" class="btn btn-primary">Create Account</a>
-          <a href="https://discord.gg/postlabor" target="_blank" class="btn btn-outline">Join Discord</a>
-          <a href="https://daveshap.substack.com" target="_blank" class="btn btn-outline">Newsletter</a>
+          <a href="content.html" class="btn btn-outline">Browse Content</a>
+          <a href="projects.html" class="btn btn-outline">View Projects</a>
         </div>
       </section>
     </div>
@@ -165,6 +171,20 @@
     await initPage();
     updateAuthUI();
     lucide.createIcons();
+
+    // Load live stats
+    try {
+      const [cR, pR, prR, dR] = await Promise.allSettled([
+        fetch('/api/content?limit=1&status=published').then(r=>r.json()),
+        fetch('/api/projects?limit=1').then(r=>r.json()),
+        fetch('/api/proposals?limit=1').then(r=>r.json()),
+        fetch('/api/discussions?limit=1').then(r=>r.json())
+      ]);
+      if(cR.status==='fulfilled') document.getElementById('s-content').textContent=cR.value.total||cR.value.content?.length||0;
+      if(pR.status==='fulfilled') document.getElementById('s-projects').textContent=pR.value.total||pR.value.projects?.length||0;
+      if(prR.status==='fulfilled') document.getElementById('s-proposals').textContent=prR.value.total||prR.value.proposals?.length||0;
+      if(dR.status==='fulfilled') document.getElementById('s-discussions').textContent=dR.value.total||dR.value.discussions?.length||0;
+    } catch(e) {}
   </script>
 </body>
 </html>
