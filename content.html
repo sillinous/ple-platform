@@ -467,6 +467,7 @@
       <div class="content-grid" id="content-grid">
         <div class="loading">Loading content...</div>
       </div>
+      <div id="content-pagination" style="margin-top:2rem;text-align:center;"></div>
     </div>
   </main>
 
@@ -539,6 +540,8 @@
   <script>
     let currentUser = null;
     let currentFilter = 'all';
+    let currentPage = 0;
+    const pageSize = 20;
     let contentTags = [];
 
     // Check auth
@@ -568,7 +571,7 @@
       const grid = document.getElementById('content-grid');
       
       try {
-        let url = '/api/content?limit=50';
+        let url = `/api/content?limit=${pageSize}&offset=${currentPage * pageSize}`;
         
         if (currentFilter === 'published') {
           url += '&status=published';
@@ -584,12 +587,27 @@
         const res = await fetch(url, { headers });
         const data = await res.json();
         allContentItems = data.content || [];
+        const total = data.total || allContentItems.length;
         renderFilteredContent();
+        renderPagination(total);
       } catch (e) {
         console.error('Failed to load content:', e);
         grid.innerHTML = '<div class="error">Failed to load content</div>';
       }
     }
+
+    function renderPagination(total) {
+      const el = document.getElementById('content-pagination');
+      const totalPages = Math.ceil(total / pageSize);
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      const cur = currentPage + 1;
+      el.innerHTML = `<div style="display:flex;justify-content:center;gap:0.5rem;align-items:center;">
+        ${cur > 1 ? `<button onclick="goPage(${currentPage-1})" style="padding:0.4rem 0.8rem;border:1px solid var(--border-color,#e5e2dd);border-radius:6px;background:white;cursor:pointer;font-family:inherit;">&laquo; Prev</button>` : ''}
+        <span style="font-size:0.85rem;color:var(--text-muted);">Page ${cur} of ${totalPages}</span>
+        ${cur < totalPages ? `<button onclick="goPage(${currentPage+1})" style="padding:0.4rem 0.8rem;border:1px solid var(--border-color,#e5e2dd);border-radius:6px;background:white;cursor:pointer;font-family:inherit;">Next &raquo;</button>` : ''}
+      </div>`;
+    }
+    window.goPage = function(p) { currentPage = p; loadContent(); window.scrollTo({top:0,behavior:'smooth'}); };
 
     let currentTag = '';
     function renderFilteredContent() {
@@ -689,6 +707,7 @@
         document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentFilter = tab.dataset.filter;
+        currentPage = 0;
         loadContent();
       });
     });

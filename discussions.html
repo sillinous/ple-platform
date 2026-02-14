@@ -190,12 +190,15 @@
             <span class="proposal-meta-item"><i data-lucide="user"></i><a href="profile.html?id=${d.author?.id}" style="color:inherit;text-decoration:none;border-bottom:1px dashed #ccc">${d.author?.name || 'Anonymous'}</a></span>
             <span class="proposal-meta-item"><i data-lucide="message-square"></i>${d.replyCount} replies</span>
             <span class="proposal-meta-item"><i data-lucide="clock"></i>${formatDate(d.createdAt)}</span>
+            ${d.updatedAt && d.updatedAt !== d.createdAt ? `<span class="proposal-meta-item" style="color:var(--color-horizon,#1B4D3E);font-size:0.75rem;">active ${formatRelTime(d.updatedAt)}</span>` : ''}
           </div>
         </div>
       `).join('');
       lucide.createIcons();
     }
     
+    function formatRelTime(d){if(!d)return"";const ms=Date.now()-new Date(d).getTime();if(ms<60000)return"just now";if(ms<3600000)return Math.floor(ms/60000)+"m ago";if(ms<86400000)return Math.floor(ms/3600000)+"h ago";if(ms<604800000)return Math.floor(ms/86400000)+"d ago";return new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric"});}
+
     function truncate(text, length) {
       if (!text) return '';
       if (text.length <= length) return text;

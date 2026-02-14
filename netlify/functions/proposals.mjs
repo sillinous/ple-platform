@@ -127,7 +127,13 @@ async function updateProposal(sql, body, user) {
   }
   
   // Update with COALESCE to keep existing values if not provided
-  const newStatus = (status && user.role === 'admin') ? status : null;
+  // Authors can open their drafts and withdraw; admins can set any status
+  const isAuthor = proposals[0].author_id === user.id;
+  let newStatus = null;
+  if (status) {
+    if (user.role === 'admin') newStatus = status;
+    else if (isAuthor && (status === 'open' || status === 'withdrawn')) newStatus = status;
+  }
   
   await sql`
     UPDATE proposals SET 

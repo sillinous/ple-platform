@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="src/styles/brand.css">
   <link rel="stylesheet" href="src/styles/app.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <!-- Header -->
@@ -111,6 +112,12 @@
           </div>
         </div>
       </div>
+
+      <!-- Lifecycle Actions (author/admin only) -->
+      <div id="lifecycle-actions" style="display:none;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border-color,#e5e2dd);">
+        <h3 style="font-family:'Fraunces',serif;font-size:1rem;margin-bottom:1rem;color:var(--text-muted);">Manage Proposal</h3>
+        <div id="lifecycle-btns" style="display:flex;gap:0.75rem;flex-wrap:wrap;"></div>
+      </div>
     </div>
   </main>
 
@@ -158,8 +165,8 @@
                 </span>
               ` : ''}
             </div>
-            <div style="line-height: 1.8; color: var(--color-text-secondary); white-space: pre-wrap;">
-              ${escapeHtml(currentProposal.content)}
+            <div style="line-height: 1.8; color: var(--color-text-secondary);">
+              ${typeof marked!=='undefined'?marked.parse(currentProposal.content||''):escapeHtml(currentProposal.content)}
             </div>
           </div>
         `;
@@ -172,6 +179,9 @@
         
         // Load comments
         renderComments(data.comments);
+        
+        // Render lifecycle actions for author/admin
+        renderLifecycleActions();
         
         lucide.createIcons();
       } catch (e) {
@@ -285,6 +295,44 @@
     });
     
     // Helpers
+    function renderLifecycleActions() {
+      if (!currentUser || !currentProposal) return;
+      const isAuthor = currentProposal.author?.id === currentUser.id;
+      const isAdmin = currentUser.role === 'admin';
+      if (!isAuthor && !isAdmin) return;
+      
+      const s = currentProposal.status;
+      const btns = [];
+      
+      if (s === 'draft' && (isAuthor || isAdmin)) btns.push({label:'Open for Voting', status:'open', color:'#1B4D3E'});
+      if (s === 'open' && isAdmin) btns.push({label:'Accept Proposal', status:'accepted', color:'#065F46'});
+      if (s === 'open' && isAdmin) btns.push({label:'Reject Proposal', status:'rejected', color:'#991B1B'});
+      if (s === 'accepted' && isAdmin) btns.push({label:'Mark Implemented', status:'implemented', color:'#0369A1'});
+      if ((s === 'open' || s === 'draft') && isAuthor) btns.push({label:'Withdraw', status:'withdrawn', color:'#6B7280'});
+      
+      if (btns.length === 0) return;
+      
+      const el = document.getElementById('lifecycle-actions');
+      el.style.display = 'block';
+      document.getElementById('lifecycle-btns').innerHTML = btns.map(b => 
+        `<button onclick="changeProposalStatus('${b.status}')" style="padding:0.5rem 1rem;border:1px solid ${b.color};color:${b.color};background:transparent;border-radius:8px;font-size:0.85rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='${b.color}';this.style.color='white'" onmouseout="this.style.background='transparent';this.style.color='${b.color}'">${b.label}</button>`
+      ).join('');
+    }
+    
+    window.changeProposalStatus = async function(newStatus) {
+      if (!confirm(`Change proposal status to "${newStatus}"?`)) return;
+      try {
+        const token = localStorage.getItem('ple_token');
+        const r = await fetch('/api/proposals', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ id: proposalId, status: newStatus })
+        });
+        if (r.ok) { showToast('Proposal status updated'); loadProposal(); }
+        else { const d = await r.json(); showToast(d.error || 'Failed to update', true); }
+      } catch(e) { showToast('Failed to update status', true); }
+    };
+
     function formatType(type) {
       return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     }
