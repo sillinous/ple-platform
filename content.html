@@ -688,7 +688,7 @@
             ` : ''}
             
             <h3 class="content-title">${escapeHtml(item.title)}</h3>
-            <p class="content-excerpt">${escapeHtml(item.excerpt || 'No excerpt')}</p>
+            <p class="content-excerpt">${escapeHtml(item.excerpt || (item.body||'').replace(/[#*`>\[\]]/g,'').substring(0,150).trim() || 'No excerpt')}</p>
             
             ${item.tags && item.tags.length > 0 ? `
               <div class="content-tags">

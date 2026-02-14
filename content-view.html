@@ -348,6 +348,20 @@
         </button>
       </div>
 
+      <!-- Prev/Next Navigation -->
+      <div id="article-nav" style="display:none;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color);display:none;">
+        <div style="display:flex;justify-content:space-between;gap:1rem;">
+          <a id="prev-article" href="#" style="flex:1;padding:0.75rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:inherit;display:none;">
+            <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.25rem;">&larr; Previous</div>
+            <div id="prev-title" style="font-size:0.85rem;font-weight:500;"></div>
+          </a>
+          <a id="next-article" href="#" style="flex:1;padding:0.75rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:inherit;text-align:right;display:none;">
+            <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.25rem;">Next &rarr;</div>
+            <div id="next-title" style="font-size:0.85rem;font-weight:500;"></div>
+          </a>
+        </div>
+      </div>
+
       <!-- Related Content -->
       <div id="related-section" style="display:none;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color);">
         <h3 style="font-family:var(--font-display);font-size:1.15rem;margin-bottom:1rem;">Related Content</h3>
@@ -359,7 +373,10 @@
         <h3 style="font-family:var(--font-display); margin-bottom:1.5rem;">Discussion</h3>
         <div id="comment-form-area" style="display:none; margin-bottom:2rem;">
           <textarea id="comment-body" rows="3" placeholder="Share your thoughts..." style="width:100%;padding:0.75rem 1rem;border:1px solid var(--border-color);border-radius:8px;font-family:inherit;font-size:0.95rem;resize:vertical;background:var(--bg-secondary);"></textarea>
-          <div style="display:flex;justify-content:flex-end;margin-top:0.5rem;"><button class="btn btn-primary" onclick="postComment()">Post Comment</button></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
+            <span style="font-size:0.7rem;color:var(--text-muted,#888);">Supports markdown: **bold**, *italic*, `code`</span>
+            <button class="btn btn-primary" onclick="postComment()">Post Comment</button>
+          </div>
         </div>
         <div id="comments-list"></div>
       </div>
@@ -449,6 +466,7 @@
       document.getElementById('content-body').style.display='';
       lucide.createIcons();
       loadRelated(item.id, item.tags||[]);
+      loadArticleNav(item.id);
       generateTOC();
       if(typeof hljs!=='undefined') document.querySelectorAll('#content-html pre code').forEach(el=>hljs.highlightElement(el));
     }
@@ -557,6 +575,33 @@
         ).join('');
       }catch(e){}
     }
+    async function loadArticleNav(currentId) {
+      try {
+        const r = await fetch('/api/content?status=published&limit=50', { headers: authH() });
+        const d = await r.json();
+        const items = (d.content || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const idx = items.findIndex(c => c.id === currentId);
+        if (idx === -1) return;
+        const nav = document.getElementById('article-nav');
+        let shown = false;
+        if (idx < items.length - 1) {
+          const prev = items[idx + 1];
+          const el = document.getElementById('prev-article');
+          el.href = `/content-view.html?id=${prev.slug || prev.id}`;
+          document.getElementById('prev-title').textContent = prev.title;
+          el.style.display = 'block'; shown = true;
+        }
+        if (idx > 0) {
+          const next = items[idx - 1];
+          const el = document.getElementById('next-article');
+          el.href = `/content-view.html?id=${next.slug || next.id}`;
+          document.getElementById('next-title').textContent = next.title;
+          el.style.display = 'block'; shown = true;
+        }
+        if (shown) nav.style.display = 'block';
+      } catch (e) {}
+    }
+
     function editContent(){if(currentContent)window.location=`/content-editor.html?id=${currentContent.id}`;}
     async function deleteContent(){
       if(!currentContent)return;

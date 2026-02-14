@@ -191,10 +191,13 @@
         container.innerHTML = `<div class="empty-state"><i data-lucide="message-square" class="empty-state-icon"></i><h4 class="empty-state-title">${q||currentType ? 'No matching discussions' : 'No Discussions Yet'}</h4><p class="empty-state-description">${q||currentType ? 'Try different search or filter.' : 'Be the first to start a conversation!'}</p></div>`;
         lucide.createIcons(); return;
       }
-      container.innerHTML = items.map(d => `
+      container.innerHTML = items.map(d => {
+        const isHot = (d.replyCount||0) >= 3 && d.updatedAt && (Date.now() - new Date(d.updatedAt).getTime()) < 7*24*60*60*1000;
+        return `
         <div class="proposal-card">
-          <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+          <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
             <span class="proposal-type-badge" style="font-size:0.7rem;text-transform:capitalize;">${d.type || 'general'}</span>
+            ${isHot ? '<span style="padding:0.1rem 0.4rem;border-radius:100px;font-size:0.6rem;font-weight:700;background:#F4A261;color:white;text-transform:uppercase;letter-spacing:0.3px;">Hot</span>' : ''}
           </div>
           <h3 class="proposal-title" style="margin-bottom: 0.75rem;">
             <a href="discussion-view.html?id=${d.id}">${d.title || 'Untitled Discussion'}</a>
@@ -204,10 +207,10 @@
             <span class="proposal-meta-item"><i data-lucide="user"></i><a href="profile.html?id=${d.author?.id}" style="color:inherit;text-decoration:none;border-bottom:1px dashed #ccc">${d.author?.name || 'Anonymous'}</a></span>
             <span class="proposal-meta-item"><i data-lucide="message-square"></i>${d.replyCount} replies</span>
             <span class="proposal-meta-item"><i data-lucide="clock"></i>${formatDate(d.createdAt)}</span>
-            ${d.updatedAt && d.updatedAt !== d.createdAt ? `<span class="proposal-meta-item" style="color:var(--color-horizon,#1B4D3E);font-size:0.75rem;">active ${formatRelTime(d.updatedAt)}</span>` : ''}
+            ${d.updatedAt && d.updatedAt !== d.createdAt ? '<span class="proposal-meta-item" style="color:var(--color-horizon,#1B4D3E);font-size:0.75rem;">active '+formatRelTime(d.updatedAt)+'</span>' : ''}
           </div>
         </div>
-      `).join('');
+      `}).join('');
       lucide.createIcons();
     }
     
