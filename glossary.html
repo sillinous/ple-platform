@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary | Post-Labor Economics</title>
+  <meta name="description" content="Key terms and concepts in post-labor economics.">
+  <link rel="icon" type="image/svg+xml" href="/ple-logo.svg">
+  <link rel="alternate" type="application/rss+xml" title="PLE Feed" href="/api/rss">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .glossary-search{width:100%;max-width:500px;padding:0.7rem 1rem 0.7rem 2.5rem;border:1px solid var(--border-color,#e5e2dd);border-radius:10px;font-family:inherit;font-size:0.95rem;background:white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 0.75rem center;}
+    .letter-nav{display:flex;flex-wrap:wrap;gap:0.25rem;margin:1.5rem 0;}
+    .letter-btn{width:32px;height:32px;border:1px solid var(--border-color,#e5e2dd);border-radius:6px;background:white;cursor:pointer;font-weight:600;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+    .letter-btn:hover,.letter-btn.active{background:var(--color-horizon,#1B4D3E);color:white;border-color:var(--color-horizon,#1B4D3E);}
+    .letter-btn.empty{opacity:0.3;cursor:default;}
+    .letter-heading{font-family:'Fraunces',serif;font-size:1.75rem;color:var(--color-horizon,#1B4D3E);margin:2rem 0 0.75rem;padding-bottom:0.5rem;border-bottom:2px solid var(--color-horizon,#1B4D3E);}
+    .term{margin-bottom:1.5rem;}
+    .term-name{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.25rem;}
+    .term-def{color:var(--text-secondary,#555);line-height:1.7;font-size:0.95rem;}
+    .term-tags{display:flex;gap:0.35rem;margin-top:0.35rem;}
+    .term-tag{font-size:0.7rem;padding:0.1rem 0.4rem;border-radius:4px;background:rgba(27,77,62,0.06);color:var(--color-horizon,#1B4D3E);}
+    .term-count{font-size:0.85rem;color:var(--text-muted);margin-bottom:2rem;}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="nav-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-symbol">L/0</span> <span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="nav-menu">
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="tags.html" class="nav-link">Tags</a>
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="login.html" class="nav-link" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="nav-link" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main-content" style="max-width:800px;margin:0 auto;padding:2rem 1.5rem;">
+    <h1 style="font-family:'Fraunces',serif;font-size:2rem;margin-bottom:0.25rem;">Glossary</h1>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;">Key terms and concepts in post-labor economics</p>
+    <input type="text" class="glossary-search" placeholder="Search terms..." id="search" oninput="filter()">
+    <div class="letter-nav" id="letter-nav"></div>
+    <div class="term-count" id="term-count"></div>
+    <div id="terms"></div>
+  </main>
+  <script type="module">
+    import { initPage } from './src/scripts/api.js';
+    await initPage();
+
+    const TERMS = [
+      { term: 'Artificial General Intelligence (AGI)', def: 'AI systems with human-level cognitive abilities across all domains. A key inflection point for labor markets, as AGI could potentially perform most human work.', tags: ['technology','automation'] },
+      { term: 'Automation Dividend', def: 'The economic surplus generated when machines replace human labor. PLE frameworks propose redistributing this dividend to ensure broad prosperity.', tags: ['economics','policy'] },
+      { term: 'Basic Income', def: 'Regular, unconditional cash payments to all citizens regardless of employment status. A foundational policy proposal in post-labor economics.', tags: ['policy','UBI'] },
+      { term: 'Cognitive Automation', def: 'The automation of knowledge work and decision-making tasks previously thought to require human intelligence.', tags: ['technology','automation'] },
+      { term: 'Creative Commons', def: 'A system of copyright licenses enabling free distribution of creative works. Relevant to post-labor models of intellectual property.', tags: ['governance','IP'] },
+      { term: 'Decoupling', def: 'The separation of income from employment. A central concept in PLE, where economic security no longer depends on selling labor.', tags: ['economics','core'] },
+      { term: 'Digital Commons', def: 'Shared digital resources and infrastructure managed collectively rather than by private entities or the state.', tags: ['governance','technology'] },
+      { term: 'Economic Security', def: 'The condition where individuals have reliable access to resources needed for a dignified life, independent of labor market participation.', tags: ['economics','core'] },
+      { term: 'Frictional Unemployment', def: 'Temporary unemployment occurring when people transition between jobs. Distinct from structural displacement caused by automation.', tags: ['economics','labor'] },
+      { term: 'GATO Framework', def: 'Governance, Architecture, Technology, and Operations — PLE\'s organizational framework for building post-labor economic systems.', tags: ['framework','core'] },
+      { term: 'Guaranteed Services', def: 'Universal provision of essential services (healthcare, education, housing) as an alternative or complement to cash transfers.', tags: ['policy'] },
+      { term: 'Human Capital', def: 'The economic value of a person\'s skills and knowledge. In post-labor frameworks, the concept shifts from market value to intrinsic value.', tags: ['economics','labor'] },
+      { term: 'Job Guarantee', def: 'A policy ensuring employment for anyone willing to work at a living wage, typically through government-funded community service positions.', tags: ['policy'] },
+      { term: 'Labor Market Polarization', def: 'The trend where middle-skill jobs disappear while high-skill and low-skill jobs grow, hollowing out the middle class.', tags: ['economics','labor'] },
+      { term: 'Liberation', def: 'PLE\'s core essence — the freedom from economic coercion and the ability to pursue meaningful activity beyond wage labor.', tags: ['core','philosophy'] },
+      { term: 'Means of Production', def: 'Physical and non-physical inputs used to produce goods and services. Ownership and access to these means is a central question in post-labor economics.', tags: ['economics'] },
+      { term: 'Negative Income Tax', def: 'A tax system where people below a threshold receive supplemental pay from the government rather than paying taxes. Functionally similar to basic income.', tags: ['policy','UBI'] },
+      { term: 'Post-Labor Economics', def: 'The study of economic systems and policies for a world where human labor is no longer the primary driver of production. Focuses on prosperity, dignity, and meaning beyond work.', tags: ['core'] },
+      { term: 'Post-Scarcity', def: 'A theoretical economic state where goods and services are abundant enough to meet everyone\'s needs with minimal human labor.', tags: ['economics','theory'] },
+      { term: 'PRIME Framework', def: 'PLE\'s framework for evaluating policy proposals across multiple dimensions: practicality, rights, implementation, monitoring, and equity.', tags: ['framework','core'] },
+      { term: 'Prosperity Beyond Work', def: 'PLE\'s tagline and central thesis — that human flourishing need not depend on employment.', tags: ['core'] },
+      { term: 'Robot Tax', def: 'A proposed tax on automated production to fund social programs and smooth the transition from labor-based to post-labor economies.', tags: ['policy','automation'] },
+      { term: 'Structural Unemployment', def: 'Unemployment caused by fundamental shifts in the economy (like automation) that make certain skills permanently obsolete.', tags: ['economics','labor'] },
+      { term: 'Structured Optimism', def: 'PLE\'s philosophical approach — combining analytical rigor with humanistic warmth. Neither techno-utopian nor dystopian, but constructively forward-looking.', tags: ['philosophy','core'] },
+      { term: 'Technological Unemployment', def: 'Job losses caused by technological advancement outpacing the creation of new roles. The phenomenon driving post-labor economics.', tags: ['economics','technology'] },
+      { term: 'Transition Economics', def: 'The study of how economies move from labor-dependent to post-labor models, including managing displacement, retraining, and social safety nets.', tags: ['economics','core'] },
+      { term: 'Universal Basic Income (UBI)', def: 'A government program providing every citizen with a regular, unconditional sum of money. The most widely discussed post-labor policy proposal.', tags: ['policy','UBI'] },
+      { term: 'Universal Basic Services (UBS)', def: 'Public provision of essential services like healthcare, education, transport, and housing free at point of use, as an alternative to cash transfers.', tags: ['policy'] },
+      { term: 'Value Alignment', def: 'Ensuring AI systems pursue goals compatible with human values. Critical for post-labor economics where AI manages increasing amounts of production.', tags: ['technology','governance'] },
+      { term: 'Wage Slavery', def: 'The condition where economic survival requires selling labor under exploitative conditions. A motivating concept in liberation-focused economics.', tags: ['labor','philosophy'] },
+      { term: 'Worker Transition', def: 'Programs and policies to support workers displaced by automation, including retraining, income support, and community development.', tags: ['policy','labor'] },
+      { term: 'Working Group', def: 'A self-organized team within the PLE platform focused on a specific topic or project area.', tags: ['platform','governance'] }
+    ].sort((a,b) => a.term.localeCompare(b.term));
+
+    const esc = s => { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; };
+    let activeLetter = null;
+
+    function render(items) {
+      const grouped = {};
+      items.forEach(t => { const l = t.term[0].toUpperCase(); if(!grouped[l]) grouped[l]=[]; grouped[l].push(t); });
+      
+      // Letter nav
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      document.getElementById('letter-nav').innerHTML = letters.map(l => {
+        const has = grouped[l]?.length > 0;
+        return `<button class="letter-btn${has?'':' empty'}${activeLetter===l?' active':''}" ${has?`onclick="jumpTo('${l}')"`:''} ${!has?'disabled':''}>${l}</button>`;
+      }).join('');
+      
+      document.getElementById('term-count').textContent = `${items.length} term${items.length!==1?'s':''}`;
+      
+      let html = '';
+      Object.keys(grouped).sort().forEach(letter => {
+        html += `<h2 class="letter-heading" id="letter-${letter}">${letter}</h2>`;
+        grouped[letter].forEach(t => {
+          html += `<div class="term"><div class="term-name">${esc(t.term)}</div><div class="term-def">${esc(t.def)}</div>
+            <div class="term-tags">${t.tags.map(tag=>`<span class="term-tag">${esc(tag)}</span>`).join('')}</div></div>`;
+        });
+      });
+      document.getElementById('terms').innerHTML = html || '<p style="color:var(--text-muted);padding:2rem 0">No terms match your search.</p>';
+    }
+
+    window.filter = function() {
+      const q = document.getElementById('search').value.toLowerCase().trim();
+      activeLetter = null;
+      render(q ? TERMS.filter(t => t.term.toLowerCase().includes(q) || t.def.toLowerCase().includes(q) || t.tags.some(tag=>tag.includes(q))) : TERMS);
+    };
+
+    window.jumpTo = function(letter) {
+      activeLetter = letter;
+      render(TERMS);
+      document.getElementById('letter-'+letter)?.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+
+    render(TERMS);
+  </script>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="/api/rss" style="color:inherit;">RSS</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
+</body>
+</html>

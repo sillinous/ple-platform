@@ -88,13 +88,13 @@ async function listContent(sql, params, user) {
   let tagMap = {};
   if (contentIds.length > 0) {
     const allTags = await sql`
-      SELECT ct.content_id, t.name FROM content_tags ct
+      SELECT ct.content_id, t.name, t.color FROM content_tags ct
       JOIN tags t ON ct.tag_id = t.id
       WHERE ct.content_id = ANY(${contentIds})
     `;
     for (const row of allTags) {
       if (!tagMap[row.content_id]) tagMap[row.content_id] = [];
-      tagMap[row.content_id].push(row.name);
+      tagMap[row.content_id].push({ name: row.name, color: row.color });
     }
   }
 
@@ -127,10 +127,15 @@ async function getContent(sql, id, user) {
 
   // Get tags
   const tags = await sql`
-    SELECT t.name FROM tags t
+    SELECT t.name, t.color FROM tags t
     JOIN content_tags ct ON t.id = ct.tag_id
     WHERE ct.content_id = ${item.id}
   `;
+
+  // Increment view count (fire-and-forget for published content)
+  if (item.status === 'published') {
+    sql`UPDATE content_items SET view_count = COALESCE(view_count, 0) + 1 WHERE id = ${item.id}`.catch(() => {});
+  }
 
   // Get version count
   const versionCount = await sql`SELECT COUNT(*) as count FROM content_versions WHERE content_id = ${item.id}`;
@@ -145,7 +150,7 @@ async function getContent(sql, id, user) {
 
   return jsonResponse({
     content: formatContent(item),
-    tags: tags.map(t => t.name),
+    tags: tags.map(t => ({ name: t.name, color: t.color })),
     versionCount: parseInt(versionCount[0]?.count || 0),
     comments
   });
@@ -293,7 +298,7 @@ function formatContent(c) {
     author: { id: c.author_id, name: c.author_name, avatar: c.author_avatar },
     reviewer: c.reviewer_id ? { id: c.reviewer_id, name: c.reviewer_name } : null,
     project: c.project_id ? { id: c.project_id, title: c.project_title } : null,
-    featuredImage: c.featured_image,
+    featuredImage: c.featured_image, viewCount: parseInt(c.view_count || 0),
     publishedAt: c.published_at, createdAt: c.created_at, updatedAt: c.updated_at
   };
 }

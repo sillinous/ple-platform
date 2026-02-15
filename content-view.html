@@ -308,6 +308,10 @@
           <i data-lucide="folder" style="width: 16px; height: 16px;"></i>
           <a id="project-link-text" href="#" style="color:inherit;text-decoration:none;border-bottom:1px dashed #ccc"></a>
         </div>
+        <div class="content-meta-item" id="view-count-item" style="display:none">
+          <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+          <span id="view-count">0</span> views
+        </div>
         <div class="content-meta-item" style="margin-left:auto;">
           <button onclick="copyLink()" style="background:none;border:1px solid var(--border-color,#e5e2dd);padding:0.3rem 0.6rem;border-radius:6px;cursor:pointer;font-size:0.8rem;color:var(--text-muted);font-family:inherit;display:flex;align-items:center;gap:0.3rem;" title="Copy link">
             <i data-lucide="link" style="width:14px;height:14px;"></i> Share
@@ -464,9 +468,11 @@
       const words=(item.body||'').split(/\s+/).length;
       document.getElementById('read-time').textContent=`${Math.max(1,Math.ceil(words/200))} min read`;
       if(item.project?.id){const pl=document.getElementById('project-link');pl.style.display='flex';const a=document.getElementById('project-link-text');a.href='project-view.html?id='+item.project.id;a.textContent=item.project.title;}
+      if(item.viewCount>0){document.getElementById('view-count-item').style.display='flex';document.getElementById('view-count').textContent=item.viewCount;}
       document.getElementById('content-html').innerHTML=typeof DOMPurify!=='undefined'?DOMPurify.sanitize(marked.parse(item.body||'')):marked.parse(item.body||'');
       if(item.tags?.length){const tc=document.getElementById('content-tags');
-        tc.innerHTML=item.tags.map(t=>`<span class="content-tag"><i data-lucide="tag" style="width:12px;height:12px"></i> ${escapeHtml(t)}</span>`).join('');
+        tc.innerHTML=item.tags.map(t=>{const name=typeof t==='string'?t:t.name;const color=typeof t==='object'&&t.color?t.color:'#6B7280';
+          return`<span class="content-tag" style="border-left:3px solid ${escapeHtml(color)}"><i data-lucide="tag" style="width:12px;height:12px"></i> ${escapeHtml(name)}</span>`;}).join('');
         tc.style.display='';lucide.createIcons();}
       const canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='editor'||(item.author&&item.author.id===currentUser.id));
       if(canEdit) document.getElementById('content-actions').style.display='';

@@ -314,13 +314,48 @@ export async function initPage() {
     navMenu.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => navMenu.classList.remove('open'));
     });
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (navMenu.classList.contains('open') && !navMenu.contains(e.target) && !e.target.closest('.nav-toggle')) {
         navMenu.classList.remove('open');
       }
     });
   }
+
+  // Dark mode toggle
+  const savedTheme = localStorage.getItem('ple_theme');
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+  if (!document.querySelector('.dark-toggle')) {
+    const btn = document.createElement('button');
+    btn.className = 'dark-toggle';
+    btn.setAttribute('aria-label', 'Toggle dark mode');
+    btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    btn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+      localStorage.setItem('ple_theme', isDark ? '' : 'dark');
+      btn.textContent = isDark ? '🌙' : '☀️';
+    });
+    document.body.appendChild(btn);
+  }
+
+  // Focus trap for modals
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { modal.classList.remove('active'); return; }
+      if (e.key !== 'Tab') return;
+      const focusable = modal.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])');
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  });
+
+  // ARIA: label nav
+  document.querySelectorAll('nav, .nav-container').forEach(n => { if(!n.getAttribute('aria-label')) n.setAttribute('aria-label', 'Main navigation'); });
+  document.querySelectorAll('main, .main-content, [id="main-content"]').forEach(m => m.setAttribute('role', 'main'));
 }
 
 export function updateAuthUI() {

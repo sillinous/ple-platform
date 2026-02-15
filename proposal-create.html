@@ -93,6 +93,12 @@
           <p class="form-hint">Be thorough - good proposals include context, rationale, and implementation details. Supports markdown formatting: **bold**, *italic*, `code`, [links](url), > quotes, ## headings</p>
         </div>
 
+        <div class="form-group">
+          <label class="form-label" for="voting-ends">Voting Deadline (optional)</label>
+          <input type="date" id="voting-ends" name="votingEnds" class="form-input" style="max-width:250px">
+          <p class="form-hint">Set a deadline for when voting closes. Voting begins when the proposal is opened.</p>
+        </div>
+
         <div id="form-error" class="form-error" style="display: none;"></div>
 
         <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -164,6 +170,7 @@
       const elementId = document.getElementById('elementId').value || null;
       const title = document.getElementById('title').value;
       const content = document.getElementById('content').value;
+      const votingEnds = document.getElementById('voting-ends').value || null;
       
       errorDiv.style.display = 'none';
       submitBtn.disabled = true;
@@ -174,7 +181,8 @@
           proposalType,
           elementId,
           title,
-          content
+          content,
+          votingEnds
         });
         
         showToast('Proposal created successfully!', 'success');

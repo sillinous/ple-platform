@@ -461,6 +461,7 @@
           <option value="az">A → Z</option>
           <option value="za">Z → A</option>
         </select>
+        <button onclick="exportCSV()" style="padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.85rem;color:var(--text-secondary,#555);background:white;cursor:pointer" title="Export as CSV">⬇ Export</button>
       </div>
 
       <div class="content-tabs">
@@ -624,7 +625,7 @@
       const sort = document.getElementById('content-sort')?.value || 'newest';
       let items = allContentItems;
       if (q) items = items.filter(c => (c.title||'').toLowerCase().includes(q) || (c.excerpt||'').toLowerCase().includes(q) || (c.contentType||'').toLowerCase().includes(q));
-      if (currentTag) items = items.filter(c => (c.tags||[]).includes(currentTag));
+      if (currentTag) items = items.filter(c => (c.tags||[]).some(t => (typeof t==='string'?t:t.name)===currentTag));
       // Sort
       items = [...items].sort((a,b) => {
         if (sort==='oldest') return new Date(a.createdAt)-new Date(b.createdAt);
@@ -637,7 +638,8 @@
 
       // Build tag filter buttons from available tags
       const allTags = new Set();
-      allContentItems.forEach(c => (c.tags||[]).forEach(t => allTags.add(t)));
+      const tagColors = {};
+      allContentItems.forEach(c => (c.tags||[]).forEach(t => { const name=typeof t==='string'?t:t.name; allTags.add(name); if(typeof t==='object'&&t.color)tagColors[name]=t.color; }));
       const tf = document.getElementById('tag-filters');
       if (allTags.size > 0) {
         tf.innerHTML = `<button onclick="setTagFilter('')" style="padding:0.2rem 0.6rem;border-radius:100px;border:1px solid ${!currentTag?'var(--color-horizon,#1B4D3E)':'var(--border-color,#e5e2dd)'};background:${!currentTag?'rgba(27,77,62,0.08)':'transparent'};color:${!currentTag?'var(--color-horizon,#1B4D3E)':'var(--text-muted,#888)'};font-size:0.75rem;cursor:pointer;font-family:inherit">All Tags</button>` +
@@ -646,6 +648,23 @@
     }
     window.filterContent = function() { renderFilteredContent(); };
     window.sortContent = function() { renderFilteredContent(); };
+    window.exportCSV = function() {
+      const rows = [['Title','Type','Status','Author','Published','URL']];
+      allContent.forEach(c => {
+        rows.push([
+          '"'+(c.title||'').replace(/"/g,'""')+'"',
+          c.contentType||'article', c.status||'draft',
+          '"'+(c.author?.name||'Anonymous')+'"',
+          c.publishedAt?new Date(c.publishedAt).toISOString().split('T')[0]:'',
+          'https://postlaboreconomics.netlify.app/content-view?id='+(c.slug||c.id)
+        ]);
+      });
+      const csv=rows.map(r=>r.join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+      a.download='ple-content-'+new Date().toISOString().split('T')[0]+'.csv';
+      a.click();URL.revokeObjectURL(a.href);
+    };
     window.setTagFilter = function(tag) { currentTag = tag; renderFilteredContent(); };
 
     function renderContentCard(item) {
@@ -694,7 +713,7 @@
             
             ${item.tags && item.tags.length > 0 ? `
               <div class="content-tags">
-                ${item.tags.slice(0, 3).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+                ${item.tags.slice(0, 3).map(t => {const name=typeof t==='string'?t:t.name;return`<span class="tag">${escapeHtml(name)}</span>`;}).join('')}
                 ${item.tags.length > 3 ? `<span class="tag">+${item.tags.length - 3}</span>` : ''}
               </div>
             ` : ''}

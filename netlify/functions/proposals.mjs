@@ -96,7 +96,7 @@ async function getProposal(sql, id) {
 }
 
 async function createProposal(sql, body, user) {
-  const { title, content, proposalType, elementId } = body;
+  const { title, content, proposalType, elementId, votingEnds } = body;
   
   if (!title || !content || !proposalType) {
     return jsonResponse({ error: 'Title, content, and proposal type are required' }, 400);
@@ -105,10 +105,11 @@ async function createProposal(sql, body, user) {
   const id = uuidv4();
   const status = 'draft';
   const elemId = elementId || null;
+  const vEnd = votingEnds || null;
   
   await sql`
-    INSERT INTO proposals (id, title, content, proposal_type, author_id, element_id, status)
-    VALUES (${id}, ${title}, ${content}, ${proposalType}, ${user.id}, ${elemId}, ${status})
+    INSERT INTO proposals (id, title, content, proposal_type, author_id, element_id, status, voting_ends)
+    VALUES (${id}, ${title}, ${content}, ${proposalType}, ${user.id}, ${elemId}, ${status}, ${vEnd})
   `;
   
   await logActivity(user.id, 'proposal_created', 'proposal', id, { title, proposalType });
@@ -117,17 +118,15 @@ async function createProposal(sql, body, user) {
 }
 
 async function updateProposal(sql, body, user) {
-  const { id, title, content, status } = body;
+  const { id, title, content, status, votingEnds } = body;
   if (!id) return jsonResponse({ error: 'Proposal ID is required' }, 400);
   
-  const proposals = await sql`SELECT author_id FROM proposals WHERE id = ${id}`;
+  const proposals = await sql`SELECT author_id, status as current_status FROM proposals WHERE id = ${id}`;
   if (proposals.length === 0) return jsonResponse({ error: 'Proposal not found' }, 404);
   if (proposals[0].author_id !== user.id && user.role !== 'admin') {
     return jsonResponse({ error: 'Not authorized' }, 403);
   }
   
-  // Update with COALESCE to keep existing values if not provided
-  // Authors can open their drafts and withdraw; admins can set any status
   const isAuthor = proposals[0].author_id === user.id;
   let newStatus = null;
   if (status) {
@@ -135,11 +134,17 @@ async function updateProposal(sql, body, user) {
     else if (isAuthor && (status === 'open' || status === 'withdrawn')) newStatus = status;
   }
   
+  // Auto-set voting_starts when opening
+  const setVotingStart = newStatus === 'open' && proposals[0].current_status !== 'open';
+  const vEnd = votingEnds || null;
+  
   await sql`
     UPDATE proposals SET 
       title = COALESCE(${title || null}, title),
       content = COALESCE(${content || null}, content),
       status = COALESCE(${newStatus}, status),
+      voting_starts = CASE WHEN ${setVotingStart} THEN CURRENT_TIMESTAMP ELSE voting_starts END,
+      voting_ends = COALESCE(${vEnd}::timestamp, voting_ends),
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ${id}
   `;

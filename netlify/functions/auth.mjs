@@ -31,6 +31,8 @@ export default async (req, context) => {
       return await handleGetPublicProfile(sql, url.searchParams.get('id'));
     } else if (req.method === 'GET' && action === 'members') {
       return await handleListMembers(sql);
+    } else if (req.method === 'GET' && action === 'leaderboard') {
+      return await handleLeaderboard(sql);
     }
     
     return jsonResponse({ error: 'Invalid action' }, 400);
@@ -223,6 +225,27 @@ async function handleGetPublicProfile(sql, userId) {
       discussions: parseInt(discussionCount[0].c)
     }
   });
+}
+
+async function handleLeaderboard(sql) {
+  const contributors = await sql`
+    SELECT u.id, u.display_name, u.avatar_url, u.role,
+      (SELECT COUNT(*) FROM content_items WHERE author_id = u.id AND status = 'published') as content_count,
+      (SELECT COUNT(*) FROM proposals WHERE author_id = u.id) as proposal_count,
+      (SELECT COUNT(*) FROM discussions WHERE author_id = u.id) as discussion_count,
+      (SELECT COUNT(*) FROM comments WHERE author_id = u.id AND status = 'active') as comment_count,
+      (SELECT COALESCE(SUM(view_count),0) FROM content_items WHERE author_id = u.id AND status = 'published') as total_views
+    FROM users u WHERE u.role != 'system'
+    ORDER BY content_count DESC, proposal_count DESC, discussion_count DESC
+    LIMIT 20
+  `;
+  return jsonResponse({ contributors: contributors.map(c => ({
+    id: c.id, name: c.display_name, avatar: c.avatar_url, role: c.role,
+    contentCount: parseInt(c.content_count), proposalCount: parseInt(c.proposal_count),
+    discussionCount: parseInt(c.discussion_count), commentCount: parseInt(c.comment_count),
+    totalViews: parseInt(c.total_views),
+    score: parseInt(c.content_count)*10 + parseInt(c.proposal_count)*5 + parseInt(c.discussion_count)*3 + parseInt(c.comment_count)
+  }))});
 }
 
 export const config = { path: '/api/auth' };

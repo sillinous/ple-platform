@@ -31,6 +31,7 @@ export default defineConfig({
         community: 'community.html',
         search: 'search.html',
         tags: 'tags.html',
+        glossary: 'glossary.html',
       }
     }
   }

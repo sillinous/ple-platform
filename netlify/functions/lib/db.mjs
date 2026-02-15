@@ -258,6 +258,7 @@ async function runMigrations() {
     version INTEGER DEFAULT 1,
     featured_image TEXT,
     published_at TIMESTAMP,
+    view_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     metadata JSONB DEFAULT '{}'

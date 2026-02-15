@@ -59,6 +59,7 @@
 
       <!-- Voting Section -->
       <div class="vote-section" id="vote-section" style="display: none;">
+        <div id="voting-deadline" style="display:none;padding:0.6rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.85rem;"></div>
         <h3 class="vote-title">Cast Your Vote</h3>
         <div class="vote-buttons" data-auth="logged-in" style="display: none;">
           <button class="vote-btn approve" data-vote="approve">
@@ -164,7 +165,7 @@
               ${currentProposal.element ? `
                 <span class="proposal-meta-item">
                   <i data-lucide="git-branch"></i>
-                  ${currentProposal.element.code}: ${currentProposal.element.title}
+                  <a href="architecture.html?element=${currentProposal.element.id}" style="color:inherit;text-decoration:none;border-bottom:1px dashed currentColor">${currentProposal.element.code}: ${currentProposal.element.title}</a>
                 </span>
               ` : ''}
               <span class="proposal-meta-item" style="margin-left:auto;">
@@ -185,6 +186,26 @@
         setMeta('og:type', 'article');
         setMeta('og:url', window.location.href);
         document.getElementById('vote-section').style.display = 'block';
+        
+        // Show voting deadline if set
+        const dl = document.getElementById('voting-deadline');
+        if (currentProposal.votingEnds) {
+          const end = new Date(currentProposal.votingEnds);
+          const now = new Date();
+          const days = Math.ceil((end - now) / 86400000);
+          if (days > 0 && currentProposal.status === 'open') {
+            dl.style.display = 'block'; dl.style.background = days <= 3 ? '#FEF3C7' : '#E8F5E9';
+            dl.style.color = days <= 3 ? '#92400E' : '#1B5E20';
+            dl.innerHTML = `⏱ Voting closes ${end.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} (${days} day${days!==1?'s':''} remaining)`;
+          } else if (days <= 0 && currentProposal.status === 'open') {
+            dl.style.display = 'block'; dl.style.background = '#FEE2E2'; dl.style.color = '#991B1B';
+            dl.textContent = '⏱ Voting period has ended';
+          }
+          if (currentProposal.votingStarts) {
+            const start = new Date(currentProposal.votingStarts);
+            dl.innerHTML += `<span style="font-size:0.75rem;display:block;margin-top:0.2rem;opacity:0.7">Opened ${start.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`;
+          }
+        }
         
         // Load votes
         loadVotes();
