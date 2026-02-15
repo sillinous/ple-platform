@@ -1,21 +1,24 @@
 /**
  * RSS Feed for published content
  */
-import { getDb } from './lib/db.mjs';
+import { getDb, jsonResponse } from './lib/db.mjs';
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 export default async (req) => {
-  const sql = getDb();
-  const items = await sql`
-    SELECT c.id, c.title, c.slug, c.excerpt, c.content_type, c.published_at, c.created_at,
-           u.display_name as author_name
-    FROM content_items c LEFT JOIN users u ON c.author_id = u.id
-    WHERE c.status = 'published'
-    ORDER BY COALESCE(c.published_at, c.created_at) DESC LIMIT 20
-  `;
+  try {
+    const sql = await getDb();
+    const items = await sql`
+      SELECT c.id, c.title, c.slug, c.excerpt, c.content_type, c.published_at, c.created_at,
+             u.display_name as author_name
+      FROM content_items c LEFT JOIN users u ON c.author_id = u.id
+      WHERE c.status = 'published'
+      ORDER BY COALESCE(c.published_at, c.created_at) DESC LIMIT 20
+    `;
 
-  const base = 'https://postlaboreconomics.netlify.app';
-  const now = new Date().toUTCString();
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    const base = 'https://postlaboreconomics.netlify.app';
+    const now = new Date().toUTCString();
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>Post-Labor Economics</title>
@@ -36,11 +39,12 @@ export default async (req) => {
 </channel>
 </rss>`;
 
-  return new Response(xml, {
-    headers: { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }
-  });
+    return new Response(xml, {
+      headers: { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' }
+    });
+  } catch (e) {
+    return jsonResponse({ error: 'Failed to generate RSS feed', details: e.message }, 500);
+  }
 };
-
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 export const config = { path: '/api/rss' };
