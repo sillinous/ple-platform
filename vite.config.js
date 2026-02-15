@@ -30,6 +30,7 @@ export default defineConfig({
         '404': '404.html',
         community: 'community.html',
         search: 'search.html',
+        tags: 'tags.html',
       }
     }
   }

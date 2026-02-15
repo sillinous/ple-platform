@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse by Tag | Post-Labor Economics</title>
+  <meta name="description" content="Explore PLE content organized by topic tags.">
+  <link rel="icon" type="image/svg+xml" href="/ple-logo.svg">
+  <link rel="alternate" type="application/rss+xml" title="PLE Feed" href="/api/rss">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .tag-cloud{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2rem;}
+    .tag-pill{padding:0.4rem 0.85rem;border-radius:100px;border:1px solid var(--border-color,#e5e2dd);font-size:0.85rem;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--text-secondary,#555);background:white;}
+    .tag-pill:hover,.tag-pill.active{background:var(--color-horizon,#1B4D3E);color:white;border-color:var(--color-horizon,#1B4D3E);}
+    .tag-pill .tag-count{font-size:0.7rem;opacity:0.7;margin-left:0.3rem;}
+    .content-card{background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1.25rem;transition:all 0.15s;cursor:pointer;}
+    .content-card:hover{border-color:var(--color-horizon,#1B4D3E);box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+    .content-card h3{font-family:'Fraunces',serif;font-size:1.1rem;margin-bottom:0.35rem;}
+    .content-card h3 a{color:inherit;text-decoration:none;}
+    .content-card .meta{font-size:0.8rem;color:var(--text-muted,#888);display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.5rem;}
+    .content-card .excerpt{font-size:0.9rem;color:var(--text-secondary,#555);line-height:1.5;margin-top:0.5rem;}
+    .content-card .tags{display:flex;gap:0.35rem;flex-wrap:wrap;margin-top:0.5rem;}
+    .content-card .tag{font-size:0.7rem;padding:0.1rem 0.4rem;border-radius:4px;background:rgba(27,77,62,0.06);color:var(--color-horizon,#1B4D3E);}
+    .results-grid{display:grid;gap:1rem;}
+    .active-tag-banner{background:var(--color-horizon,#1B4D3E);color:white;padding:0.5rem 1rem;border-radius:8px;display:inline-flex;align-items:center;gap:0.5rem;font-size:0.9rem;margin-bottom:1.5rem;}
+    .active-tag-banner button{background:none;border:none;color:white;cursor:pointer;font-size:1.1rem;padding:0 0.25rem;}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="nav-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-symbol">L/0</span> <span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="nav-menu">
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="tags.html" class="nav-link active">Tags</a>
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="login.html" class="nav-link" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="nav-link" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main-content" style="max-width:900px;margin:0 auto;padding:2rem 1.5rem;">
+    <h1 style="font-family:'Fraunces',serif;font-size:2rem;margin-bottom:0.5rem;">Browse by Topic</h1>
+    <p style="color:var(--text-muted);margin-bottom:2rem;">Explore content, discussions, and proposals organized by topic.</p>
+    <div id="tag-cloud" class="tag-cloud"><span style="color:var(--text-muted)">Loading tags...</span></div>
+    <div id="active-filter" style="display:none;"></div>
+    <div id="results" class="results-grid"></div>
+  </main>
+  <script type="module">
+    import { initPage } from './src/scripts/api.js';
+    await initPage();
+
+    let allContent = [];
+    let allTags = {};
+    let activeTag = new URLSearchParams(window.location.search).get('tag') || null;
+
+    async function load() {
+      try {
+        const r = await fetch('/api/content?status=published&limit=200');
+        const d = await r.json();
+        allContent = d.content || [];
+        // Build tag index
+        allContent.forEach(c => {
+          (c.tags || []).forEach(t => {
+            if (!allTags[t]) allTags[t] = [];
+            allTags[t].push(c);
+          });
+        });
+        renderCloud();
+        if (activeTag) filterByTag(activeTag);
+      } catch(e) { document.getElementById('tag-cloud').innerHTML = '<p>Failed to load content.</p>'; }
+    }
+
+    function renderCloud() {
+      const sorted = Object.entries(allTags).sort((a,b) => b[1].length - a[1].length);
+      if (!sorted.length) { document.getElementById('tag-cloud').innerHTML = '<p style="color:var(--text-muted)">No tags found yet.</p>'; return; }
+      document.getElementById('tag-cloud').innerHTML = sorted.map(([tag, items]) =>
+        `<a href="?tag=${encodeURIComponent(tag)}" class="tag-pill ${activeTag===tag?'active':''}" onclick="event.preventDefault();filterByTag('${tag.replace(/'/g,"\\'")}')">${tag}<span class="tag-count">${items.length}</span></a>`
+      ).join('');
+    }
+
+    window.filterByTag = function(tag) {
+      activeTag = activeTag === tag ? null : tag;
+      const url = activeTag ? `?tag=${encodeURIComponent(activeTag)}` : window.location.pathname;
+      history.replaceState(null, '', url);
+      renderCloud();
+      const filter = document.getElementById('active-filter');
+      const results = document.getElementById('results');
+      if (!activeTag) { filter.style.display = 'none'; results.innerHTML = ''; return; }
+      filter.style.display = 'block';
+      filter.innerHTML = `<div class="active-tag-banner">${activeTag} (${allTags[activeTag]?.length || 0} articles)<button onclick="filterByTag('${activeTag.replace(/'/g,"\\'")}')">&times;</button></div>`;
+      const items = allTags[activeTag] || [];
+      results.innerHTML = items.map(c => `
+        <div class="content-card" onclick="window.location='content-view.html?id=${c.slug||c.id}'">
+          <h3><a href="content-view.html?id=${c.slug||c.id}">${esc(c.title)}</a></h3>
+          <div class="excerpt">${esc((c.excerpt || c.body || '').replace(/[#*\`>\[\]]/g,'').substring(0,180))}</div>
+          <div class="tags">${(c.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+          <div class="meta">
+            <span>${c.author?.name || 'Anonymous'}</span>
+            <span>${c.contentType || 'article'}</span>
+            <span>${new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+    load();
+  </script>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="/api/rss" style="color:inherit;">RSS</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
+</body>
+</html>

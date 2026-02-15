@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="src/styles/app.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     .project-hero {
       background: linear-gradient(135deg, var(--color-horizon) 0%, var(--color-horizon-dark) 100%);
@@ -753,6 +754,7 @@
   </style>
 </head>
 <body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
   <!-- Header -->
   <header class="header">
     <div class="header-container">
@@ -771,6 +773,7 @@
       </nav>
       
       <div class="header-actions">
+        <a href="tags.html" class="nav-link">Tags</a>
         <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
         <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
         <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
@@ -822,7 +825,7 @@
     </div>
   </div>
 
-  <main class="main-content" style="padding-top: 0;">
+  <main id="main-content" class="main-content" style="padding-top: 0;">
     <div class="container">
       <div class="project-tabs">
         <button class="tab-btn active" data-tab="overview">Overview</button>
@@ -872,7 +875,7 @@
       <div class="tab-content" id="tab-content">
         <div style="margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
           <p style="font-size:0.9rem;color:var(--text-muted);">Articles and documents linked to this project</p>
-          <a href="content-editor.html" class="btn btn-primary auth-only" style="display:none;">+ Write Content</a>
+          <a id="write-content-link" href="content-editor.html" class="btn btn-primary auth-only" style="display:none;">+ Write Content</a>
         </div>
         <div id="project-content-list"><div class="loading">Loading content...</div></div>
       </div>
@@ -1060,6 +1063,7 @@
       document.getElementById('stat-hours').textContent=totalHours>0?totalHours+'h':'—';
       renderBreakdown(ts,tot); renderActivity(project.activity);
       populateMsSelect(project.milestones); populateSettings();
+      const wcl=document.getElementById('write-content-link');if(wcl)wcl.href=`content-editor.html?project=${projectId}`;
     }
 
     // ── Overview widgets ──
@@ -1151,7 +1155,7 @@
     function openTD(id) {
       const t=findTask(id);if(!t)return;const m=document.getElementById('task-detail-modal');
       m.querySelector('.td-title').textContent=t.title;
-      m.querySelector('.td-desc').innerHTML=t.description?(typeof marked!=='undefined'?marked.parse(t.description):esc(t.description)):'<em style="color:var(--text-muted)">No description.</em>';
+      m.querySelector('.td-desc').innerHTML=t.description?(typeof marked!=='undefined'?typeof DOMPurify!=='undefined'?DOMPurify.sanitize(marked.parse(t.description)):marked.parse(t.description):esc(t.description)):'<em style="color:var(--text-muted)">No description.</em>';
       m.querySelector('.td-status').textContent=cap(t.status); m.querySelector('.td-status').className=`td-status status-badge status-${t.status}`;
       m.querySelector('.td-priority').textContent=cap(t.priority); m.querySelector('.td-priority').className=`td-priority task-priority priority-${t.priority}`;
       m.querySelector('.td-milestone').textContent=t.milestone?.title||'None';
@@ -1262,11 +1266,15 @@
       const g=document.getElementById('team-grid');
       let html=`<div class="member-card"><div class="member-avatar">${(project.owner?.name||'O').split(' ').map(n=>n[0]).join('').toUpperCase()}</div>
         <div class="member-info"><div class="member-name">${esc(project.owner?.name||'Unknown')}</div><div class="member-role">Project Owner</div></div></div>`;
-      if(groups.length) html+=groups.map(gr=>`<div class="member-card">
+      if(groups.length) html+=groups.map(gr=>{
+        const isOwner = currentUser && (project.owner?.id===currentUser.id || currentUser.role==='admin');
+        return`<div class="member-card">
         <div class="member-avatar" style="background:var(--color-sage);font-size:0.85rem">${gr.member_count||0}</div>
         <div class="member-info"><div class="member-name">${esc(gr.name)}</div><div class="member-role">${gr.member_count||0} members · ${cap(gr.status)}</div>
         ${gr.description?`<div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem">${esc(gr.description)}</div>`:''}</div>
-        ${currentUser?`<div style="display:flex;gap:0.5rem"><button class="btn-icon" onclick="editGrp('${gr.id}')" title="Edit">✏️</button><button class="btn-icon" onclick="delGrp('${gr.id}')" title="Delete">🗑️</button></div>`:''}</div>`).join('');
+        <div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end">
+          ${currentUser?`<button class="btn btn-ghost" style="font-size:0.75rem;padding:0.2rem 0.6rem" onclick="toggleGroup('${gr.id}')" id="grp-join-${gr.id}">Join</button>`:''}
+          ${isOwner?`<div style="display:flex;gap:0.35rem"><button class="btn-icon" onclick="editGrp('${gr.id}')" title="Edit">✏️</button><button class="btn-icon" onclick="delGrp('${gr.id}')" title="Delete">🗑️</button></div>`:''}</div></div>`}).join('');
       g.innerHTML=html;
     }
     function openGrpModal(edit=null){const f=document.getElementById('grp-form');f.reset();
@@ -1287,6 +1295,16 @@
     async function delGrp(id){if(!confirm('Delete this working group?'))return;
       const r=await fetch(`/api/groups/${id}`,{method:'DELETE',headers:authH()});
       if(r.ok){toast('Group deleted');loadProject();}else alert('Failed to delete');}
+    async function toggleGroup(id){
+      try{const r=await fetch(`/api/groups/${id}`,{method:'POST',headers:authH(),body:JSON.stringify({action:'join'})});
+        if(r.ok){const d=await r.json();toast(d.message||'Updated');loadProject();}
+        else{const d=await r.json();
+          if(d.error?.includes('already')){
+            const r2=await fetch(`/api/groups/${id}`,{method:'POST',headers:authH(),body:JSON.stringify({action:'leave'})});
+            if(r2.ok){toast('Left group');loadProject();}else toast('Failed','error');
+          }else toast(d.error||'Failed','error');}
+      }catch(e){toast('Failed','error');}
+    }
 
     // ═══ ACTIVITY ═══
     function renderActivity(acts) {
@@ -1326,6 +1344,6 @@
       hint.style.color=d<0?'#DC2626':'var(--text-muted)';
     });
   </script>
-<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a> · <a href="/api/rss" style="color:inherit;">RSS</a></div></footer>
 </body>
 </html>

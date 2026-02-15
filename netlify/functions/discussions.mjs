@@ -35,6 +35,7 @@ export default async (req, context) => {
 async function listDiscussions(sql, params) {
   const proposalId = params.get('proposalId') || null;
   const elementId = params.get('elementId') || null;
+  const authorId = params.get('authorId') || null;
   const limit = Math.min(parseInt(params.get('limit') || '20'), 100);
   const offset = parseInt(params.get('offset') || '0');
   
@@ -46,12 +47,14 @@ async function listDiscussions(sql, params) {
     WHERE d.parent_id IS NULL AND d.status = 'active'
       AND (${proposalId}::uuid IS NULL OR d.proposal_id = ${proposalId}::uuid)
       AND (${elementId}::uuid IS NULL OR d.element_id = ${elementId}::uuid)
+      AND (${authorId}::uuid IS NULL OR d.author_id = ${authorId}::uuid)
     ORDER BY d.created_at DESC 
     LIMIT ${limit} OFFSET ${offset}
   `,
     sql`SELECT COUNT(*) as count FROM discussions WHERE parent_id IS NULL AND status = 'active'
       AND (${proposalId}::uuid IS NULL OR proposal_id = ${proposalId}::uuid)
-      AND (${elementId}::uuid IS NULL OR element_id = ${elementId}::uuid)`
+      AND (${elementId}::uuid IS NULL OR element_id = ${elementId}::uuid)
+      AND (${authorId}::uuid IS NULL OR author_id = ${authorId}::uuid)`
   ]);
   
   const total = parseInt(countResult[0]?.count || 0);

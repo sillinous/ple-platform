@@ -15,6 +15,8 @@ export default async (req, context) => {
 
     if (req.method === 'GET') {
       const id = url.searchParams.get('id');
+      const action = url.searchParams.get('action');
+      if (action === 'versions' && id) return await getVersionHistory(sql, id);
       return id ? await getContent(sql, id, user) : await listContent(sql, url.searchParams, user);
     }
 
@@ -294,6 +296,18 @@ function formatContent(c) {
     featuredImage: c.featured_image,
     publishedAt: c.published_at, createdAt: c.created_at, updatedAt: c.updated_at
   };
+}
+
+async function getVersionHistory(sql, contentId) {
+  const versions = await sql`
+    SELECT cv.id, cv.version_number, cv.title, cv.change_summary,
+           cv.created_at, u.display_name as editor_name
+    FROM content_versions cv
+    LEFT JOIN users u ON cv.edited_by = u.id
+    WHERE cv.content_id = ${contentId}
+    ORDER BY cv.version_number DESC
+  `;
+  return jsonResponse({ versions });
 }
 
 export const config = { path: '/api/content' };

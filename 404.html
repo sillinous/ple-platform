@@ -32,9 +32,17 @@
   <p>The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
   <div class="actions">
     <a href="/" class="btn primary">Go Home</a>
+    <a href="/search" class="btn ghost">Search</a>
     <a href="/content" class="btn ghost">Browse Content</a>
-    <a href="/projects" class="btn ghost">View Projects</a>
   </div>
+  <div id="suggestions" style="margin-top:3rem;text-align:left;max-width:400px;width:100%;"></div>
+  <script>
+    fetch('/api/content?status=published&limit=4').then(r=>r.json()).then(d=>{
+      const items=d.content||[];if(!items.length)return;
+      document.getElementById('suggestions').innerHTML='<h3 style="font-family:Fraunces,serif;font-size:1rem;margin-bottom:0.75rem;color:#333;">Recent from the community</h3>'+
+        items.map(c=>'<a href="/content-view?id='+(c.slug||c.id)+'" style="display:block;padding:0.5rem 0;border-bottom:1px solid #eee;text-decoration:none;color:inherit;font-size:0.9rem;"><span style="font-weight:500;">'+c.title+'</span><br><span style="font-size:0.75rem;color:#888;">'+(c.author?.name||'Anonymous')+' · '+(c.contentType||'article')+'</span></a>').join('');
+    }).catch(()=>{});
+  </script>
 <footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
 </body>
 </html>

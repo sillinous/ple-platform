@@ -820,3 +820,7 @@
   .vote-buttons { flex-direction: column; }
   .dashboard-grid { grid-template-columns: 1fr; }
 }
+
+/* Skip Navigation */
+.skip-nav{position:absolute;top:-100%;left:50%;transform:translateX(-50%);background:var(--color-horizon,#1B4D3E);color:white;padding:0.5rem 1.5rem;border-radius:0 0 8px 8px;z-index:10000;font-size:0.85rem;text-decoration:none;transition:top 0.2s;}
+.skip-nav:focus{top:0;}

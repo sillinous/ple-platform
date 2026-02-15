@@ -106,6 +106,16 @@
           <div class="contrib-list" id="published-list"></div>
         </div>
 
+        <div id="proposals-section" style="display:none">
+          <h3 class="section-label">Proposals</h3>
+          <div class="contrib-list" id="proposals-list"></div>
+        </div>
+
+        <div id="discussions-section" style="display:none">
+          <h3 class="section-label">Discussions</h3>
+          <div class="contrib-list" id="discussions-list"></div>
+        </div>
+
         <h3 class="section-label">Recent Activity</h3>
         <div class="contrib-list" id="activity-list"><div class="empty-note">Loading...</div></div>
 
@@ -140,7 +150,7 @@
       if(viewId && (!currentUser || viewId!==currentUser.id)){
         isOwn=false; await loadPublicProfile(viewId);
       } else if(currentUser && (!viewId || viewId===currentUser.id)){
-        isOwn=true; profileUser=currentUser; render(); loadOwnStats(); loadPublished(currentUser.id); loadActivity(currentUser.id);
+        isOwn=true; profileUser=currentUser; render(); loadOwnStats(); loadPublished(currentUser.id); loadProposals(currentUser.id); loadDiscussions(currentUser.id); loadActivity(currentUser.id);
       } else if(viewId){
         isOwn=false; await loadPublicProfile(viewId);
       } else { window.location='login.html?redirect=profile.html'; }
@@ -152,7 +162,7 @@
         document.getElementById('c-content').textContent=data.stats?.content||0;
         document.getElementById('c-proposals').textContent=data.stats?.proposals||0;
         document.getElementById('c-discussions').textContent=data.stats?.discussions||0;
-        loadPublished(uid); loadActivity(uid);
+        loadPublished(uid); loadProposals(uid); loadDiscussions(uid); loadActivity(uid);
       }catch(e){showErr();}
     }
 
@@ -195,6 +205,22 @@
       }catch(e){}
     }
 
+    async function loadProposals(uid){
+      try{const r=await fetch('/api/proposals?authorId='+uid+'&limit=20');const d=await r.json();
+        const items=(d.proposals||[]).filter(p=>p.author?.id===uid);
+        const sec=document.getElementById('proposals-section');const el=document.getElementById('proposals-list');
+        if(!items.length)return;sec.style.display='block';
+        el.innerHTML=items.map(p=>'<a href="proposal-view.html?id='+p.id+'" class="contrib-item" style="text-decoration:none;color:inherit;display:block;"><div class="contrib-item-title">'+esc(p.title)+'</div><div class="contrib-item-meta"><span class="item-badge badge-'+p.status+'">'+cap(p.status)+'</span> · '+fmtRel(p.createdAt)+'</div></a>').join('');
+      }catch(e){}
+    }
+    async function loadDiscussions(uid){
+      try{const r=await fetch('/api/discussions?authorId='+uid+'&limit=20');const d=await r.json();
+        const items=d.discussions||[];
+        const sec=document.getElementById('discussions-section');const el=document.getElementById('discussions-list');
+        if(!items.length)return;sec.style.display='block';
+        el.innerHTML=items.map(disc=>'<a href="discussion-view.html?id='+disc.id+'" class="contrib-item" style="text-decoration:none;color:inherit;display:block;"><div class="contrib-item-title">'+esc(disc.title||'Untitled')+'</div><div class="contrib-item-meta">'+cap(disc.discussion_type||'general')+' · '+(disc.reply_count||0)+' replies · '+fmtRel(disc.created_at)+'</div></a>').join('');
+      }catch(e){}
+    }
     async function loadActivity(uid){
       try{const r=await fetch('/api/activity?userId='+uid+'&limit=10',{headers:authH()});const d=await r.json();
         const el=document.getElementById('activity-list');

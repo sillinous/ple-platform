@@ -87,6 +87,7 @@
   </style>
 </head>
 <body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
   <header class="header">
     <div class="header-container">
       <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
@@ -99,6 +100,7 @@
         <a href="architecture.html" class="nav-link">Architecture</a>
       </nav>
       <div class="header-actions">
+        <a href="tags.html" class="nav-link">Tags</a>
         <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
         <a href="profile.html" class="nav-link" data-user-name style="text-decoration:none"></a>
         <button class="btn btn-ghost" id="logout-btn">Sign Out</button>
@@ -106,7 +108,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
     <div class="dash-container">
       <div class="dash-hero">
         <h1>Welcome back, <span data-user-name>Member</span></h1>
@@ -144,11 +146,13 @@
             <button class="work-tab" data-panel="projects-panel">Projects <span class="tab-count" id="cnt-projects">0</span></button>
             <button class="work-tab" data-panel="tasks-panel">My Tasks <span class="tab-count" id="cnt-tasks">0</span></button>
             <button class="work-tab" data-panel="proposals-panel">Proposals <span class="tab-count" id="cnt-proposals">0</span></button>
+            <button class="work-tab" data-panel="saved-panel">Saved <span class="tab-count" id="cnt-saved">0</span></button>
           </div>
           <div class="work-panel active" id="content-panel"><div id="content-list"><div class="empty-work"><p>Loading...</p></div></div></div>
           <div class="work-panel" id="projects-panel"><div id="projects-list"><div class="empty-work"><p>Loading...</p></div></div></div>
           <div class="work-panel" id="tasks-panel"><div id="tasks-list"><div class="empty-work"><p>Loading...</p></div></div></div>
           <div class="work-panel" id="proposals-panel"><div id="proposals-list"><div class="empty-work"><p>Loading...</p></div></div></div>
+          <div class="work-panel" id="saved-panel"><div id="saved-list"><div class="empty-work"><p>Loading...</p></div></div></div>
         </div>
 
         <div>
@@ -227,6 +231,7 @@
 
     async function loadAll() {
       await Promise.allSettled([loadContent(), loadProjects(), loadTasks(), loadProposals(), loadStats(), loadActivity()]);
+      loadSaved();
       showWelcomeIfNew();
     }
 
@@ -365,7 +370,21 @@
     // Stats
     async function loadStats() {
       try { const r=await fetch('/api/discussions?limit=1',{headers:authH()}); const d=await r.json(); document.getElementById('s-discussions').textContent=d.total||0; } catch(e) {}
+
     }
+    function loadSaved() {
+      try{const bm=JSON.parse(localStorage.getItem('ple_bookmarks')||'[]');
+        document.getElementById('cnt-saved').textContent=bm.length;
+        const el=document.getElementById('saved-list');
+        if(!bm.length){el.innerHTML='<div class="empty-work"><i data-lucide="bookmark"></i><p>No saved articles yet</p><p style="font-size:0.8rem;color:var(--text-muted)">Use the Save button on articles to bookmark them here</p></div>';lucide.createIcons();return;}
+        el.innerHTML=bm.map(b=>`<a href="content-view.html?id=${b.slug||b.id}" class="item-card">
+          <div class="item-row"><div style="flex:1">
+            <div class="item-title">${esc(b.title)}</div>
+            <div class="item-meta"><span style="font-size:0.75rem;color:var(--text-muted)">Saved ${new Date(b.savedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>
+          </div><button onclick="event.preventDefault();event.stopPropagation();removeSaved('${b.id}')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:0.8rem" title="Remove">✕</button></div></a>`).join('');
+      }catch(e){document.getElementById('saved-list').innerHTML='<div class="empty-work"><p>Unable to load saved items</p></div>';}
+    }
+    window.removeSaved=function(id){try{let bm=JSON.parse(localStorage.getItem('ple_bookmarks')||'[]');bm=bm.filter(b=>b.id!==id);localStorage.setItem('ple_bookmarks',JSON.stringify(bm));loadSaved();}catch(e){}};
 
     // Attention: drafts, items in review (for editors)
     function checkAttention(allContent) {
