@@ -135,6 +135,8 @@ async function getContent(sql, id, user) {
   // Increment view count (fire-and-forget for published content)
   if (item.status === 'published') {
     sql`UPDATE content_items SET view_count = COALESCE(view_count, 0) + 1 WHERE id = ${item.id}`.catch(() => {});
+    // Try to add column if it doesn't exist
+    sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS view_count INTEGER DEFAULT 0`.catch(() => {});
   }
 
   // Get version count

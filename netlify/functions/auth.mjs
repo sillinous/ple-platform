@@ -228,17 +228,34 @@ async function handleGetPublicProfile(sql, userId) {
 }
 
 async function handleLeaderboard(sql) {
-  const contributors = await sql`
-    SELECT u.id, u.display_name, u.avatar_url, u.role,
-      (SELECT COUNT(*) FROM content_items WHERE author_id = u.id AND status = 'published') as content_count,
-      (SELECT COUNT(*) FROM proposals WHERE author_id = u.id) as proposal_count,
-      (SELECT COUNT(*) FROM discussions WHERE author_id = u.id) as discussion_count,
-      (SELECT COUNT(*) FROM comments WHERE author_id = u.id AND status = 'active') as comment_count,
-      (SELECT COALESCE(SUM(view_count),0) FROM content_items WHERE author_id = u.id AND status = 'published') as total_views
-    FROM users u WHERE u.role != 'system'
-    ORDER BY content_count DESC, proposal_count DESC, discussion_count DESC
-    LIMIT 20
-  `;
+  // Use COALESCE to handle missing view_count column gracefully
+  let contributors;
+  try {
+    contributors = await sql`
+      SELECT u.id, u.display_name, u.avatar_url, u.role,
+        (SELECT COUNT(*) FROM content_items WHERE author_id = u.id AND status = 'published') as content_count,
+        (SELECT COUNT(*) FROM proposals WHERE author_id = u.id) as proposal_count,
+        (SELECT COUNT(*) FROM discussions WHERE author_id = u.id) as discussion_count,
+        (SELECT COUNT(*) FROM comments WHERE author_id = u.id AND status = 'active') as comment_count,
+        (SELECT COALESCE(SUM(view_count),0) FROM content_items WHERE author_id = u.id AND status = 'published') as total_views
+      FROM users u WHERE u.role != 'system'
+      ORDER BY content_count DESC, proposal_count DESC, discussion_count DESC
+      LIMIT 20
+    `;
+  } catch(e) {
+    // Fallback if view_count column doesn't exist yet
+    contributors = await sql`
+      SELECT u.id, u.display_name, u.avatar_url, u.role,
+        (SELECT COUNT(*) FROM content_items WHERE author_id = u.id AND status = 'published') as content_count,
+        (SELECT COUNT(*) FROM proposals WHERE author_id = u.id) as proposal_count,
+        (SELECT COUNT(*) FROM discussions WHERE author_id = u.id) as discussion_count,
+        (SELECT COUNT(*) FROM comments WHERE author_id = u.id AND status = 'active') as comment_count,
+        0 as total_views
+      FROM users u WHERE u.role != 'system'
+      ORDER BY content_count DESC, proposal_count DESC, discussion_count DESC
+      LIMIT 20
+    `;
+  }
   return jsonResponse({ contributors: contributors.map(c => ({
     id: c.id, name: c.display_name, avatar: c.avatar_url, role: c.role,
     contentCount: parseInt(c.content_count), proposalCount: parseInt(c.proposal_count),
