@@ -170,7 +170,7 @@
             <div id="attention-list"></div>
           </div>
           <div class="sidebar-card">
-            <div class="section-head"><h4>Recent Activity</h4></div>
+            <div class="section-head"><h4>Recent Activity</h4><a href="activity.html" style="font-size:0.8rem;color:var(--color-horizon,#1B4D3E)">View All →</a></div>
             <div id="activity-feed"><p style="font-size:0.85rem;color:var(--text-muted)">Loading...</p></div>
           </div>
         </div>
@@ -390,14 +390,30 @@
     function checkAttention(allContent) {
       const isEditor = currentUser.role==='admin'||currentUser.role==='editor';
       const items = [];
+      // Content needing review (editors/admins)
       if (isEditor) {
-        allContent.filter(c=>c.status==='in_review').forEach(c=>items.push({label:c.title, href:`content-view.html?id=${c.slug||c.id}`, action:'Review'}));
+        allContent.filter(c=>c.status==='in_review').forEach(c=>items.push({label:c.title, href:`content-view.html?id=${c.slug||c.id}`, action:'Review', icon:'📝'}));
       }
-      allContent.filter(c=>c.author?.id===currentUser.id&&c.status==='draft').forEach(c=>items.push({label:c.title, href:`content-editor.html?id=${c.id}`, action:'Continue'}));
+      // Own drafts
+      allContent.filter(c=>c.author?.id===currentUser.id&&c.status==='draft').forEach(c=>items.push({label:c.title, href:`content-editor.html?id=${c.id}`, action:'Continue', icon:'✏️'}));
+
+      // Fetch open proposals for admin attention
+      fetch('/api/proposals?status=open&limit=10',{headers:authH()}).then(r=>r.json()).then(pd=>{
+        const proposals=pd.proposals||[];
+        if(isEditor){
+          // Proposals with expired voting
+          proposals.filter(p=>p.votingEnds&&new Date(p.votingEnds)<new Date()).forEach(p=>items.push({label:p.title, href:`proposal-view.html?id=${p.id}`, action:'Decide', icon:'⏱'}));
+          // Open proposals needing votes
+          proposals.filter(p=>!p.votingEnds||new Date(p.votingEnds)>=new Date()).slice(0,3).forEach(p=>items.push({label:p.title, href:`proposal-view.html?id=${p.id}`, action:'Vote', icon:'🗳'}));
+        }
+        renderAttention(items);
+      }).catch(()=>renderAttention(items));
+    }
+    function renderAttention(items) {
       const card=document.getElementById('attention-card');
       if(!items.length){card.style.display='none';return;}
       card.style.display='';
-      document.getElementById('attention-list').innerHTML=items.map(i=>`<div class="review-item"><span class="review-title">${esc(i.label)}</span><a href="${i.href}" class="review-action">${i.action} →</a></div>`).join('');
+      document.getElementById('attention-list').innerHTML=items.map(i=>`<div class="review-item"><span class="review-title">${i.icon||''} ${esc(i.label)}</span><a href="${i.href}" class="review-action">${i.action} →</a></div>`).join('');
     }
 
     // Activity

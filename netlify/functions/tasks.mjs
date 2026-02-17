@@ -44,6 +44,7 @@ async function listTasks(sql, params, user) {
   const milestoneId = params.get('milestoneId') || null;
   const status = params.get('status') || null;
   const assignee = params.get('assignedTo') || null;
+  const parentId = params.get('parent_id') || null;
   const view = params.get('view') || 'list';
   const limit = Math.min(parseInt(params.get('limit') || '100'), 200);
   const offset = parseInt(params.get('offset') || '0');
@@ -63,7 +64,8 @@ async function listTasks(sql, params, user) {
     LEFT JOIN users u ON t.assigned_to = u.id
     LEFT JOIN users creator ON t.created_by = creator.id
     LEFT JOIN milestones m ON t.milestone_id = m.id
-    WHERE t.parent_task_id IS NULL
+    WHERE (${parentId}::uuid IS NOT NULL AND t.parent_task_id = ${parentId}::uuid
+           OR ${parentId}::uuid IS NULL AND t.parent_task_id IS NULL)
       AND (${projectId}::uuid IS NULL OR t.project_id = ${projectId}::uuid)
       AND (${milestoneId}::uuid IS NULL OR t.milestone_id = ${milestoneId}::uuid)
       AND (${status}::text IS NULL OR t.status = ${status})

@@ -956,6 +956,23 @@
       <div class="td-subtask-section" style="display:none;margin-bottom:1rem">
         <div style="font-size:0.8rem;font-weight:600;margin-bottom:0.5rem;color:var(--text-muted)">Subtask Progress</div>
         <div style="background:var(--bg-secondary,#f5f3f0);border-radius:8px;height:6px;overflow:hidden"><div class="td-subtask-bar" style="height:100%;background:var(--color-horizon,#1B4D3E);border-radius:8px;transition:width 0.3s"></div></div>
+        <div class="td-subtask-list" style="margin-top:0.75rem"></div>
+      </div>
+      <div class="td-add-subtask" style="display:none;margin-bottom:1rem">
+        <div style="display:flex;gap:0.5rem">
+          <input type="text" class="td-subtask-input" placeholder="Add subtask..." style="flex:1;padding:0.4rem 0.75rem;border:1px dashed var(--border-color,#ddd);border-radius:6px;font-family:inherit;font-size:0.85rem">
+          <button onclick="addSubtask()" class="btn btn-secondary" style="font-size:0.8rem;padding:0.4rem 0.75rem">Add</button>
+        </div>
+      </div>
+      <div class="td-comments-section" style="margin-top:1rem;border-top:1px solid var(--border-color,#eee);padding-top:1rem">
+        <div style="font-size:0.8rem;font-weight:600;margin-bottom:0.75rem;color:var(--text-muted)">Comments</div>
+        <div class="td-comments-list" style="max-height:200px;overflow-y:auto"></div>
+        <div class="td-comment-form" style="display:none;margin-top:0.5rem">
+          <div style="display:flex;gap:0.5rem">
+            <input type="text" class="td-comment-input" placeholder="Add a comment..." style="flex:1;padding:0.4rem 0.75rem;border:1px solid var(--border-color,#ddd);border-radius:6px;font-family:inherit;font-size:0.85rem">
+            <button onclick="postTaskComment()" class="btn btn-primary" style="font-size:0.8rem;padding:0.4rem 0.75rem">Post</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer td-actions"></div>
@@ -1165,15 +1182,31 @@
       m.querySelector('.td-created').textContent=fmtRel(t.createdAt);
       // Subtasks
       const subSec=m.querySelector('.td-subtask-section');
+      const addSubSec=m.querySelector('.td-add-subtask');
       if(t.subtaskCount>0){
         m.querySelector('.td-subtasks').textContent=`${t.completedSubtasks} / ${t.subtaskCount} done`;
         const pct=Math.round(t.completedSubtasks/t.subtaskCount*100);
         m.querySelector('.td-subtask-bar').style.width=pct+'%';
         subSec.style.display='block';
+        // Load subtask list
+        loadSubtasks(t.id, m.querySelector('.td-subtask-list'));
       }else{
         m.querySelector('.td-subtasks').textContent='None';
+        m.querySelector('.td-subtask-list').innerHTML='';
         subSec.style.display='none';
       }
+      // Show add-subtask for logged in users
+      if(currentUser){addSubSec.style.display='block';addSubSec.dataset.parentId=t.id;
+        const inp=addSubSec.querySelector('.td-subtask-input');inp.value='';
+        inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addSubtask();}};
+      }else{addSubSec.style.display='none';}
+      // Comments
+      const commentSec=m.querySelector('.td-comments-section');
+      if(currentUser)m.querySelector('.td-comment-form').style.display='block';
+      commentSec.dataset.taskId=t.id;
+      m.querySelector('.td-comment-input').value='';
+      m.querySelector('.td-comment-input').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();postTaskComment();}};
+      loadTaskComments(t.id, m.querySelector('.td-comments-list'));
       const bar=m.querySelector('.td-status-bar');
       bar.innerHTML=currentUser?['backlog','todo','in_progress','review','done'].map(s=>`<button class="status-quick-btn ${s===t.status?'active':''}" onclick="quickStat('${t.id}','${s}')">${cap(s)}</button>`).join(''):'';
       m.querySelector('.td-actions').innerHTML=currentUser?`<button class="btn btn-secondary" onclick="editTask('${t.id}')">Edit</button><button class="btn btn-danger" onclick="delTask('${t.id}')">Delete</button>`:'';
@@ -1181,6 +1214,66 @@
     }
     async function quickStat(id,s){await fetch('/api/tasks',{method:'PUT',headers:authH(),body:JSON.stringify({id,status:s})});closeModal('task-detail-modal');loadTasks();loadProject();}
     function editTask(id){const t=findTask(id);if(!t)return;closeModal('task-detail-modal');openTaskModal(t.status,t);}
+
+    // ═══ SUBTASKS ═══
+    async function loadSubtasks(parentId, container) {
+      try{const r=await fetch(`/api/tasks?parent_id=${parentId}`,{headers:authH()});const d=await r.json();
+        const subs=d.tasks||[];
+        if(!subs.length){container.innerHTML='';return;}
+        container.innerHTML=subs.map(s=>`<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;font-size:0.85rem">
+          <input type="checkbox" ${s.status==='done'?'checked':''} onchange="toggleSubtask('${s.id}','${s.status==='done'?'todo':'done'}')" style="cursor:pointer">
+          <span style="${s.status==='done'?'text-decoration:line-through;color:var(--text-muted)':''}">${esc(s.title)}</span>
+          ${currentUser?`<button onclick="delSubtask('${s.id}')" style="margin-left:auto;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.7rem" title="Remove">✕</button>`:''}</div>`).join('');
+      }catch(e){container.innerHTML='<span style="font-size:0.8rem;color:var(--text-muted)">Failed to load subtasks</span>';}
+    }
+    async function addSubtask() {
+      const sec=document.querySelector('.td-add-subtask');
+      const inp=sec.querySelector('.td-subtask-input');
+      const title=inp.value.trim();if(!title)return;
+      const parentId=sec.dataset.parentId;
+      try{const r=await fetch('/api/tasks',{method:'POST',headers:authH(),body:JSON.stringify({project_id:projectId,title,status:'todo',parent_task_id:parentId})});
+        if(r.ok){inp.value='';toast('Subtask added');const t=findTask(parentId);if(t){t.subtaskCount=(t.subtaskCount||0)+1;}
+          loadSubtasks(parentId, document.querySelector('.td-subtask-list'));
+          const sec2=document.querySelector('.td-subtask-section');sec2.style.display='block';
+          document.querySelector('.td-subtasks').textContent=`${t?.completedSubtasks||0} / ${t?.subtaskCount||1} done`;
+        }else{const e=await r.json();toast(e.error||'Failed','error');}
+      }catch(e){toast('Failed to add subtask','error');}
+    }
+    async function toggleSubtask(id,status){
+      await fetch('/api/tasks',{method:'PUT',headers:authH(),body:JSON.stringify({id,status})});
+      loadTasks();loadProject();
+      const parentId=document.querySelector('.td-add-subtask').dataset.parentId;
+      if(parentId)loadSubtasks(parentId, document.querySelector('.td-subtask-list'));
+    }
+    async function delSubtask(id){
+      if(!confirm('Remove this subtask?'))return;
+      await fetch(`/api/tasks?id=${id}`,{method:'DELETE',headers:authH()});
+      const parentId=document.querySelector('.td-add-subtask').dataset.parentId;
+      if(parentId){loadSubtasks(parentId, document.querySelector('.td-subtask-list'));loadTasks();loadProject();}
+    }
+
+    // ═══ TASK COMMENTS ═══
+    async function loadTaskComments(taskId, container) {
+      try{const r=await fetch(`/api/comments?entity_type=task&entity_id=${taskId}`,{headers:authH()});const d=await r.json();
+        const comments=d.comments||[];
+        if(!comments.length){container.innerHTML='<span style="font-size:0.8rem;color:var(--text-muted);font-style:italic">No comments yet</span>';return;}
+        container.innerHTML=comments.map(c=>{
+          const ini=(c.author_name||'?').split(' ').map(n=>n[0]).join('').toUpperCase();
+          return`<div style="display:flex;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid var(--border-color,#eee);font-size:0.85rem">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--color-horizon);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.55rem;font-weight:600;flex-shrink:0">${ini}</div>
+            <div style="flex:1;min-width:0"><div><strong style="font-size:0.8rem">${esc(c.author_name||'Anonymous')}</strong> <span style="color:var(--text-muted);font-size:0.7rem">${fmtRel(c.created_at)}</span></div>
+            <div style="margin-top:0.15rem;color:var(--text-secondary);line-height:1.5">${esc(c.body)}</div></div></div>`}).join('');
+      }catch(e){container.innerHTML='<span style="font-size:0.8rem;color:var(--text-muted)">Failed to load comments</span>';}
+    }
+    async function postTaskComment() {
+      const taskId=document.querySelector('.td-comments-section').dataset.taskId;
+      const inp=document.querySelector('.td-comment-input');
+      const body=inp.value.trim();if(!body)return;
+      try{const r=await fetch('/api/comments',{method:'POST',headers:authH(),body:JSON.stringify({entity_type:'task',entity_id:taskId,body})});
+        if(r.ok){inp.value='';toast('Comment posted');loadTaskComments(taskId, document.querySelector('.td-comments-list'));}
+        else{const e=await r.json();toast(e.error||'Failed','error');}
+      }catch(e){toast('Failed to post comment','error');}
+    }
     async function delTask(id){if(!confirm('Delete this task?'))return;
       const r=await fetch(`/api/tasks?id=${id}`,{method:'DELETE',headers:authH()});
       if(r.ok){closeModal('task-detail-modal');toast('Task deleted');loadTasks();loadProject();}else{const e=await r.json();alert(e.error||'Failed');}}

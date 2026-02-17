@@ -841,3 +841,13 @@
 [data-theme="dark"] .btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-color); }
 .dark-toggle { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-color,#ddd); background: var(--bg-secondary,white); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 999; transition: all 0.2s; font-size: 1rem; }
 .dark-toggle:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
+/* Skeleton loading states */
+.skeleton{background:linear-gradient(90deg,var(--bg-secondary,#f5f3f0) 25%,#e8e5e0 50%,var(--bg-secondary,#f5f3f0) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-card{height:120px;margin-bottom:1rem;border-radius:12px;}
+.skeleton-line{height:14px;margin-bottom:0.5rem;border-radius:4px;}
+.skeleton-line.short{width:60%;}
+.skeleton-line.med{width:80%;}
+.skeleton-circle{width:40px;height:40px;border-radius:50%;}
+[data-theme="dark"] .skeleton{background:linear-gradient(90deg,var(--bg-secondary,#16213e) 25%,#1e2a3a 50%,var(--bg-secondary,#16213e) 75%);background-size:200% 100%;}

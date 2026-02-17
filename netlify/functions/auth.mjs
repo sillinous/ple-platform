@@ -173,12 +173,12 @@ async function handleUpdateProfile(sql, req, body) {
   const user = await getCurrentUser(req);
   if (!user) return jsonResponse({ error: 'Authentication required' }, 401);
   
-  const { displayName, bio } = body || {};
+  const { displayName, bio, avatar_url } = body || {};
   if (!displayName?.trim()) return jsonResponse({ error: 'Display name is required' }, 400);
   
-  await sql`UPDATE users SET display_name = ${displayName.trim()}, bio = ${(bio||'').trim()}, updated_at = CURRENT_TIMESTAMP WHERE id = ${user.id}`;
+  await sql`UPDATE users SET display_name = ${displayName.trim()}, bio = ${(bio||'').trim()}, avatar_url = ${(avatar_url||'').trim() || null}, updated_at = CURRENT_TIMESTAMP WHERE id = ${user.id}`;
   
-  return jsonResponse({ success: true, user: { ...user, displayName: displayName.trim(), bio: (bio||'').trim() } });
+  return jsonResponse({ success: true, user: { ...user, displayName: displayName.trim(), bio: (bio||'').trim(), avatarUrl: (avatar_url||'').trim() } });
 }
 
 async function handleListMembers(sql) {

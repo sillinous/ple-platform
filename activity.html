@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Log | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="/ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .activity-page{max-width:800px;margin:0 auto;padding:2rem 1.5rem}
+    .activity-filters{display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+    .activity-filter{padding:0.35rem 0.85rem;border-radius:100px;border:1px solid var(--border-color,#e5e2dd);background:transparent;cursor:pointer;font-family:inherit;font-size:0.8rem;color:var(--text-muted);transition:all 0.15s}
+    .activity-filter.active,.activity-filter:hover{background:rgba(27,77,62,0.08);color:var(--color-horizon,#1B4D3E);border-color:var(--color-horizon,#1B4D3E)}
+    .activity-entry{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--border-color,#f0ede8)}
+    .activity-entry:last-child{border-bottom:none}
+    .activity-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+    .dot-content{background:#3B82F6}.dot-project{background:#8B5CF6}.dot-proposal{background:#F59E0B}
+    .dot-discussion{background:#10B981}.dot-user{background:#6B7280}.dot-task{background:#EC4899}
+    .activity-body{flex:1;min-width:0}
+    .activity-text{font-size:0.9rem;line-height:1.5;color:var(--text-primary)}
+    .activity-meta{display:flex;gap:1rem;font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem}
+    .activity-link{color:var(--color-horizon,#1B4D3E);text-decoration:none;font-weight:500}
+    .activity-link:hover{text-decoration:underline}
+    .load-more{display:block;margin:1.5rem auto;padding:0.6rem 2rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;background:white;cursor:pointer;font-family:inherit;font-size:0.85rem;color:var(--text-secondary);transition:all 0.15s}
+    .load-more:hover{border-color:var(--color-horizon);color:var(--color-horizon)}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="nav-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-symbol">L/0</span> <span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="nav-menu">
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="tags.html" class="nav-link">Tags</a>
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="login.html" class="nav-link" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="nav-link" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main-content" class="activity-page">
+    <h1 style="font-family:'Fraunces',serif;font-size:2rem;margin-bottom:0.25rem">Activity Log</h1>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem">Everything happening across the platform</p>
+    <div class="activity-filters">
+      <button class="activity-filter active" onclick="setFilter('all')">All</button>
+      <button class="activity-filter" onclick="setFilter('content')">Content</button>
+      <button class="activity-filter" onclick="setFilter('project')">Projects</button>
+      <button class="activity-filter" onclick="setFilter('task')">Tasks</button>
+      <button class="activity-filter" onclick="setFilter('proposal')">Proposals</button>
+      <button class="activity-filter" onclick="setFilter('discussion')">Discussions</button>
+    </div>
+    <div id="activity-list">
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+    </div>
+    <button class="load-more" id="load-more" onclick="loadMore()" style="display:none">Load More</button>
+  </main>
+  <script type="module">
+    import { initPage } from './src/scripts/api.js';
+    await initPage();
+
+    const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+    let currentFilter='all', allActivities=[], offset=0;
+    const LIMIT=30;
+
+    function entityLink(a) {
+      if(a.entityType==='content') return `content-view.html?id=${a.entityId}`;
+      if(a.entityType==='project') return `project-view.html?id=${a.entityId}`;
+      if(a.entityType==='proposal') return `proposal-view.html?id=${a.entityId}`;
+      if(a.entityType==='discussion') return `discussion-view.html?id=${a.entityId}`;
+      if(a.entityType==='task') return null;
+      return null;
+    }
+    function dotClass(type) {
+      return {content:'dot-content',project:'dot-project',proposal:'dot-proposal',discussion:'dot-discussion',task:'dot-task'}[type]||'dot-user';
+    }
+    function fmtRel(d){if(!d)return'';const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';if(s<604800)return Math.floor(s/86400)+'d ago';return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+
+    async function loadActivities(append) {
+      try {
+        const token=localStorage.getItem('ple_token');
+        const headers=token?{'Authorization':`Bearer ${token}`}:{};
+        const r=await fetch(`/api/activity?limit=${LIMIT}&offset=${offset}`,{headers});
+        const d=await r.json();
+        const acts=d.activities||[];
+        if(append) allActivities=[...allActivities,...acts];
+        else allActivities=acts;
+        render();
+        document.getElementById('load-more').style.display=acts.length>=LIMIT?'block':'none';
+      } catch(e) {
+        document.getElementById('activity-list').innerHTML='<p style="color:var(--text-muted);padding:2rem 0;text-align:center">Unable to load activity log</p>';
+      }
+    }
+    function render() {
+      const filtered=currentFilter==='all'?allActivities:allActivities.filter(a=>a.entityType===currentFilter);
+      const el=document.getElementById('activity-list');
+      if(!filtered.length){el.innerHTML='<p style="color:var(--text-muted);padding:2rem 0;text-align:center;font-style:italic">No activity to show</p>';return;}
+      el.innerHTML=filtered.map(a=>{
+        const link=entityLink(a);
+        const userName=a.user?.name||'System';
+        const ini=userName.split(' ').map(w=>w[0]).join('').toUpperCase();
+        return`<div class="activity-entry">
+          <div class="activity-dot ${dotClass(a.entityType)}"></div>
+          <div class="activity-body">
+            <div class="activity-text">${esc(a.description)}</div>
+            <div class="activity-meta">
+              <span>${fmtRel(a.createdAt)}</span>
+              <span>${esc(a.entityType)}</span>
+              ${link?`<a href="${link}" class="activity-link">View →</a>`:''}
+            </div>
+          </div>
+        </div>`}).join('');
+    }
+    window.setFilter=function(f){
+      currentFilter=f;
+      document.querySelectorAll('.activity-filter').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===f||f==='all'&&b.textContent==='All'));
+      render();
+    };
+    window.loadMore=function(){offset+=LIMIT;loadActivities(true);};
+    loadActivities(false);
+  </script>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="/api/rss" style="color:inherit;">RSS</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
+</body>
+</html>

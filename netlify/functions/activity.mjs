@@ -22,7 +22,7 @@ export default async (req, context) => {
           (SELECT title FROM discussions WHERE id = a.entity_id AND a.entity_type = 'discussion'),
           (SELECT title FROM tasks WHERE id = a.entity_id AND a.entity_type = 'task'),
           (SELECT title FROM projects WHERE id = a.entity_id AND a.entity_type = 'project'),
-          (SELECT title FROM content WHERE id = a.entity_id AND a.entity_type = 'content')
+          (SELECT title FROM content_items WHERE id = a.entity_id AND a.entity_type = 'content')
         ) as entity_title
       FROM activity_log a LEFT JOIN users u ON a.user_id = u.id
       WHERE (${userId}::uuid IS NULL OR a.user_id = ${userId}::uuid)

@@ -280,6 +280,8 @@ export function escapeHtml(text) {
 export function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'polite');
   toast.textContent = message;
   document.body.appendChild(toast);
   
@@ -356,6 +358,88 @@ export async function initPage() {
   // ARIA: label nav
   document.querySelectorAll('nav, .nav-container').forEach(n => { if(!n.getAttribute('aria-label')) n.setAttribute('aria-label', 'Main navigation'); });
   document.querySelectorAll('main, .main-content, [id="main-content"]').forEach(m => m.setAttribute('role', 'main'));
+
+  // Notification bell for logged-in users
+  if (auth.isLoggedIn() && !document.querySelector('.notif-bell')) {
+    const bell = document.createElement('div');
+    bell.className = 'notif-bell';
+    bell.setAttribute('aria-label', 'Notifications');
+    bell.innerHTML = '🔔<span class="notif-badge" style="display:none">0</span>';
+    bell.style.cssText = 'position:fixed;bottom:1.5rem;right:4rem;width:36px;height:36px;border-radius:50%;border:1px solid var(--border-color,#ddd);background:var(--bg-secondary,white);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:999;font-size:1rem;transition:all 0.2s;';
+    const badge = bell.querySelector('.notif-badge');
+    badge.style.cssText = 'position:absolute;top:-4px;right:-4px;background:#EF4444;color:white;font-size:0.6rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;';
+    
+    // Notification dropdown
+    const dropdown = document.createElement('div');
+    dropdown.className = 'notif-dropdown';
+    dropdown.style.cssText = 'display:none;position:fixed;bottom:4.5rem;right:1.5rem;width:340px;max-height:400px;background:white;border:1px solid var(--border-color,#ddd);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.12);z-index:1000;overflow:hidden;';
+    dropdown.innerHTML = '<div style="padding:0.75rem 1rem;border-bottom:1px solid var(--border-color,#eee);display:flex;justify-content:space-between;align-items:center"><strong style="font-size:0.9rem">Notifications</strong><button onclick="markAllRead()" style="background:none;border:none;color:var(--color-horizon,#1B4D3E);font-size:0.75rem;cursor:pointer">Mark all read</button></div><div class="notif-list" style="max-height:340px;overflow-y:auto;padding:0.25rem 0"></div>';
+    
+    bell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      if (dropdown.style.display === 'block') loadNotifications(dropdown.querySelector('.notif-list'), badge);
+    });
+    document.addEventListener('click', () => { dropdown.style.display = 'none'; });
+    dropdown.addEventListener('click', e => e.stopPropagation());
+    
+    document.body.appendChild(bell);
+    document.body.appendChild(dropdown);
+    
+    // Check for unread on page load
+    checkUnread(badge);
+    
+    window.markAllRead = function() {
+      localStorage.setItem('ple_notif_read', new Date().toISOString());
+      badge.style.display = 'none';
+      document.querySelectorAll('.notif-item.unread').forEach(n => n.classList.remove('unread'));
+    };
+  }
+}
+
+async function checkUnread(badge) {
+  try {
+    const lastRead = localStorage.getItem('ple_notif_read') || '2000-01-01';
+    const token = localStorage.getItem('ple_token');
+    if (!token) return;
+    const r = await fetch('/api/activity?limit=10', { headers: { 'Authorization': `Bearer ${token}` } });
+    const d = await r.json();
+    const unread = (d.activities || []).filter(a => new Date(a.createdAt) > new Date(lastRead)).length;
+    if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.style.display = 'flex'; }
+    else { badge.style.display = 'none'; }
+  } catch(e) {}
+}
+
+async function loadNotifications(container, badge) {
+  try {
+    const lastRead = localStorage.getItem('ple_notif_read') || '2000-01-01';
+    const token = localStorage.getItem('ple_token');
+    const r = await fetch('/api/activity?limit=15', { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
+    const d = await r.json();
+    const acts = d.activities || [];
+    if (!acts.length) { container.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem">No recent activity</div>'; return; }
+    const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+    const links = { content: 'content-view.html?id=', project: 'project-view.html?id=', proposal: 'proposal-view.html?id=', discussion: 'discussion-view.html?id=' };
+    container.innerHTML = acts.map(a => {
+      const isUnread = new Date(a.createdAt) > new Date(lastRead);
+      const href = links[a.entityType] ? links[a.entityType] + a.entityId : 'activity.html';
+      const ago = fmtRelative(a.createdAt);
+      return `<a href="${href}" class="notif-item ${isUnread ? 'unread' : ''}" style="display:block;padding:0.6rem 1rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--border-color,#f0ede8);${isUnread ? 'background:rgba(27,77,62,0.04);' : ''}">
+        <div style="font-size:0.83rem;line-height:1.4;color:var(--text-primary)">${esc(a.description)}</div>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.15rem">${ago}</div>
+      </a>`;
+    }).join('') + '<a href="activity.html" style="display:block;padding:0.6rem 1rem;text-align:center;font-size:0.8rem;color:var(--color-horizon,#1B4D3E);text-decoration:none">View all activity →</a>';
+  } catch(e) { container.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-muted);font-size:0.85rem">Unable to load</div>'; }
+}
+
+function fmtRelative(d) {
+  if (!d) return '';
+  const s = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  if (s < 604800) return Math.floor(s / 86400) + 'd ago';
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export function updateAuthUI() {

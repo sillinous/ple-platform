@@ -89,6 +89,7 @@
                 <div class="form-group"><label>Email</label><input type="email" id="f-email" disabled></div>
               </div>
               <div class="form-group"><label>Bio</label><textarea id="f-bio" rows="3" placeholder="Tell the community about yourself..."></textarea></div>
+              <div class="form-group"><label>Avatar URL</label><input type="url" id="f-avatar" placeholder="https://example.com/your-photo.jpg"><p style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem">Paste a link to your profile photo (Gravatar, GitHub, LinkedIn, etc.)</p></div>
               <div class="form-actions"><button type="submit" class="btn btn-primary">Save Changes</button></div>
             </div>
           </form>
@@ -168,7 +169,10 @@
 
     function render(){
       document.title=(profileUser.displayName||'Profile')+' | PLE';
-      document.getElementById('avatar').textContent=initials(profileUser.displayName);
+      const avatarEl=document.getElementById('avatar');
+      if(profileUser.avatarUrl){
+        avatarEl.innerHTML=`<img src="${esc(profileUser.avatarUrl)}" alt="${esc(profileUser.displayName)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+      }else{avatarEl.textContent=initials(profileUser.displayName);}
       document.getElementById('display-name').textContent=profileUser.displayName;
       document.getElementById('role-badge').textContent=cap(profileUser.role||'member');
       document.getElementById('member-since').textContent='Member since '+new Date(profileUser.createdAt).toLocaleDateString('en-US',{month:'long',year:'numeric'});
@@ -179,6 +183,7 @@
         document.getElementById('f-name').value=profileUser.displayName||'';
         document.getElementById('f-email').value=profileUser.email||'';
         document.getElementById('f-bio').value=profileUser.bio||'';
+        document.getElementById('f-avatar').value=profileUser.avatarUrl||'';
         document.getElementById('account-section').style.display='block';
         document.getElementById('contrib-label').textContent='Your Contributions';
       }
@@ -233,9 +238,10 @@
 
     document.getElementById('profile-form').addEventListener('submit',async e=>{
       e.preventDefault();const name=document.getElementById('f-name').value.trim();const bio=document.getElementById('f-bio').value.trim();
+      const avatarUrl=document.getElementById('f-avatar').value.trim();
       if(!name){toast('Display name is required',true);return;}
-      try{const r=await fetch('/api/auth?action=update-profile',{method:'POST',headers:authH(),body:JSON.stringify({displayName:name,bio})});
-        if(r.ok){toast('Profile updated');profileUser.displayName=name;profileUser.bio=bio;render();}
+      try{const r=await fetch('/api/auth?action=update-profile',{method:'POST',headers:authH(),body:JSON.stringify({displayName:name,bio,avatar_url:avatarUrl})});
+        if(r.ok){toast('Profile updated');profileUser.displayName=name;profileUser.bio=bio;profileUser.avatarUrl=avatarUrl;render();}
         else{const d=await r.json();toast(d.error||'Update failed',true);}
       }catch(e){toast('Failed to update',true);}
     });

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="/ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .api-page{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+    .endpoint-group{margin-bottom:2.5rem}
+    .group-title{font-family:'Fraunces',serif;font-size:1.4rem;color:var(--color-horizon,#1B4D3E);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--color-horizon,#1B4D3E)}
+    .endpoint{background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:10px;margin-bottom:0.75rem;overflow:hidden}
+    .endpoint-header{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.15s}
+    .endpoint-header:hover{background:var(--bg-secondary,#f9f8f6)}
+    .method{padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:700;font-family:'Courier New',monospace;min-width:3.5rem;text-align:center}
+    .method-get{background:#DCFCE7;color:#166534}.method-post{background:#DBEAFE;color:#1E40AF}
+    .method-put{background:#FEF3C7;color:#92400E}.method-delete{background:#FEE2E2;color:#991B1B}
+    .endpoint-path{font-family:'Courier New',monospace;font-size:0.85rem;font-weight:500;flex:1}
+    .endpoint-desc{font-size:0.8rem;color:var(--text-muted)}
+    .endpoint-body{display:none;padding:1rem;border-top:1px solid var(--border-color,#e5e2dd);background:var(--bg-secondary,#f9f8f6)}
+    .endpoint.open .endpoint-body{display:block}
+    .param-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:0.5rem}
+    .param-table th{text-align:left;padding:0.35rem 0.5rem;border-bottom:1px solid var(--border-color,#ddd);color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase}
+    .param-table td{padding:0.35rem 0.5rem;border-bottom:1px solid var(--border-color,#f0ede8)}
+    .param-name{font-family:'Courier New',monospace;font-weight:500;color:var(--color-horizon,#1B4D3E)}
+    .param-type{font-size:0.7rem;padding:0.1rem 0.3rem;border-radius:3px;background:rgba(27,77,62,0.06);color:var(--text-muted)}
+    .param-required{font-size:0.65rem;color:#DC2626;font-weight:600}
+    code{font-family:'Courier New',monospace;font-size:0.85em;background:rgba(0,0,0,0.04);padding:0.1rem 0.3rem;border-radius:3px}
+    .auth-badge{font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:3px;background:#FEF3C7;color:#92400E}
+    .toc{margin-bottom:2rem;padding:1rem;background:var(--bg-secondary,#f9f8f6);border-radius:10px}
+    .toc a{color:var(--color-horizon);text-decoration:none;font-size:0.85rem;display:block;padding:0.2rem 0}
+    .toc a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="nav-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-symbol">L/0</span> <span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="nav-menu">
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="login.html" class="nav-link" data-auth="logged-out">Sign In</a>
+        <a href="dashboard.html" class="nav-link" data-auth="logged-in" style="display:none">Dashboard</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main-content" class="api-page">
+    <h1 style="font-family:'Fraunces',serif;font-size:2rem;margin-bottom:0.25rem">API Documentation</h1>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem">RESTful API for the PLE platform. Base URL: <code>/api</code></p>
+
+    <div class="toc">
+      <strong style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase">Endpoints</strong>
+      <a href="#auth">Authentication</a>
+      <a href="#content">Content</a>
+      <a href="#proposals">Proposals</a>
+      <a href="#discussions">Discussions</a>
+      <a href="#projects">Projects</a>
+      <a href="#tasks">Tasks</a>
+      <a href="#comments">Comments</a>
+      <a href="#votes">Votes</a>
+      <a href="#rss">RSS Feed</a>
+    </div>
+
+    <div class="endpoint-group" id="auth">
+      <h2 class="group-title">Authentication</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/auth</span><span class="endpoint-desc">Register / Login</span></div>
+        <div class="endpoint-body">
+          <p style="font-size:0.85rem;margin-bottom:0.5rem">Authenticate users. Action determined by <code>action</code> field in body.</p>
+          <table class="param-table"><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="param-name">action</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span> <code>register</code> or <code>login</code></td></tr>
+            <tr><td><span class="param-name">email</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span> User email</td></tr>
+            <tr><td><span class="param-name">password</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span> User password</td></tr>
+            <tr><td><span class="param-name">display_name</span></td><td><span class="param-type">string</span></td><td>Required for registration</td></tr>
+          </tbody></table>
+          <p style="font-size:0.8rem;margin-top:0.75rem;color:var(--text-muted)">Returns: <code>{ token, user: { id, email, displayName, role } }</code></p>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/auth?action=me</span><span class="endpoint-desc">Current user</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Returns the authenticated user's profile. Requires <code>Authorization: Bearer &lt;token&gt;</code> header.</p></div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/auth?action=members</span><span class="endpoint-desc">List members</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Returns all platform members with contribution stats.</p></div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/auth?action=leaderboard</span><span class="endpoint-desc">Contributor leaderboard</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Returns top 20 contributors scored by activity (articles: 10pts, proposals: 5pts, discussions: 3pts, comments: 1pt).</p></div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="content">
+      <h2 class="group-title">Content</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/content</span><span class="endpoint-desc">List content</span></div>
+        <div class="endpoint-body">
+          <table class="param-table"><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td>Filter: draft, in_review, approved, published</td></tr>
+            <tr><td><span class="param-name">type</span></td><td><span class="param-type">string</span></td><td>Filter: article, report, guide, policy_brief</td></tr>
+            <tr><td><span class="param-name">projectId</span></td><td><span class="param-type">uuid</span></td><td>Filter by project</td></tr>
+            <tr><td><span class="param-name">limit</span></td><td><span class="param-type">int</span></td><td>Max results (default: 20, max: 100)</td></tr>
+            <tr><td><span class="param-name">offset</span></td><td><span class="param-type">int</span></td><td>Pagination offset</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/content?id={slug|uuid}</span><span class="endpoint-desc">Get single content</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Returns full content with tags, comments, version count. Accepts slug or UUID. Increments view count for published items.</p></div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/content</span><span class="endpoint-desc">Create content</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body">
+          <table class="param-table"><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="param-name">title</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span> Content title</td></tr>
+            <tr><td><span class="param-name">body</span></td><td><span class="param-type">string</span></td><td>Markdown body</td></tr>
+            <tr><td><span class="param-name">content_type</span></td><td><span class="param-type">string</span></td><td>article, report, guide, policy_brief</td></tr>
+            <tr><td><span class="param-name">tags</span></td><td><span class="param-type">string[]</span></td><td>Array of tag names</td></tr>
+            <tr><td><span class="param-name">project_id</span></td><td><span class="param-type">uuid</span></td><td>Link to project</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-put">PUT</span><span class="endpoint-path">/api/content</span><span class="endpoint-desc">Update content</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Update title, body, status, tags, visibility, excerpt. Requires <code>id</code> in body. Authors can edit own content; editors/admins can edit any.</p></div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/content?action=versions&id={uuid}</span><span class="endpoint-desc">Version history</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Returns version history for a content item: version number, title, change summary, editor, timestamp.</p></div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="proposals">
+      <h2 class="group-title">Proposals</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/proposals</span><span class="endpoint-desc">List proposals</span></div>
+        <div class="endpoint-body">
+          <table class="param-table"><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td>draft, open, accepted, rejected, implemented, withdrawn</td></tr>
+            <tr><td><span class="param-name">authorId</span></td><td><span class="param-type">uuid</span></td><td>Filter by author</td></tr>
+            <tr><td><span class="param-name">limit</span></td><td><span class="param-type">int</span></td><td>Max results (default: 20)</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/proposals</span><span class="endpoint-desc">Create proposal</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body">
+          <table class="param-table"><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="param-name">title</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span></td></tr>
+            <tr><td><span class="param-name">content</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span> Markdown description</td></tr>
+            <tr><td><span class="param-name">proposalType</span></td><td><span class="param-type">string</span></td><td><span class="param-required">required</span> governance, content, project, architecture, community</td></tr>
+            <tr><td><span class="param-name">elementId</span></td><td><span class="param-type">uuid</span></td><td>Link to architecture element</td></tr>
+            <tr><td><span class="param-name">votingEnds</span></td><td><span class="param-type">date</span></td><td>Voting deadline</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="discussions">
+      <h2 class="group-title">Discussions</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/discussions</span><span class="endpoint-desc">List discussions</span></div>
+        <div class="endpoint-body">
+          <table class="param-table"><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="param-name">type</span></td><td><span class="param-type">string</span></td><td>question, idea, feedback, general</td></tr>
+            <tr><td><span class="param-name">authorId</span></td><td><span class="param-type">uuid</span></td><td>Filter by author</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/discussions</span><span class="endpoint-desc">Create discussion</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Body: <code>{ title, body, discussion_type }</code></p></div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="projects">
+      <h2 class="group-title">Projects</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/projects</span><span class="endpoint-desc">List projects</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Returns all projects with task stats, member counts, and milestone info. Supports <code>limit</code> and <code>offset</code>.</p></div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/projects</span><span class="endpoint-desc">Create project</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Body: <code>{ title, description, status }</code></p></div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="tasks">
+      <h2 class="group-title">Tasks</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/tasks</span><span class="endpoint-desc">List tasks</span></div>
+        <div class="endpoint-body">
+          <table class="param-table"><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="param-name">projectId</span></td><td><span class="param-type">uuid</span></td><td>Filter by project</td></tr>
+            <tr><td><span class="param-name">parent_id</span></td><td><span class="param-type">uuid</span></td><td>Get subtasks of a parent task</td></tr>
+            <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td>backlog, todo, in_progress, review, done, blocked</td></tr>
+            <tr><td><span class="param-name">assignedTo</span></td><td><span class="param-type">uuid|me|unassigned</span></td><td>Filter by assignee</td></tr>
+            <tr><td><span class="param-name">milestoneId</span></td><td><span class="param-type">uuid</span></td><td>Filter by milestone</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/tasks</span><span class="endpoint-desc">Create task</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Body: <code>{ project_id, title, description, status, priority, assigned_to, parent_task_id, due_date, estimated_hours }</code></p></div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="comments">
+      <h2 class="group-title">Comments</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/comments</span><span class="endpoint-desc">List comments</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Query: <code>entity_type</code> (content, task, proposal, discussion, project) + <code>entity_id</code></p></div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/comments</span><span class="endpoint-desc">Post comment</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Body: <code>{ entity_type, entity_id, body, parent_id }</code>. Supports threaded replies via <code>parent_id</code>.</p></div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="votes">
+      <h2 class="group-title">Votes</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/votes</span><span class="endpoint-desc">Cast vote</span><span class="auth-badge">Auth</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Body: <code>{ proposal_id, vote_type }</code> where vote_type is <code>approve</code>, <code>reject</code>, or <code>abstain</code>. One vote per user per proposal.</p></div>
+      </div>
+    </div>
+
+    <div class="endpoint-group" id="rss">
+      <h2 class="group-title">RSS Feed</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/rss</span><span class="endpoint-desc">RSS 2.0 Feed</span></div>
+        <div class="endpoint-body"><p style="font-size:0.85rem">Returns RSS 2.0 XML of the 20 most recent published content items. Content-Type: <code>application/rss+xml</code>. Cached for 1 hour.</p></div>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem;padding:1.25rem;background:var(--bg-secondary,#f9f8f6);border-radius:10px">
+      <h3 style="font-size:1rem;margin-bottom:0.5rem">Authentication</h3>
+      <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6">Endpoints marked with <span class="auth-badge">Auth</span> require a Bearer token. Obtain one via <code>POST /api/auth</code> with <code>action: "login"</code>, then include <code>Authorization: Bearer &lt;token&gt;</code> in subsequent requests.</p>
+    </div>
+  </main>
+  <script type="module">
+    import { initPage } from './src/scripts/api.js';
+    await initPage();
+  </script>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="/api/rss" style="color:inherit;">RSS</a> · <a href="https://github.com/sillinous/ple-platform" target="_blank" style="color:inherit;">GitHub</a></div></footer>
+</body>
+</html>

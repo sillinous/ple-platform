@@ -454,7 +454,7 @@
       </div>
 
       <div style="display:flex;gap:1rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
-        <input type="text" id="content-search" placeholder="Search content..." style="flex:1;min-width:200px;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterContent()">
+        <input type="text" id="content-search" aria-label="Search content" placeholder="Search content..." style="flex:1;min-width:200px;max-width:400px;padding:0.6rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.9rem;" oninput="filterContent()">
         <select id="content-sort" onchange="sortContent()" style="padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.85rem;color:var(--text-secondary,#555);">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
@@ -474,7 +474,7 @@
       <div id="tag-filters" style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:1.25rem;"></div>
 
       <div class="content-grid" id="content-grid">
-        <div class="loading">Loading content...</div>
+        <div class="loading"><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div>
       </div>
       <div id="content-pagination" style="margin-top:2rem;text-align:center;"></div>
     </div>
