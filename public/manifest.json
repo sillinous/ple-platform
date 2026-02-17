@@ -1,0 +1,12 @@
+{
+  "name": "Post-Labor Economics",
+  "short_name": "PLE",
+  "description": "Prosperity Beyond Work — frameworks for post-labor economics",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFAF6",
+  "theme_color": "#1B4D3E",
+  "icons": [
+    { "src": "/ple-logo.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

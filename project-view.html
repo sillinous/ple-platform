@@ -862,7 +862,20 @@
 
       <!-- Tasks Tab -->
       <div class="tab-content" id="tab-tasks">
-        <div style="margin-bottom:1rem;display:flex;justify-content:flex-end"><button class="btn btn-primary auth-only" onclick="openTaskModal()" id="add-task-btn" style="display:none">+ Add Task</button></div>
+        <div style="margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+            <select id="task-filter-priority" onchange="applyTaskFilters()" style="padding:0.35rem 0.5rem;border:1px solid var(--border-color,#e5e2dd);border-radius:6px;font-family:inherit;font-size:0.8rem;color:var(--text-secondary)">
+              <option value="">All Priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+            </select>
+            <select id="task-filter-assignee" onchange="applyTaskFilters()" style="padding:0.35rem 0.5rem;border:1px solid var(--border-color,#e5e2dd);border-radius:6px;font-family:inherit;font-size:0.8rem;color:var(--text-secondary)">
+              <option value="">All Assignees</option><option value="unassigned">Unassigned</option>
+            </select>
+            <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.8rem;color:var(--text-muted);cursor:pointer">
+              <input type="checkbox" id="task-filter-overdue" onchange="applyTaskFilters()"> Overdue only
+            </label>
+          </div>
+          <button class="btn btn-primary auth-only" onclick="openTaskModal()" id="add-task-btn" style="display:none">+ Add Task</button>
+        </div>
         <div class="kanban-board" id="kanban-board"><div class="loading">Loading tasks...</div></div>
       </div>
 
@@ -1115,9 +1128,34 @@
     async function loadTasks() {
       try { const r=await fetch(`/api/tasks?projectId=${projectId}&view=kanban`,{headers:authH()}); const d=await r.json();
         if(d.view==='kanban'){allTasks=d.columns;renderKanban(d.columns);
-          document.getElementById('task-count').textContent=Object.values(d.columns).reduce((s,c)=>s+c.length,0);}
+          document.getElementById('task-count').textContent=Object.values(d.columns).reduce((s,c)=>s+c.length,0);
+          // Populate assignee filter dropdown
+          const assignees=new Map();
+          Object.values(d.columns).flat().forEach(t=>{if(t.assignee?.id)assignees.set(t.assignee.id,t.assignee.name);});
+          const sel=document.getElementById('task-filter-assignee');
+          const existing=sel.querySelectorAll('option[data-dynamic]');existing.forEach(o=>o.remove());
+          assignees.forEach((name,id)=>{const o=document.createElement('option');o.value=id;o.textContent=name;o.dataset.dynamic='1';sel.appendChild(o);});
+        }
       } catch(e){console.error('Tasks:',e);}
     }
+    window.applyTaskFilters = function() {
+      if(!allTasks)return;
+      const priority=document.getElementById('task-filter-priority').value;
+      const assignee=document.getElementById('task-filter-assignee').value;
+      const overdue=document.getElementById('task-filter-overdue').checked;
+      const now=new Date();
+      const filtered={};
+      for(const[status,tasks] of Object.entries(allTasks)){
+        filtered[status]=tasks.filter(t=>{
+          if(priority&&t.priority!==priority)return false;
+          if(assignee==='unassigned'&&t.assignee)return false;
+          if(assignee&&assignee!=='unassigned'&&assignee!==''&&t.assignee?.id!==assignee)return false;
+          if(overdue&&!(t.dueDate&&new Date(t.dueDate)<now&&t.status!=='done'))return false;
+          return true;
+        });
+      }
+      renderKanban(filtered);
+    };
 
     async function loadProjectContent() {
       try {

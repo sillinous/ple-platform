@@ -359,6 +359,51 @@ export async function initPage() {
   document.querySelectorAll('nav, .nav-container').forEach(n => { if(!n.getAttribute('aria-label')) n.setAttribute('aria-label', 'Main navigation'); });
   document.querySelectorAll('main, .main-content, [id="main-content"]').forEach(m => m.setAttribute('role', 'main'));
 
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+
+  // Global keyboard shortcuts (Alt+key for navigation)
+  document.addEventListener('keydown', (e) => {
+    // Don't trigger when typing in inputs
+    if (e.target.matches('input, textarea, select, [contenteditable]')) return;
+    if (!e.altKey) return;
+    const shortcuts = {
+      'h': '/', 'c': '/content.html', 'p': '/projects.html',
+      'g': '/proposals.html', 'd': '/discussions.html', 's': '/search.html',
+      'b': '/dashboard.html', 'a': '/activity.html'
+    };
+    const dest = shortcuts[e.key.toLowerCase()];
+    if (dest && window.location.pathname !== dest) {
+      e.preventDefault();
+      window.location.href = dest;
+    }
+    // Alt+/ to show shortcuts help
+    if (e.key === '/') {
+      e.preventDefault();
+      const existing = document.getElementById('shortcuts-help');
+      if (existing) { existing.remove(); return; }
+      const help = document.createElement('div');
+      help.id = 'shortcuts-help';
+      help.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border:1px solid var(--border-color,#ddd);border-radius:14px;padding:1.5rem 2rem;z-index:10001;box-shadow:0 8px 30px rgba(0,0,0,0.12);max-width:360px;width:90%';
+      help.innerHTML = `<h3 style="font-family:'Fraunces',serif;font-size:1.1rem;margin-bottom:1rem">Keyboard Shortcuts</h3>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:0.3rem 1rem;font-size:0.85rem">
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+H</kbd><span>Home</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+C</kbd><span>Content</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+P</kbd><span>Projects</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+G</kbd><span>Governance</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+D</kbd><span>Discussions</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+S</kbd><span>Search</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+B</kbd><span>Dashboard</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+A</kbd><span>Activity</span>
+          <kbd style="font-family:monospace;background:#f3f3f3;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.8rem">Alt+/</kbd><span>This help</span>
+        </div>
+        <button onclick="this.parentElement.remove()" style="margin-top:1rem;padding:0.3rem 1rem;border:1px solid var(--border-color,#ddd);border-radius:6px;background:white;cursor:pointer;font-family:inherit;font-size:0.8rem">Close</button>`;
+      document.body.appendChild(help);
+    }
+  });
+
   // Notification bell for logged-in users
   if (auth.isLoggedIn() && !document.querySelector('.notif-bell')) {
     const bell = document.createElement('div');

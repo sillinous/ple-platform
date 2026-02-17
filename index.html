@@ -7,6 +7,8 @@
   <meta name="description" content="Building the intellectual and policy frameworks for a world where human dignity and economic security are no longer dependent on selling your time.">
   
   <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1B4D3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -103,8 +105,12 @@
           Research, analysis, and policy frameworks from contributors building the post-labor future.
         </p>
       </div>
+      <div id="featured-section" style="display:none;margin-bottom:2rem">
+        <h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.75rem">⭐ Editor's Picks</h3>
+        <div id="featured-content" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem"></div>
+      </div>
       <div id="latest-content">
-        <div class="loading"><div class="loading-spinner"></div></div>
+        <div class="loading"><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div>
       </div>
       <div class="section-footer" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
         <a href="content.html" class="btn btn-outline">Browse All Content <i data-lucide="arrow-right"></i></a>
@@ -258,11 +264,28 @@
     // Load latest content
     async function loadContent() {
       try {
+        // Load featured content first
+        try {
+          const fr=await fetch('/api/content?featured=true&status=published&limit=3');const fd=await fr.json();
+          const featured=fd.content||[];
+          if(featured.length){
+            document.getElementById('featured-section').style.display='block';
+            document.getElementById('featured-content').innerHTML=featured.map(c=>{
+              const tagName=t=>typeof t==='string'?t:t.name;
+              return`<a href="content-view.html?id=${c.slug||c.id}" style="display:block;padding:1.25rem;border:2px solid rgba(245,158,11,0.3);border-radius:12px;text-decoration:none;color:inherit;background:linear-gradient(135deg,rgba(245,158,11,0.03),transparent);transition:box-shadow 0.2s">
+                <div style="font-size:0.7rem;color:#F59E0B;font-weight:600;margin-bottom:0.4rem">⭐ FEATURED</div>
+                <h4 style="font-family:'Fraunces',serif;font-size:1.05rem;margin-bottom:0.3rem">${c.title}</h4>
+                <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.5">${c.excerpt||(c.body||'').replace(/[#*`>\[\]]/g,'').substring(0,100)+'...'}</p>
+              </a>`}).join('');
+          }
+        }catch(e){}
+
         const data = await fetch('/api/content?limit=4&status=published').then(r=>r.json());
         const el = document.getElementById('latest-content');
         if (!data.content?.length) { el.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Content coming soon.</p>'; return; }
         el.innerHTML = `<div class="element-grid">${data.content.map(c => {
-          const tags = (c.tags||[]).slice(0,2).map(t=>`<span style="font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:100px;background:rgba(27,77,62,0.08);color:var(--color-horizon,#1B4D3E)">${c.tags ? t : ''}</span>`).join(' ');
+          const tagName=t=>typeof t==='string'?t:t.name;
+          const tags = (c.tags||[]).slice(0,2).map(t=>`<span style="font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:100px;background:rgba(27,77,62,0.08);color:var(--color-horizon,#1B4D3E)">${tagName(t)}</span>`).join(' ');
           const words=(c.body||'').split(/\s+/).length;
           const readTime=Math.max(1,Math.ceil(words/200));
           return `

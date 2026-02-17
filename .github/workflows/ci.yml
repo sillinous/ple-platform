@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npx vite build
+      
+      - name: Validate HTML
+        run: |
+          echo "Checking HTML files..."
+          for f in *.html; do
+            if ! head -1 "$f" | grep -q "DOCTYPE\|doctype"; then
+              echo "⚠️  $f missing DOCTYPE"
+            fi
+          done
+          echo "✅ HTML validation complete"
+      
+      - name: Validate JavaScript
+        run: |
+          echo "Checking serverless functions..."
+          for f in netlify/functions/*.mjs; do
+            node --check "$f" 2>&1 && echo "✅ $f" || echo "❌ $f"
+          done
+          echo "✅ JS validation complete"
+      
+      - name: Check build output
+        run: |
+          if [ -d "dist" ]; then
+            echo "✅ Build output exists"
+            echo "Files: $(find dist -type f | wc -l)"
+            echo "Size: $(du -sh dist | cut -f1)"
+          else
+            echo "❌ No build output"
+            exit 1
+          fi

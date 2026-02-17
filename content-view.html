@@ -290,7 +290,7 @@
         <span id="content-type-text">Article</span>
       </div>
       <span class="content-type-badge" id="content-type-badge">Article</span>
-      <h1 class="content-view-title" id="content-title">Loading...</h1>
+      <h1 class="content-view-title" id="content-title"><div class="skeleton skeleton-line" style="height:2rem;width:70%;margin-bottom:0.5rem"></div></h1>
       <div class="content-meta-row">
         <div class="content-meta-item">
           <div class="author-avatar" id="author-avatar">?</div>
@@ -362,7 +362,13 @@
       </div>
 
       <!-- Prev/Next Navigation -->
-      <div id="article-nav" style="display:none;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color);display:none;">
+      <div id="series-banner" style="display:none;margin-top:2rem;padding:1rem 1.25rem;background:linear-gradient(135deg,rgba(27,77,62,0.04),rgba(244,162,97,0.04));border:1px solid rgba(27,77,62,0.15);border-radius:10px;">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-horizon,#1B4D3E);font-weight:600;margin-bottom:0.4rem">📖 Part of a Series</div>
+        <div id="series-title" style="font-weight:600;font-size:0.95rem;margin-bottom:0.25rem"></div>
+        <div id="series-progress" style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--text-muted)"></div>
+      </div>
+
+      <div id="article-nav" style="display:none;margin-top:2rem;padding-top:2rem;border-top:1px solid var(--border-color);">
         <div style="display:flex;justify-content:space-between;gap:1rem;">
           <a id="prev-article" href="#" style="flex:1;padding:0.75rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;text-decoration:none;color:inherit;display:none;">
             <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.25rem;">&larr; Previous</div>
@@ -446,7 +452,7 @@
         currentContent=data.content; currentContent.tags=data.tags||[];
         currentContent.versionCount=data.versionCount||0;
         contentComments=data.comments||[];
-        renderContent(currentContent); renderComments(contentComments); updateBookmarkUI();
+        renderContent(currentContent); renderComments(contentComments); updateBookmarkUI(); updateFeatureUI();
       }catch(e){console.error(e);showError();}
     }
 
@@ -618,11 +624,32 @@
       updateBookmarkUI();
     };
 
+    // Featured toggle (editors/admins)
+    function updateFeatureUI(){
+      if(!currentContent||!currentUser)return;
+      if(currentUser.role==='admin'||currentUser.role==='editor'){
+        const btn=document.getElementById('feature-btn');btn.style.display='flex';
+        const isFeat=!!currentContent.featuredAt;
+        document.getElementById('feature-text').textContent=isFeat?'Unfeature':'Feature';
+        btn.style.color=isFeat?'#F59E0B':'var(--text-muted)';
+        btn.style.borderColor=isFeat?'#F59E0B':'var(--border-color,#e5e2dd)';
+      }
+    }
+    window.toggleFeatured = async function(){
+      if(!currentContent)return;
+      const token=localStorage.getItem('ple_token');
+      try{const r=await fetch('/api/content?action=feature',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({id:currentContent.id})});
+        const d=await r.json();if(r.ok){currentContent.featuredAt=d.featured?new Date().toISOString():null;updateFeatureUI();toast(d.featured?'Content featured':'Feature removed');}
+        else{toast(d.error||'Failed','error');}
+      }catch(e){toast('Failed to toggle feature','error');}
+    };
+
     async function loadRelated(currentId, tags) {
       if(!tags?.length) return;
       try{
         const r=await fetch('/api/content?limit=20&status=published');const d=await r.json();
-        const related=(d.content||[]).filter(c=>c.id!==currentId&&(c.tags||[]).some(t=>tags.includes(t))).slice(0,3);
+        const tagNames=tags.map(t=>typeof t==='string'?t:t.name);
+        const related=(d.content||[]).filter(c=>c.id!==currentId&&(c.tags||[]).some(t=>{const n=typeof t==='string'?t:t.name;return tagNames.includes(n);})).slice(0,3);
         if(!related.length) return;
         document.getElementById('related-section').style.display='block';
         document.getElementById('related-list').innerHTML=related.map(c=>
@@ -654,6 +681,24 @@
           el.style.display = 'block'; shown = true;
         }
         if (shown) nav.style.display = 'block';
+
+        // Series detection: find articles with same primary tag
+        if (currentContent?.tags?.length) {
+          const primaryTag = typeof currentContent.tags[0]==='string'?currentContent.tags[0]:currentContent.tags[0].name;
+          const seriesItems = items.filter(c=>(c.tags||[]).some(t=>(typeof t==='string'?t:t.name)===primaryTag))
+            .sort((a,b)=>new Date(a.publishedAt||a.createdAt)-new Date(b.publishedAt||b.createdAt));
+          if (seriesItems.length >= 3) {
+            const pos = seriesItems.findIndex(c=>c.id===currentContent.id);
+            if (pos >= 0) {
+              const banner = document.getElementById('series-banner');
+              banner.style.display = 'block';
+              document.getElementById('series-title').textContent = `${primaryTag} (${pos+1} of ${seriesItems.length})`;
+              document.getElementById('series-progress').innerHTML = seriesItems.map((s,i)=>
+                `<a href="content-view.html?id=${s.slug||s.id}" style="width:${Math.max(20,100/seriesItems.length)}%;height:4px;border-radius:2px;background:${i===pos?'var(--color-horizon,#1B4D3E)':i<pos?'var(--color-dawn,#F4A261)':'var(--border-color,#ddd)'};display:block" title="${s.title}"></a>`
+              ).join('');
+            }
+          }
+        }
       } catch (e) {}
     }
 

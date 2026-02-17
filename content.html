@@ -686,6 +686,7 @@
           </div>
           <div class="content-body">
             <span class="content-type-badge type-${contentType}">${typeLabel}</span>
+            ${item.featuredAt ? '<span style="font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:100px;background:rgba(245,158,11,0.1);color:#D97706;font-weight:600;margin-left:0.35rem">⭐ Featured</span>' : ''}
             
             ${item.status === 'in_review' ? `
               <div class="workflow-status needs-review">
