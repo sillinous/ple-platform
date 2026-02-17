@@ -15,21 +15,34 @@ export default async (req, context) => {
     const userId = url.searchParams.get('userId') || null;
     const entityType = url.searchParams.get('entityType') || null;
     
-    const activities = await sql`
-      SELECT a.*, u.display_name as user_name, u.avatar_url as user_avatar,
-        COALESCE(
-          (SELECT title FROM proposals WHERE id = a.entity_id AND a.entity_type = 'proposal'),
-          (SELECT title FROM discussions WHERE id = a.entity_id AND a.entity_type = 'discussion'),
-          (SELECT title FROM tasks WHERE id = a.entity_id AND a.entity_type = 'task'),
-          (SELECT title FROM projects WHERE id = a.entity_id AND a.entity_type = 'project'),
-          (SELECT title FROM content_items WHERE id = a.entity_id AND a.entity_type = 'content')
-        ) as entity_title
-      FROM activity_log a LEFT JOIN users u ON a.user_id = u.id
-      WHERE (${userId}::uuid IS NULL OR a.user_id = ${userId}::uuid)
-        AND (${entityType}::text IS NULL OR a.entity_type = ${entityType})
-      ORDER BY a.created_at DESC 
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+    let activities;
+    try {
+      activities = await sql`
+        SELECT a.*, u.display_name as user_name, u.avatar_url as user_avatar,
+          COALESCE(
+            (SELECT title FROM proposals WHERE id = a.entity_id AND a.entity_type = 'proposal'),
+            (SELECT title FROM discussions WHERE id = a.entity_id AND a.entity_type = 'discussion'),
+            (SELECT title FROM tasks WHERE id = a.entity_id AND a.entity_type = 'task'),
+            (SELECT title FROM projects WHERE id = a.entity_id AND a.entity_type = 'project'),
+            (SELECT title FROM content_items WHERE id = a.entity_id AND a.entity_type = 'content')
+          ) as entity_title
+        FROM activity_log a LEFT JOIN users u ON a.user_id = u.id
+        WHERE (${userId}::uuid IS NULL OR a.user_id = ${userId}::uuid)
+          AND (${entityType}::text IS NULL OR a.entity_type = ${entityType})
+        ORDER BY a.created_at DESC 
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+    } catch(e) {
+      // Fallback without entity title lookups
+      activities = await sql`
+        SELECT a.*, u.display_name as user_name, u.avatar_url as user_avatar
+        FROM activity_log a LEFT JOIN users u ON a.user_id = u.id
+        WHERE (${userId}::uuid IS NULL OR a.user_id = ${userId}::uuid)
+          AND (${entityType}::text IS NULL OR a.entity_type = ${entityType})
+        ORDER BY a.created_at DESC 
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+    }
     
     return jsonResponse({
       activities: activities.map(a => ({
