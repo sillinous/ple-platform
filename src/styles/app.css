@@ -851,3 +851,4 @@
 .skeleton-line.med{width:80%;}
 .skeleton-circle{width:40px;height:40px;border-radius:50%;}
 [data-theme="dark"] .skeleton{background:linear-gradient(90deg,var(--bg-secondary,#16213e) 25%,#1e2a3a 50%,var(--bg-secondary,#16213e) 75%);background-size:200% 100%;}
+.toast[role="alert"]{z-index:10001}

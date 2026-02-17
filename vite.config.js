@@ -32,6 +32,8 @@ export default defineConfig({
         search: 'search.html',
         tags: 'tags.html',
         glossary: 'glossary.html',
+        admin: 'admin.html',
+        settings: 'settings.html',
         activity: 'activity.html',
         series: 'series.html',
         'api-docs': 'api-docs.html',

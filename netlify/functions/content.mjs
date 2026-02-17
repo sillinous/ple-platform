@@ -27,6 +27,7 @@ export default async (req, context) => {
       if (action === 'submit') return await submitForReview(sql, await req.json(), user);
       if (action === 'approve') return await approveContent(sql, await req.json(), user);
       if (action === 'publish') return await publishContent(sql, await req.json(), user);
+      if (action === 'feature') return await toggleFeatured(sql, await req.json(), user);
       return await createContent(sql, await req.json(), user);
     }
     if (req.method === 'PUT') {
@@ -49,6 +50,7 @@ async function listContent(sql, params, user) {
   const author = params.get('author') || null;
   const visibility = params.get('visibility') || null;
   const projectId = params.get('projectId') || null;
+  const featured = params.get('featured') || null;
   const limit = Math.min(parseInt(params.get('limit') || '50'), 100);
   const offset = parseInt(params.get('offset') || '0');
 
@@ -68,6 +70,7 @@ async function listContent(sql, params, user) {
       AND (${authorFilter}::uuid IS NULL OR c.author_id = ${authorFilter}::uuid)
       AND (${visibility}::text IS NULL OR c.visibility = ${visibility})
       AND (${projectId}::uuid IS NULL OR c.project_id = ${projectId}::uuid)
+      AND (${featured}::text IS NULL OR (${featured} = 'true' AND c.featured_at IS NOT NULL))
       AND (
         c.status = 'published' AND c.visibility = 'public'
         OR ${user?.id}::uuid IS NOT NULL
@@ -292,6 +295,27 @@ async function deleteContent(sql, id, user) {
   return jsonResponse({ success: true });
 }
 
+async function toggleFeatured(sql, body, user) {
+  if (user.role !== 'admin' && user.role !== 'editor') return jsonResponse({ error: 'Not authorized' }, 403);
+  const { id } = body;
+  if (!id) return jsonResponse({ error: 'Content ID is required' }, 400);
+  const existing = await sql`SELECT featured_at FROM content_items WHERE id = ${id}`;
+  if (existing.length === 0) return jsonResponse({ error: 'Content not found' }, 404);
+  const isFeatured = !!existing[0].featured_at;
+  try {
+    if (isFeatured) {
+      await sql`UPDATE content_items SET featured_at = NULL WHERE id = ${id}`;
+    } else {
+      await sql`UPDATE content_items SET featured_at = CURRENT_TIMESTAMP WHERE id = ${id}`;
+    }
+  } catch(e) {
+    // Column may not exist yet
+    await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS featured_at TIMESTAMP`.catch(()=>{});
+    await sql`UPDATE content_items SET featured_at = CURRENT_TIMESTAMP WHERE id = ${id}`.catch(()=>{});
+  }
+  return jsonResponse({ success: true, featured: !isFeatured });
+}
+
 function formatContent(c) {
   return {
     id: c.id, title: c.title, slug: c.slug, 
@@ -301,6 +325,7 @@ function formatContent(c) {
     reviewer: c.reviewer_id ? { id: c.reviewer_id, name: c.reviewer_name } : null,
     project: c.project_id ? { id: c.project_id, title: c.project_title } : null,
     featuredImage: c.featured_image, viewCount: parseInt(c.view_count || 0),
+    featuredAt: c.featured_at || null,
     publishedAt: c.published_at, createdAt: c.created_at, updatedAt: c.updated_at
   };
 }

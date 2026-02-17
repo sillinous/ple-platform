@@ -763,7 +763,7 @@
         <span class="logo-text">Post-Labor Economics</span>
       </a>
       
-      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <nav class="nav-menu">
         <a href="projects.html" class="nav-link active">Projects</a>
         <a href="content.html" class="nav-link">Content</a>
@@ -834,6 +834,7 @@
         <button class="tab-btn" data-tab="content">Content <span class="tab-count" id="content-count">0</span></button>
         <button class="tab-btn" data-tab="team">Team <span class="tab-count" id="team-count">0</span></button>
         <button class="tab-btn" data-tab="activity">Activity</button>
+        <button class="tab-btn" data-tab="timeline">Timeline</button>
         <button class="tab-btn auth-only" data-tab="settings" style="display:none;">Settings</button>
       </div>
 
@@ -889,6 +890,16 @@
       <!-- Activity Tab -->
       <div class="tab-content" id="tab-activity">
         <div class="overview-section"><div class="activity-list" id="full-activity"><div class="loading">Loading activity...</div></div></div>
+      </div>
+
+      <!-- Timeline/Gantt Tab -->
+      <div class="tab-content" id="tab-timeline">
+        <div class="overview-section">
+          <h3 style="font-family:'Fraunces',serif;font-size:1.25rem;margin-bottom:1rem">Project Timeline</h3>
+          <div id="gantt-chart" style="overflow-x:auto;border:1px solid var(--border-color,#e5e2dd);border-radius:12px;min-height:200px;background:white;padding:1rem">
+            <div style="text-align:center;padding:2rem;color:var(--text-muted)">Loading timeline...</div>
+          </div>
+        </div>
       </div>
 
       <!-- Settings Tab -->
@@ -1425,6 +1436,99 @@
       document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
       btn.classList.add('active');document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');});});
+
+    // ── Gantt Timeline ──
+    function renderGantt() {
+      const chart = document.getElementById('gantt-chart');
+      if (!allTasks.length && !allMilestones.length) {
+        chart.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted)"><p>No tasks or milestones to display on the timeline.</p><p style="font-size:0.85rem;margin-top:0.5rem">Add tasks with due dates to see the Gantt view.</p></div>';
+        return;
+      }
+
+      // Build timeline items from tasks and milestones
+      const items = [];
+      const now = new Date();
+      allTasks.filter(t=>!t.parentTaskId).forEach(t => {
+        const start = new Date(t.createdAt);
+        const end = t.dueDate ? new Date(t.dueDate) : t.completedAt ? new Date(t.completedAt) : new Date(start.getTime()+7*86400000);
+        items.push({ name: t.title, start, end, type: 'task', status: t.status, id: t.id });
+      });
+      allMilestones.forEach(m => {
+        const target = m.targetDate ? new Date(m.targetDate) : new Date();
+        items.push({ name: '◆ ' + m.title, start: target, end: target, type: 'milestone', status: m.status, id: m.id });
+      });
+      if (!items.length) { chart.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted)">No timeline data available.</div>'; return; }
+
+      // Calculate date range
+      const allDates = items.flatMap(i => [i.start, i.end]);
+      const minDate = new Date(Math.min(...allDates));
+      const maxDate = new Date(Math.max(...allDates, now.getTime()+7*86400000));
+      const rangeMs = maxDate - minDate || 1;
+      const totalDays = Math.ceil(rangeMs / 86400000);
+
+      // Generate month headers
+      const months = [];
+      let d = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+      while (d <= maxDate) {
+        months.push({ label: d.toLocaleDateString('en-US',{month:'short',year:'2-digit'}), start: new Date(d) });
+        d = new Date(d.getFullYear(), d.getMonth()+1, 1);
+      }
+
+      const barH = 28, rowH = 36, headerH = 30, chartW = Math.max(600, totalDays * 4);
+      const statusColors = { done:'#2a9d8f', 'in-progress':'var(--color-dawn,#F4A261)', todo:'#A8A29E', backlog:'#D4D4D8', blocked:'#DC2626', complete:'#2a9d8f', active:'var(--color-dawn,#F4A261)' };
+
+      let html = `<div style="position:relative;min-width:${chartW}px">`;
+      // Month headers
+      html += '<div style="display:flex;border-bottom:1px solid var(--border-color,#e5e2dd);margin-bottom:4px">';
+      months.forEach(m => {
+        const mEnd = new Date(m.start.getFullYear(), m.start.getMonth()+1, 0);
+        const mWidth = Math.max(40, ((Math.min(mEnd,maxDate)-Math.max(m.start,minDate))/rangeMs)*100);
+        html += `<div style="flex:0 0 ${mWidth}%;font-size:0.7rem;color:var(--text-muted);padding:4px 6px;border-right:1px solid var(--border-color,#f0f0f0)">${m.label}</div>`;
+      });
+      html += '</div>';
+
+      // Today marker position
+      const todayPct = ((now - minDate) / rangeMs) * 100;
+
+      // Bars
+      items.forEach(item => {
+        const left = ((item.start - minDate) / rangeMs) * 100;
+        const width = item.type === 'milestone' ? 0.5 : Math.max(0.5, ((item.end - item.start) / rangeMs) * 100);
+        const color = statusColors[item.status] || '#A8A29E';
+        const overdue = item.end < now && item.status !== 'done' && item.status !== 'complete';
+
+        html += `<div style="display:flex;align-items:center;height:${rowH}px;border-bottom:1px solid #f5f5f5">
+          <div style="position:relative;width:100%;height:${barH}px">
+            ${item.type==='milestone' ?
+              `<div style="position:absolute;left:${left}%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:${color};clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)" title="${esc(item.name)}"></div>` :
+              `<div style="position:absolute;left:${left}%;width:${width}%;height:20px;top:50%;transform:translateY(-50%);background:${color};border-radius:4px;opacity:0.85;${overdue?'border:2px solid #DC2626;':''}cursor:default" title="${esc(item.name)} (${item.status})"></div>`
+            }
+            <span style="position:absolute;left:${Math.min(left+width+0.5,90)}%;top:50%;transform:translateY(-50%);font-size:0.7rem;white-space:nowrap;color:var(--text-secondary);max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc(item.name)}</span>
+          </div>
+        </div>`;
+      });
+
+      // Today line
+      if (todayPct >= 0 && todayPct <= 100) {
+        html += `<div style="position:absolute;left:${todayPct}%;top:0;bottom:0;width:2px;background:#DC2626;opacity:0.5;z-index:1"></div>
+          <div style="position:absolute;left:${todayPct}%;top:-2px;transform:translateX(-50%);font-size:0.6rem;color:#DC2626;white-space:nowrap">Today</div>`;
+      }
+      html += '</div>';
+
+      // Legend
+      html += '<div style="display:flex;gap:1rem;margin-top:1rem;font-size:0.7rem;color:var(--text-muted);flex-wrap:wrap">';
+      [['Done','#2a9d8f'],['In Progress','var(--color-dawn,#F4A261)'],['Todo','#A8A29E'],['Blocked','#DC2626'],['◆ Milestone','#A8A29E']].forEach(([l,c]) => {
+        html += `<span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:8px;background:${c};border-radius:2px;display:inline-block"></span>${l}</span>`;
+      });
+      html += '</div>';
+
+      chart.innerHTML = html;
+    }
+
+    // Re-render Gantt when timeline tab is shown
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => { if(btn.dataset.tab === 'timeline') setTimeout(renderGantt, 50); });
+    });
 
     // ── Init ──
     checkAuth(); loadProject(); loadMembers();

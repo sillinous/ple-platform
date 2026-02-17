@@ -24,6 +24,8 @@ export default async (req, context) => {
         return await handleLogout(sql, req);
       } else if (action === 'update-profile') {
         return await handleUpdateProfile(sql, req, body);
+      } else if (action === 'update-role') {
+        return await handleUpdateRole(sql, req, body);
       }
     } else if (req.method === 'GET' && action === 'me') {
       return await handleGetCurrentUser(sql, req);
@@ -225,6 +227,16 @@ async function handleGetPublicProfile(sql, userId) {
       discussions: parseInt(discussionCount[0].c)
     }
   });
+}
+
+async function handleUpdateRole(sql, req, body) {
+  const user = await getCurrentUser(req, sql);
+  if (!user || user.role !== 'admin') return jsonResponse({ error: 'Admin access required' }, 403);
+  const { userId, role } = body;
+  if (!userId || !role || !['member','editor','admin'].includes(role)) return jsonResponse({ error: 'Invalid parameters' }, 400);
+  if (userId === user.id) return jsonResponse({ error: 'Cannot change own role' }, 400);
+  await sql`UPDATE users SET role = ${role}, updated_at = CURRENT_TIMESTAMP WHERE id = ${userId}`;
+  return jsonResponse({ success: true });
 }
 
 async function handleLeaderboard(sql) {

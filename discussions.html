@@ -24,7 +24,7 @@
         <span class="logo-text">Post-Labor Economics</span>
       </a>
       
-      <button class="nav-toggle" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <nav class="nav-menu">
         <a href="projects.html" class="nav-link">Projects</a>
         <a href="content.html" class="nav-link">Content</a>
@@ -85,7 +85,7 @@
 
       <!-- Filters -->
       <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
-        <input type="text" id="disc-search" placeholder="Search discussions..." oninput="filterDiscussions()" style="flex:1;min-width:200px;max-width:300px;padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.875rem;">
+        <input type="text" id="disc-search" placeholder="Search discussions..." aria-label="Search discussions" oninput="filterDiscussions()" style="flex:1;min-width:200px;max-width:300px;padding:0.5rem 0.75rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.875rem;">
         <select id="disc-sort" onchange="filterDiscussions()" style="padding:0.45rem 0.65rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;font-family:inherit;font-size:0.8rem;color:var(--text-secondary,#555);">
           <option value="newest">Newest</option>
           <option value="active">Most active</option>
@@ -103,7 +103,7 @@
       </div>
 
       <!-- Discussions List -->
-      <div id="discussions-list">
+      <div id="discussions-list" aria-live="polite">
         <div class="loading">
           <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
         </div>

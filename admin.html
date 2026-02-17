@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="/ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+    .admin-stat{background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1.25rem;text-align:center}
+    .admin-stat-value{font-family:'Fraunces',serif;font-size:1.75rem;font-weight:700;color:var(--color-horizon,#1B4D3E)}
+    .admin-stat-label{font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem}
+    .admin-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+    .admin-tab{padding:0.5rem 1rem;border:1px solid var(--border-color,#e5e2dd);border-radius:8px;background:white;cursor:pointer;font-family:inherit;font-size:0.85rem;transition:all 0.15s}
+    .admin-tab.active{background:var(--color-horizon,#1B4D3E);color:white;border-color:var(--color-horizon,#1B4D3E)}
+    .review-card{background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:1rem}
+    .review-card:hover{border-color:var(--color-horizon,#1B4D3E);box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+    .review-badge{font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:100px;font-weight:600;white-space:nowrap}
+    .badge-review{background:#FEF3C7;color:#92400E}
+    .badge-draft{background:#F3F4F6;color:#6B7280}
+    .badge-open{background:#DBEAFE;color:#1E40AF}
+    .badge-expired{background:#FEE2E2;color:#991B1B}
+    .review-actions{display:flex;gap:0.5rem;margin-left:auto;flex-shrink:0}
+    .review-actions button{padding:0.3rem 0.6rem;border:1px solid var(--border-color,#e5e2dd);border-radius:6px;background:white;cursor:pointer;font-size:0.75rem;font-family:inherit;transition:all 0.15s}
+    .review-actions button:hover{background:var(--color-horizon,#1B4D3E);color:white;border-color:var(--color-horizon,#1B4D3E)}
+    .review-actions button.danger:hover{background:#DC2626;border-color:#DC2626}
+    .user-row{display:flex;align-items:center;gap:1rem;padding:0.75rem 1rem;border-bottom:1px solid var(--border-color,#e5e2dd)}
+    .user-row:last-child{border-bottom:none}
+    .user-avatar-sm{width:32px;height:32px;border-radius:50%;background:var(--color-horizon,#1B4D3E);color:white;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;flex-shrink:0}
+    .role-select{padding:0.2rem 0.5rem;border:1px solid var(--border-color,#e5e2dd);border-radius:6px;font-size:0.75rem;font-family:inherit}
+    @media(max-width:600px){.admin-grid{grid-template-columns:1fr 1fr}.review-card{flex-direction:column;align-items:flex-start}.review-actions{margin-left:0;width:100%}.review-actions button{flex:1}}
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="nav-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-symbol">L/0</span> <span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="nav-menu">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="activity.html" class="nav-link">Activity</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content" style="max-width:960px;margin:0 auto;padding:2rem 1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <div>
+        <h1 style="font-family:'Fraunces',serif;font-size:1.75rem;">Admin Panel</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Platform moderation and management</p>
+      </div>
+      <a href="dashboard.html" class="btn btn-ghost">← Dashboard</a>
+    </div>
+
+    <div id="access-denied" style="display:none;text-align:center;padding:4rem 2rem;">
+      <i data-lucide="shield-off" style="width:48px;height:48px;color:var(--text-muted);margin-bottom:1rem"></i>
+      <h2>Access Denied</h2>
+      <p style="color:var(--text-muted)">You need admin or editor privileges to access this page.</p>
+      <a href="dashboard.html" class="btn btn-primary" style="margin-top:1rem">Return to Dashboard</a>
+    </div>
+
+    <div id="admin-content" style="display:none">
+      <div class="admin-grid" id="stats-grid">
+        <div class="admin-stat"><div class="admin-stat-value" id="s-review">-</div><div class="admin-stat-label">In Review</div></div>
+        <div class="admin-stat"><div class="admin-stat-value" id="s-open-proposals">-</div><div class="admin-stat-label">Open Proposals</div></div>
+        <div class="admin-stat"><div class="admin-stat-value" id="s-members">-</div><div class="admin-stat-label">Members</div></div>
+        <div class="admin-stat"><div class="admin-stat-value" id="s-published">-</div><div class="admin-stat-label">Published</div></div>
+        <div class="admin-stat"><div class="admin-stat-value" id="s-discussions">-</div><div class="admin-stat-label">Discussions</div></div>
+        <div class="admin-stat"><div class="admin-stat-value" id="s-projects">-</div><div class="admin-stat-label">Projects</div></div>
+      </div>
+
+      <div class="admin-tabs" id="tabs">
+        <button class="admin-tab active" onclick="switchTab('review')">📝 Review Queue</button>
+        <button class="admin-tab" onclick="switchTab('proposals')">🗳 Proposals</button>
+        <button class="admin-tab" onclick="switchTab('users')">👥 Users</button>
+        <button class="admin-tab" onclick="switchTab('reports')">📊 Reports</button>
+      </div>
+
+      <div id="panel-review"></div>
+      <div id="panel-proposals" style="display:none"></div>
+      <div id="panel-users" style="display:none"></div>
+      <div id="panel-reports" style="display:none"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initPage, auth } from './src/scripts/api.js';
+    await initPage();
+
+    let currentUser = null;
+    const authH = () => { const h={'Content-Type':'application/json'}; const t=localStorage.getItem('ple_token'); if(t) h['Authorization']=`Bearer ${t}`; return h; };
+    const esc = s => { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; };
+    function toast(msg,type='success'){const t=document.createElement('div');t.className=`toast toast-${type}`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000);}
+
+    // Auth check
+    const token = localStorage.getItem('ple_token');
+    if (!token) { window.location = '/login.html?redirect=/admin'; }
+    else {
+      try {
+        const r = await fetch('/api/auth?action=me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (r.ok) {
+          currentUser = await r.json();
+          if (currentUser.role === 'admin' || currentUser.role === 'editor') {
+            document.getElementById('admin-content').style.display = 'block';
+            loadAll();
+          } else {
+            document.getElementById('access-denied').style.display = 'block';
+          }
+        } else { window.location = '/login.html?redirect=/admin'; }
+      } catch { window.location = '/login.html?redirect=/admin'; }
+    }
+
+    lucide.createIcons();
+
+    async function loadAll() {
+      await Promise.all([loadStats(), loadReviewQueue(), loadProposals(), loadUsers()]);
+      loadReports();
+    }
+
+    async function loadStats() {
+      try {
+        const [cRes, pRes, mRes, dRes, prRes] = await Promise.all([
+          fetch('/api/content?limit=1&status=in_review', { headers: authH() }),
+          fetch('/api/proposals?limit=1&status=open', { headers: authH() }),
+          fetch('/api/auth?action=members'),
+          fetch('/api/discussions?limit=1'),
+          fetch('/api/projects?limit=1', { headers: authH() })
+        ]);
+        const [cD, pD, mD, dD, prD] = await Promise.all([cRes.json(), pRes.json(), mRes.json(), dRes.json(), prRes.json()]);
+        document.getElementById('s-review').textContent = cD.total || 0;
+        document.getElementById('s-open-proposals').textContent = pD.total || 0;
+        document.getElementById('s-members').textContent = (mD.members||[]).length;
+        document.getElementById('s-discussions').textContent = dD.total || 0;
+        document.getElementById('s-projects').textContent = (prD.projects||[]).length;
+
+        // Published count
+        const pubRes = await fetch('/api/content?limit=1&status=published');
+        const pubD = await pubRes.json();
+        document.getElementById('s-published').textContent = pubD.total || 0;
+      } catch(e) {}
+    }
+
+    async function loadReviewQueue() {
+      const panel = document.getElementById('panel-review');
+      try {
+        const r = await fetch('/api/content?limit=50&status=in_review', { headers: authH() });
+        const d = await r.json();
+        const items = d.content || [];
+        if (!items.length) {
+          panel.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted)"><i data-lucide="check-circle" style="width:32px;height:32px;margin-bottom:0.5rem"></i><p>No items in review queue</p></div>';
+          lucide.createIcons(); return;
+        }
+        panel.innerHTML = items.map(c => `
+          <div class="review-card">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600"><a href="content-view.html?id=${c.slug||c.id}" style="color:inherit;text-decoration:none">${esc(c.title)}</a></div>
+              <div style="font-size:0.8rem;color:var(--text-muted)">${esc(c.author?.name||'Unknown')} · ${c.contentType||'article'} · ${new Date(c.createdAt).toLocaleDateString()}</div>
+            </div>
+            <span class="review-badge badge-review">In Review</span>
+            <div class="review-actions">
+              <button onclick="approveContent('${c.id}')">✓ Approve</button>
+              <button onclick="rejectContent('${c.id}')" class="danger">✗ Reject</button>
+              <button onclick="window.location='content-view.html?id=${c.slug||c.id}'">View</button>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) { panel.innerHTML = '<p style="color:var(--text-muted);padding:1rem">Unable to load review queue.</p>'; }
+    }
+
+    async function loadProposals() {
+      const panel = document.getElementById('panel-proposals');
+      try {
+        const r = await fetch('/api/proposals?limit=50', { headers: authH() });
+        const d = await r.json();
+        const items = (d.proposals || []).filter(p => p.status === 'open' || p.status === 'accepted');
+        if (!items.length) {
+          panel.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted)"><p>No active proposals</p></div>';
+          return;
+        }
+        panel.innerHTML = items.map(p => {
+          const isExpired = p.votingEnds && new Date(p.votingEnds) < new Date();
+          const badgeClass = isExpired ? 'badge-expired' : 'badge-open';
+          const badgeText = isExpired ? 'Voting Expired' : p.status === 'accepted' ? 'Accepted' : 'Open';
+          return `<div class="review-card">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600"><a href="proposal-view.html?id=${p.id}" style="color:inherit;text-decoration:none">${esc(p.title)}</a></div>
+              <div style="font-size:0.8rem;color:var(--text-muted)">${esc(p.author?.name||'Unknown')} · ${p.proposalType} · ${p.voteTotals?.approve||0} approve / ${p.voteTotals?.reject||0} reject</div>
+            </div>
+            <span class="review-badge ${badgeClass}">${badgeText}</span>
+            <div class="review-actions">
+              ${p.status==='open'&&currentUser.role==='admin'?`<button onclick="decideProposal('${p.id}','accepted')">✓ Accept</button><button onclick="decideProposal('${p.id}','rejected')" class="danger">✗ Reject</button>`:''}
+              ${p.status==='accepted'&&currentUser.role==='admin'?`<button onclick="decideProposal('${p.id}','implemented')">🚀 Mark Implemented</button>`:''}
+              <button onclick="window.location='proposal-view.html?id=${p.id}'">View</button>
+            </div>
+          </div>`;
+        }).join('');
+      } catch(e) { panel.innerHTML = '<p style="color:var(--text-muted);padding:1rem">Unable to load proposals.</p>'; }
+    }
+
+    async function loadUsers() {
+      const panel = document.getElementById('panel-users');
+      try {
+        const r = await fetch('/api/auth?action=members');
+        const d = await r.json();
+        const members = d.members || [];
+        panel.innerHTML = `<div style="background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:12px;overflow:hidden">
+          ${members.map(m => {
+            const ini = (m.displayName||'?').split(' ').map(w=>w[0]).join('').toUpperCase();
+            return `<div class="user-row">
+              <div class="user-avatar-sm">${ini}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:600;font-size:0.9rem"><a href="profile.html?id=${m.id}" style="color:inherit;text-decoration:none">${esc(m.displayName)}</a></div>
+                <div style="font-size:0.75rem;color:var(--text-muted)">${m.email||''} · Joined ${new Date(m.createdAt).toLocaleDateString()}</div>
+              </div>
+              <select class="role-select" onchange="changeRole('${m.id}',this.value)" ${currentUser.role!=='admin'?'disabled':''}>
+                <option value="member" ${m.role==='member'?'selected':''}>Member</option>
+                <option value="editor" ${m.role==='editor'?'selected':''}>Editor</option>
+                <option value="admin" ${m.role==='admin'?'selected':''}>Admin</option>
+              </select>
+            </div>`;
+          }).join('')}
+        </div>`;
+      } catch(e) { panel.innerHTML = '<p style="color:var(--text-muted);padding:1rem">Unable to load users.</p>'; }
+    }
+
+    function loadReports() {
+      const panel = document.getElementById('panel-reports');
+      panel.innerHTML = `
+        <div style="background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1.5rem">
+          <h3 style="font-family:'Fraunces',serif;margin-bottom:1rem">Quick Actions</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.75rem">
+            <a href="content.html" style="padding:1rem;border:1px solid var(--border-color);border-radius:8px;text-decoration:none;color:inherit;text-align:center;transition:all 0.15s">
+              <div style="font-size:1.5rem;margin-bottom:0.25rem">📝</div>
+              <div style="font-weight:600;font-size:0.85rem">Manage Content</div>
+            </a>
+            <a href="projects.html" style="padding:1rem;border:1px solid var(--border-color);border-radius:8px;text-decoration:none;color:inherit;text-align:center;transition:all 0.15s">
+              <div style="font-size:1.5rem;margin-bottom:0.25rem">📁</div>
+              <div style="font-weight:600;font-size:0.85rem">Manage Projects</div>
+            </a>
+            <a href="activity.html" style="padding:1rem;border:1px solid var(--border-color);border-radius:8px;text-decoration:none;color:inherit;text-align:center;transition:all 0.15s">
+              <div style="font-size:1.5rem;margin-bottom:0.25rem">📊</div>
+              <div style="font-weight:600;font-size:0.85rem">View Activity</div>
+            </a>
+            <a href="community.html" style="padding:1rem;border:1px solid var(--border-color);border-radius:8px;text-decoration:none;color:inherit;text-align:center;transition:all 0.15s">
+              <div style="font-size:1.5rem;margin-bottom:0.25rem">👥</div>
+              <div style="font-weight:600;font-size:0.85rem">Community</div>
+            </a>
+            <a href="api-docs.html" style="padding:1rem;border:1px solid var(--border-color);border-radius:8px;text-decoration:none;color:inherit;text-align:center;transition:all 0.15s">
+              <div style="font-size:1.5rem;margin-bottom:0.25rem">🔌</div>
+              <div style="font-weight:600;font-size:0.85rem">API Docs</div>
+            </a>
+            <button onclick="exportAllCSV()" style="padding:1rem;border:1px solid var(--border-color);border-radius:8px;background:white;cursor:pointer;text-align:center;transition:all 0.15s;font-family:inherit">
+              <div style="font-size:1.5rem;margin-bottom:0.25rem">⬇</div>
+              <div style="font-weight:600;font-size:0.85rem">Export All Data</div>
+            </button>
+          </div>
+        </div>`;
+    }
+
+    // Actions
+    window.approveContent = async function(id) {
+      try {
+        await fetch('/api/content', { method: 'PUT', headers: authH(), body: JSON.stringify({ id, status: 'approved' }) });
+        toast('Content approved'); loadReviewQueue(); loadStats();
+      } catch(e) { toast('Failed to approve', 'error'); }
+    };
+
+    window.rejectContent = async function(id) {
+      if (!confirm('Reject this content? It will be returned to draft.')) return;
+      try {
+        await fetch('/api/content', { method: 'PUT', headers: authH(), body: JSON.stringify({ id, status: 'draft' }) });
+        toast('Content returned to draft'); loadReviewQueue(); loadStats();
+      } catch(e) { toast('Failed to reject', 'error'); }
+    };
+
+    window.decideProposal = async function(id, status) {
+      const label = status === 'accepted' ? 'accept' : status === 'rejected' ? 'reject' : 'mark as implemented';
+      if (!confirm(`${label.charAt(0).toUpperCase()+label.slice(1)} this proposal?`)) return;
+      try {
+        await fetch('/api/proposals', { method: 'PUT', headers: authH(), body: JSON.stringify({ id, status }) });
+        toast(`Proposal ${status}`); loadProposals(); loadStats();
+      } catch(e) { toast('Failed to update proposal', 'error'); }
+    };
+
+    window.changeRole = async function(userId, role) {
+      if (!confirm(`Change this user's role to ${role}?`)) return;
+      try {
+        await fetch('/api/auth?action=update-role', { method: 'POST', headers: authH(), body: JSON.stringify({ userId, role }) });
+        toast('Role updated');
+      } catch(e) { toast('Failed to update role', 'error'); }
+    };
+
+    window.switchTab = function(tab) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="panel-"]').forEach(p => p.style.display = 'none');
+      event.target.classList.add('active');
+      document.getElementById('panel-' + tab).style.display = 'block';
+    };
+
+    window.exportAllCSV = async function() {
+      try {
+        const r = await fetch('/api/content?limit=500&status=published');
+        const d = await r.json();
+        const rows = [['Title','Type','Author','Published','Views','URL']];
+        (d.content||[]).forEach(c => rows.push([
+          '"'+(c.title||'').replace(/"/g,'""')+'"', c.contentType||'article',
+          '"'+(c.author?.name||'')+'"', c.publishedAt?new Date(c.publishedAt).toISOString().split('T')[0]:'',
+          c.viewCount||0, 'https://postlaboreconomics.netlify.app/content-view?id='+(c.slug||c.id)
+        ]));
+        const csv = rows.map(r=>r.join(',')).join('\n');
+        const blob = new Blob([csv],{type:'text/csv'});
+        const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+        a.download='ple-export-'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
+      } catch(e) { toast('Export failed', 'error'); }
+    };
+  </script>
+<footer style="margin-top:4rem;padding:1.5rem 0;border-top:1px solid var(--border-color,#e5e2dd);text-align:center;font-size:0.8rem;color:var(--text-muted,#888);"><div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · <a href="about.html" style="color:inherit;">About</a> · <a href="community.html" style="color:inherit;">Community</a> · <a href="/api/rss" style="color:inherit;">RSS</a></div></footer>
+</body>
+</html>
