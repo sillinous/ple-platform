@@ -171,3 +171,5 @@ function corsHeaders() {
 function json(status, data) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', ...corsHeaders() } });
 }
+
+export const config = { path: '/api/chat' };

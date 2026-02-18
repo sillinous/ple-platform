@@ -116,3 +116,5 @@ async function searchAll(kb, { query, scope = 'all' }) {
 
 function ch() { return { 'Access-Control-Allow-Origin':'*', 'Access-Control-Allow-Methods':'POST,GET,OPTIONS', 'Access-Control-Allow-Headers':'Content-Type,Authorization' }; }
 function jn(s, d) { return new Response(JSON.stringify(d, null, 2), { status: s, headers: { 'Content-Type':'application/json', ...ch() } }); }
+
+export const config = { path: '/api/mcp' };
