@@ -99,7 +99,7 @@
       
       try {
         await auth.register(email, password, displayName);
-        window.location.href = 'dashboard.html';
+        window.location.href = 'about.html';
       } catch (error) {
         errorDiv.textContent = error.message || 'Registration failed. Please try again.';
         errorDiv.style.display = 'block';
