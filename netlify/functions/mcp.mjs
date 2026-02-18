@@ -100,7 +100,10 @@ async function searchAll(kb, { query, scope = 'all' }) {
     for (const [k,v] of Object.entries(kb.key_concepts)) if ((k+v.definition).toLowerCase().includes(q)) r.push({ type:'concept', key:k, text:v.definition });
     for (const ex of kb.real_world_examples) if ((ex.name+ex.description).toLowerCase().includes(q)) r.push({ type:'example', name:ex.name, text:ex.description });
     if (kb.framework.property_interventions) for (const i of kb.framework.property_interventions.interventions) if ((i.name+i.description).toLowerCase().includes(q)) r.push({ type:'intervention', name:i.name, text:i.description });
-    for (const p of kb.framework.manifesto_principles) if ((p.principle+p.description).toLowerCase().includes(q)) r.push({ type:'principle', name:p.principle, text:p.description });
+    for (const p of kb.framework.manifesto_principles) {
+      const pText = typeof p === 'string' ? p : (p.principle || '') + ' ' + (p.description || '');
+      if (pText.toLowerCase().includes(q)) r.push({ type:'principle', name: typeof p === 'string' ? p.split('—')[0].trim() : p.principle, text: pText });
+    }
     results.kb = r;
   }
 

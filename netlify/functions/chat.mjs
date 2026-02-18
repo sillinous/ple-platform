@@ -115,7 +115,7 @@ function buildContext(kb, message) {
       return `## Economic Agency Principles\n` + kb.framework.economic_agency_principles.map(p => `${p.name}: ${p.description}`).join('\n');
     }],
     [/manifesto|tenet|core.*belief/, 'manifesto_principles', () => {
-      return `## Manifesto Principles\n` + kb.framework.manifesto_principles.map(p => `${p.principle}: ${p.description}`).join('\n');
+      return `## Manifesto Principles\n` + kb.framework.manifesto_principles.map(p => typeof p === 'string' ? p : `${p.principle}: ${p.description}`).join('\n');
     }],
     [/concept|labor.*zero|decoupl|solarpunk|structured.*optim/, 'key_concepts', () => {
       return `## Key Concepts\n` + Object.entries(kb.key_concepts).map(([k, v]) => `${k}: ${v.definition}`).join('\n');
