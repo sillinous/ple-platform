@@ -121,3 +121,4 @@ Open source under the MIT License.
 ---
 
 **L/0** — The threshold between Labor and Zero. Not the end of work, but the beginning of choice.
+# Triggered rebuild Wed Feb 18 14:23:09 UTC 2026
