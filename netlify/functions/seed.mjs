@@ -48,25 +48,18 @@ export default async function handler(req) {
     }
 
     // Auth check — require admin (or bootstrap mode to promote first user)
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
     if (!authHeader) return json(401, { error: 'Authentication required. Pass Bearer token.' });
     
     const sql = await getDb();
-
-    const token = authHeader.replace('Bearer ', '');
-    const sessions = await sql`SELECT user_id FROM sessions WHERE token = ${token} AND expires_at > NOW()`;
-    if (!sessions.length) return json(401, { error: 'Invalid session' });
-    
-    const users = await sql`SELECT id, role FROM users WHERE id = ${sessions[0].user_id}`;
-    if (!users.length) return json(401, { error: 'User not found' });
-    let user = users[0];
+    const user = await getCurrentUser(req);
+    if (!user) return json(401, { error: 'Invalid or expired session' });
     
     // Bootstrap: if action=bootstrap, promote first user to admin (only if no admins exist)
     if (action === 'bootstrap') {
       const admins = await sql`SELECT id FROM users WHERE role = 'admin'`;
       if (admins.length) return json(200, { message: 'Admin already exists', admin_id: admins[0].id });
       await sql`UPDATE users SET role = 'admin' WHERE id = ${user.id}`;
-      user = { ...user, role: 'admin' };
       return json(200, { message: 'Bootstrapped! You are now admin.', user_id: user.id });
     }
 
