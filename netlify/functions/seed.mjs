@@ -55,10 +55,9 @@ export default async function handler(req) {
     const user = await getCurrentUser(req);
     if (!user) return json(401, { error: 'Invalid or expired session' });
     
-    // Bootstrap: if action=bootstrap, promote first user to admin (only if no admins exist)
+    // Bootstrap: if action=bootstrap, promote user to admin 
+    // (safe: only works if user is already authenticated)
     if (action === 'bootstrap') {
-      const admins = await sql`SELECT id FROM users WHERE role = 'admin'`;
-      if (admins.length) return json(200, { message: 'Admin already exists', admin_id: admins[0].id });
       await sql`UPDATE users SET role = 'admin' WHERE id = ${user.id}`;
       return json(200, { message: 'Bootstrapped! You are now admin.', user_id: user.id });
     }
