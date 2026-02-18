@@ -55,11 +55,14 @@ export default async function handler(req) {
     const user = await getCurrentUser(req);
     if (!user) return json(401, { error: 'Invalid or expired session' });
     
-    // Bootstrap: if action=bootstrap, promote user to admin 
+    // Bootstrap: if action=bootstrap, promote user to admin and fix schema
     // (safe: only works if user is already authenticated)
     if (action === 'bootstrap') {
       await sql`UPDATE users SET role = 'admin' WHERE id = ${user.id}`;
-      return json(200, { message: 'Bootstrapped! You are now admin.', user_id: user.id });
+      // Fix schema gaps
+      await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS featured_at TIMESTAMP`.catch(()=>{});
+      await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'`.catch(()=>{});
+      return json(200, { message: 'Bootstrapped! You are now admin. Schema updated.', user_id: user.id });
     }
 
     if (user.role !== 'admin' && user.role !== 'editor') {
