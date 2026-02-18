@@ -5,410 +5,580 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Post-Labor Economics | Prosperity Beyond Work</title>
   <meta name="description" content="Building the intellectual and policy frameworks for a world where human dignity and economic security are no longer dependent on selling your time.">
-  
   <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1B4D3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/styles/brand.css">
   <link rel="stylesheet" href="src/styles/app.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="alternate" type="application/rss+xml" title="PLE Feed" href="/api/rss">
+
+  <style>
+    /* ═══ HERO ═══ */
+    .hp-hero {
+      min-height: 92vh; display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      background: linear-gradient(160deg, #0D1B2A 0%, #143B30 45%, #1B4D3E 100%);
+      color: white;
+    }
+    .hp-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 25% 30%, rgba(244,162,97,0.12) 0%, transparent 55%),
+                  radial-gradient(ellipse at 75% 70%, rgba(107,154,196,0.08) 0%, transparent 45%);
+    }
+    .hp-hero::after {
+      content: ''; position: absolute; inset: 0; opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    /* floating orbs */
+    .orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.15; animation:orbFloat 20s ease-in-out infinite; }
+    .orb-1 { width:400px;height:400px;background:var(--color-dawn);top:-10%;left:-5%;animation-delay:0s }
+    .orb-2 { width:350px;height:350px;background:#6B9AC4;bottom:-10%;right:-5%;animation-delay:-7s }
+    .orb-3 { width:250px;height:250px;background:var(--color-horizon);top:40%;right:20%;animation-delay:-14s;opacity:0.1 }
+    @keyframes orbFloat {
+      0%,100%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(30px,-20px) scale(1.05)}
+      66%{transform:translate(-20px,25px) scale(0.95)}
+    }
+    .hero-inner {
+      position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:2rem 1.5rem;
+      display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;
+    }
+    .hero-text { max-width: 540px; }
+    .hero-eyebrow-new {
+      display:inline-flex;align-items:center;gap:0.5rem;
+      padding:0.35rem 0.9rem;border-radius:100px;
+      background:rgba(244,162,97,0.12);border:1px solid rgba(244,162,97,0.2);
+      color:var(--color-dawn);font-size:0.75rem;font-weight:600;letter-spacing:0.06em;
+      margin-bottom:1.5rem;text-transform:uppercase;
+      opacity:0;animation:fadeUp .7s ease-out .15s forwards;
+    }
+    .hero-title-new {
+      font-family:'Fraunces',serif;font-size:clamp(2.75rem,5.5vw,4.25rem);
+      font-weight:700;line-height:1.08;letter-spacing:-0.03em;margin-bottom:1.25rem;
+      opacity:0;animation:fadeUp .7s ease-out .3s forwards;
+    }
+    .hero-title-new .dawn { color:var(--color-dawn) }
+    .hero-desc-new {
+      font-size:1.15rem;line-height:1.75;color:rgba(255,255,255,0.7);margin-bottom:2rem;max-width:480px;
+      opacity:0;animation:fadeUp .7s ease-out .45s forwards;
+    }
+    .hero-actions-new {
+      display:flex;gap:0.75rem;flex-wrap:wrap;
+      opacity:0;animation:fadeUp .7s ease-out .6s forwards;
+    }
+    .btn-hero-primary {
+      display:inline-flex;align-items:center;gap:0.5rem;
+      padding:0.85rem 2rem;border-radius:100px;
+      background:var(--color-dawn);color:#0D1B2A;font-weight:600;
+      text-decoration:none;font-family:inherit;font-size:0.95rem;
+      transition:all .25s ease;border:none;cursor:pointer;
+    }
+    .btn-hero-primary:hover { transform:translateY(-2px);box-shadow:0 8px 25px rgba(244,162,97,0.35) }
+    .btn-hero-outline {
+      display:inline-flex;align-items:center;gap:0.5rem;
+      padding:0.85rem 2rem;border-radius:100px;
+      background:transparent;color:white;font-weight:500;
+      text-decoration:none;font-family:inherit;font-size:0.95rem;
+      border:1.5px solid rgba(255,255,255,0.2);transition:all .25s ease;
+    }
+    .btn-hero-outline:hover { border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.04) }
+
+    /* Hero visual (right side) */
+    .hero-visual {
+      position:relative;display:flex;align-items:center;justify-content:center;
+      opacity:0;animation:fadeUp .8s ease-out .5s forwards;
+    }
+    .hero-graphic {
+      width:100%;max-width:420px;aspect-ratio:1;position:relative;
+    }
+    /* Concentric rings */
+    .ring {
+      position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,0.06);
+      top:50%;left:50%;transform:translate(-50%,-50%);
+    }
+    .ring-1 { width:90%;height:90%;animation:ringPulse 8s ease-in-out infinite }
+    .ring-2 { width:68%;height:68%;animation:ringPulse 8s ease-in-out 2s infinite;border-color:rgba(244,162,97,0.08) }
+    .ring-3 { width:46%;height:46%;animation:ringPulse 8s ease-in-out 4s infinite;border-color:rgba(107,154,196,0.1) }
+    @keyframes ringPulse { 0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.03)} }
+    /* Center symbol */
+    .hero-symbol-center {
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      font-family:'Fraunces',serif;font-size:4.5rem;font-weight:300;
+      color:rgba(244,162,97,0.8);letter-spacing:-0.04em;
+      text-shadow:0 0 60px rgba(244,162,97,0.2);
+    }
+    /* Orbiting nodes */
+    .orbit-node {
+      position:absolute;width:44px;height:44px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+      background:rgba(255,255,255,0.06);backdrop-filter:blur(4px);
+      border:1px solid rgba(255,255,255,0.08);
+      animation:nodeFloat 6s ease-in-out infinite;
+    }
+    .orbit-node:nth-child(1){top:5%;left:50%;transform:translateX(-50%);animation-delay:0s}
+    .orbit-node:nth-child(2){top:25%;right:2%;animation-delay:-1.5s}
+    .orbit-node:nth-child(3){bottom:12%;right:10%;animation-delay:-3s}
+    .orbit-node:nth-child(4){bottom:5%;left:50%;transform:translateX(-50%);animation-delay:-4.5s}
+    .orbit-node:nth-child(5){top:25%;left:2%;animation-delay:-2s}
+    .orbit-node:nth-child(6){bottom:35%;left:0%;animation-delay:-3.5s}
+    @keyframes nodeFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ═══ STATS STRIP ═══ */
+    .stats-strip {
+      background:#0D1B2A;color:white;padding:2.5rem 1.5rem;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .stats-strip-inner {
+      max-width:1100px;margin:0 auto;
+      display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:center;
+    }
+    .ss-val {
+      font-family:'Fraunces',serif;font-size:2.5rem;font-weight:700;
+      color:var(--color-dawn);line-height:1;
+    }
+    .ss-label { font-size:0.75rem;color:rgba(255,255,255,0.45);margin-top:0.4rem;letter-spacing:0.04em }
+
+    /* ═══ HOW IT WORKS ═══ */
+    .hiw-section { padding:clamp(4rem,8vw,6rem) 1.5rem; }
+    .hiw-inner { max-width:1100px;margin:0 auto }
+    .hiw-grid {
+      display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:2.5rem;
+      position:relative;
+    }
+    .hiw-step {
+      text-align:center;padding:2.5rem 2rem;position:relative;
+      border:1px solid var(--border-color,#e5e2dd);
+      transition:background .3s ease;
+    }
+    .hiw-step:first-child { border-radius:16px 0 0 16px }
+    .hiw-step:last-child { border-radius:0 16px 16px 0 }
+    .hiw-step:hover { background:rgba(27,77,62,0.02) }
+    .hiw-num {
+      width:48px;height:48px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-family:'Fraunces',serif;font-size:1.25rem;font-weight:700;
+      margin-bottom:1rem;color:white;
+    }
+    .hiw-step h3 { font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.5rem;color:var(--color-horizon) }
+    .hiw-step p { font-size:0.9rem;line-height:1.65;color:var(--text-muted,#777);max-width:260px;margin:0 auto }
+    .hiw-arrow {
+      position:absolute;right:-14px;top:50%;transform:translateY(-50%);z-index:2;
+      width:28px;height:28px;border-radius:50%;background:white;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid var(--border-color,#e5e2dd);color:var(--color-dawn);font-size:1rem;
+    }
+
+    /* ═══ WHY BANNER (enhanced) ═══ */
+    .why-banner {
+      display:flex;align-items:center;gap:2rem;
+      padding:2rem 2.5rem;border-radius:20px;
+      background:linear-gradient(135deg,#0D1B2A 0%,#1B4D3E 100%);
+      color:white;text-decoration:none;transition:all .3s ease;
+      position:relative;overflow:hidden;
+    }
+    .why-banner::before {
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse at 100% 0%,rgba(244,162,97,0.1),transparent 60%);
+    }
+    .why-banner:hover { transform:translateY(-3px);box-shadow:0 12px 40px rgba(13,27,42,0.25) }
+    .why-banner-icon {
+      flex-shrink:0;width:56px;height:56px;border-radius:14px;
+      background:rgba(244,162,97,0.12);display:flex;align-items:center;justify-content:center;
+      font-size:1.5rem;position:relative;z-index:1;
+    }
+    .why-banner-text { flex:1;position:relative;z-index:1 }
+
+    /* ═══ CONTENT CARDS (enhanced) ═══ */
+    .content-grid-hp {
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;
+    }
+    .content-card-hp {
+      display:block;padding:1.5rem;border-radius:14px;background:white;
+      border:1px solid rgba(0,0,0,0.06);text-decoration:none;color:inherit;
+      transition:all .3s ease;position:relative;overflow:hidden;
+    }
+    .content-card-hp::before {
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--color-horizon),var(--color-dawn));
+      opacity:0;transition:opacity .3s ease;
+    }
+    .content-card-hp:hover { transform:translateY(-4px);box-shadow:0 12px 35px rgba(0,0,0,0.08) }
+    .content-card-hp:hover::before { opacity:1 }
+    .cc-type { font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-horizon);opacity:0.7 }
+    .cc-title { font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;margin:0.5rem 0;line-height:1.35 }
+    .cc-excerpt { font-size:0.85rem;line-height:1.6;color:var(--text-muted,#777);margin-bottom:0.75rem }
+    .cc-meta { display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;color:var(--text-muted,#999) }
+    .cc-tag { font-size:0.65rem;padding:0.1rem 0.45rem;border-radius:100px;background:rgba(27,77,62,0.07);color:var(--color-horizon) }
+
+    /* ═══ COMMUNITY PULSE (enhanced) ═══ */
+    .pulse-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem }
+    .pulse-col { background:white;border-radius:14px;border:1px solid rgba(0,0,0,0.06);overflow:hidden }
+    .pulse-col-head { padding:1rem 1.25rem;border-bottom:1px solid rgba(0,0,0,0.04);display:flex;justify-content:space-between;align-items:center }
+    .pulse-col-head h3 { font-family:'Fraunces',serif;font-size:0.95rem;font-weight:600;color:var(--color-horizon) }
+    .pulse-col-body { padding:0.5rem 0 }
+    .pulse-item { display:block;padding:0.75rem 1.25rem;text-decoration:none;color:inherit;transition:background .15s;border-bottom:1px solid rgba(0,0,0,0.03) }
+    .pulse-item:last-child { border-bottom:none }
+    .pulse-item:hover { background:rgba(27,77,62,0.02) }
+    .pulse-item-title { font-weight:500;font-size:0.88rem;margin-bottom:0.2rem }
+    .pulse-item-meta { font-size:0.75rem;color:var(--text-muted,#888);display:flex;gap:0.75rem }
+
+    /* ═══ VISION QUOTE ═══ */
+    .vision-section {
+      padding:clamp(3rem,6vw,5rem) 1.5rem;
+      background:linear-gradient(135deg,rgba(27,77,62,0.03),rgba(244,162,97,0.03));
+    }
+    .vision-inner { max-width:800px;margin:0 auto;text-align:center }
+    .vision-quote {
+      font-family:'Fraunces',serif;font-size:clamp(1.4rem,3vw,2rem);
+      font-weight:500;line-height:1.45;font-style:italic;color:var(--color-horizon);
+      position:relative;padding:0 2rem;
+    }
+    .vision-quote::before,.vision-quote::after {
+      font-family:'Fraunces',serif;font-size:4rem;font-weight:800;
+      color:rgba(244,162,97,0.2);line-height:1;position:absolute;
+    }
+    .vision-quote::before { content:'\201C';top:-0.75rem;left:-0.5rem }
+    .vision-quote::after { content:'\201D';bottom:-1.5rem;right:-0.5rem }
+    .vision-attr { margin-top:1.5rem;font-size:0.85rem;color:var(--text-muted) }
+
+    /* ═══ MEMBERS (enhanced) ═══ */
+    .members-section { padding:clamp(3rem,5vw,4rem) 1.5rem;text-align:center }
+    .member-ring {
+      display:inline-flex;align-items:center;justify-content:center;
+      width:52px;height:52px;border-radius:50%;
+      background:var(--color-horizon);color:white;
+      font-size:0.85rem;font-weight:600;text-decoration:none;
+      border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.08);
+      transition:all .2s ease;margin:0 -4px;position:relative;
+    }
+    .member-ring:hover { transform:scale(1.2);z-index:2;box-shadow:0 4px 16px rgba(27,77,62,0.2) }
+
+    /* ═══ FINAL CTA (enhanced) ═══ */
+    .hp-cta {
+      padding:clamp(4rem,8vw,6rem) 1.5rem;
+      background:linear-gradient(160deg,#1B4D3E,#0D1B2A);
+      color:white;text-align:center;position:relative;overflow:hidden;
+    }
+    .hp-cta::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(244,162,97,0.12),transparent 70%) }
+    .hp-cta .cta-inner { position:relative;z-index:1;max-width:620px;margin:0 auto }
+
+    /* ═══ SCROLL REVEAL ═══ */
+    .reveal { opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease }
+    .reveal.visible { opacity:1;transform:translateY(0) }
+    .rd1{transition-delay:.08s}.rd2{transition-delay:.16s}.rd3{transition-delay:.24s}
+
+    /* ═══ RESPONSIVE ═══ */
+    @media(max-width:900px) {
+      .hero-inner{grid-template-columns:1fr;text-align:center}
+      .hero-text{max-width:100%}.hero-desc-new{margin-left:auto;margin-right:auto}
+      .hero-actions-new{justify-content:center}
+      .hero-visual{display:none}
+      .stats-strip-inner{grid-template-columns:repeat(2,1fr)}
+      .hiw-grid{grid-template-columns:1fr;gap:0}
+      .hiw-step{border-radius:0!important}
+      .hiw-step:first-child{border-radius:16px 16px 0 0!important}
+      .hiw-step:last-child{border-radius:0 0 16px 16px!important}
+      .hiw-arrow{display:none}
+      .pulse-grid{grid-template-columns:1fr}
+      .why-banner{flex-direction:column;text-align:center}
+    }
+  </style>
 </head>
 <body>
   <a href="#main-content" class="skip-nav">Skip to main content</a>
-  <!-- Header -->
-  <header class="header">
+  <header class="header" style="position:absolute;top:0;left:0;right:0;z-index:100;background:transparent;">
     <div class="header-container">
-      <a href="index.html" class="logo">
-        <span class="logo-symbol">L/0</span>
-        <span class="logo-text">Post-Labor Economics</span>
-      </a>
-      
-      <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.querySelector('.nav-menu').classList.toggle('open')" aria-label="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <a href="index.html" class="logo" style="color:white"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-menu').classList.toggle('open')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <nav class="nav-menu">
-        <a href="projects.html" class="nav-link">Projects</a>
-        <a href="content.html" class="nav-link">Content</a>
-        <a href="proposals.html" class="nav-link">Proposals</a>
-        <a href="discussions.html" class="nav-link">Discussions</a>
-        <a href="architecture.html" class="nav-link">Architecture</a>
+        <a href="projects.html" class="nav-link" style="color:rgba(255,255,255,0.8)">Projects</a>
+        <a href="content.html" class="nav-link" style="color:rgba(255,255,255,0.8)">Content</a>
+        <a href="proposals.html" class="nav-link" style="color:rgba(255,255,255,0.8)">Proposals</a>
+        <a href="discussions.html" class="nav-link" style="color:rgba(255,255,255,0.8)">Discussions</a>
+        <a href="about.html" class="nav-link" style="color:rgba(255,255,255,0.8)">About</a>
       </nav>
-      
       <div class="header-actions">
-        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
-        <a href="login.html" class="btn btn-ghost" data-auth="logged-out">Sign In</a>
-        <a href="register.html" class="btn btn-primary" data-auth="logged-out">Join Us</a>
-        <a href="dashboard.html" class="btn btn-primary" data-auth="logged-in" style="display:none">Dashboard</a>
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;color:rgba(255,255,255,0.8)" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="login.html" class="btn btn-ghost" data-auth="logged-out" style="color:white;border-color:rgba(255,255,255,0.2)">Sign In</a>
+        <a href="register.html" class="btn-hero-primary" data-auth="logged-out" style="font-size:0.85rem;padding:0.55rem 1.2rem">Join Us</a>
+        <a href="dashboard.html" class="btn-hero-primary" data-auth="logged-in" style="display:none;font-size:0.85rem;padding:0.55rem 1.2rem">Dashboard</a>
       </div>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <p class="hero-eyebrow">The Movement for Economic Liberation</p>
-        <h1 class="hero-title">Prosperity Beyond Work</h1>
-        <p class="hero-description">
-          We're not preparing for job loss—we're preparing for liberation. Building frameworks 
-          for a world where human dignity and economic security exist independent of labor markets.
-        </p>
-        <div class="hero-actions">
-          <a href="register.html" class="btn btn-primary btn-lg" data-auth="logged-out">
-            Join the Movement
-            <i data-lucide="arrow-right"></i>
-          </a>
-          <a href="dashboard.html" class="btn btn-primary btn-lg" data-auth="logged-in" style="display:none">
-            Go to Dashboard
-            <i data-lucide="arrow-right"></i>
-          </a>
-          <a href="about.html" class="btn btn-outline btn-lg">
-            Why does this exist?
-          </a>
+  <!-- ═══ HERO ═══ -->
+  <section class="hp-hero" id="main-content">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-eyebrow-new">✦ The Movement for Economic Liberation</div>
+        <h1 class="hero-title-new">Prosperity<br><span class="dawn">Beyond Work</span></h1>
+        <p class="hero-desc-new">We're building the intellectual and policy frameworks for a world where human dignity and economic security exist independent of labor markets.</p>
+        <div class="hero-actions-new">
+          <a href="register.html" class="btn-hero-primary" data-auth="logged-out">Join the Movement →</a>
+          <a href="dashboard.html" class="btn-hero-primary" data-auth="logged-in" style="display:none">Go to Dashboard →</a>
+          <a href="about.html" class="btn-hero-outline">Why does this exist?</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-graphic">
+          <div class="ring ring-1"></div>
+          <div class="ring ring-2"></div>
+          <div class="ring ring-3"></div>
+          <div class="hero-symbol-center">L/0</div>
+          <div class="orbit-node">📝</div>
+          <div class="orbit-node">🏗️</div>
+          <div class="orbit-node">🗳️</div>
+          <div class="orbit-node">💬</div>
+          <div class="orbit-node">📚</div>
+          <div class="orbit-node">🔬</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Live Stats Section -->
-  <section class="section">
-    <div class="container">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-value" id="content-count">-</div>
-          <div class="stat-label">Published Articles</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="projects-count">-</div>
-          <div class="stat-label">Active Projects</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="proposals-count">-</div>
-          <div class="stat-label">Community Proposals</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="elements-count">-</div>
-          <div class="stat-label">Discussions</div>
-        </div>
-      </div>
+  <!-- ═══ STATS STRIP ═══ -->
+  <section class="stats-strip">
+    <div class="stats-strip-inner">
+      <div><div class="ss-val" id="content-count" data-target="0">—</div><div class="ss-label">Published Articles</div></div>
+      <div><div class="ss-val" id="projects-count" data-target="0">—</div><div class="ss-label">Active Projects</div></div>
+      <div><div class="ss-val" id="proposals-count" data-target="0">—</div><div class="ss-label">Proposals</div></div>
+      <div><div class="ss-val" id="elements-count" data-target="0">—</div><div class="ss-label">Discussions</div></div>
     </div>
   </section>
 
-  <!-- Why Banner -->
-  <section style="padding:0 1.5rem;">
-    <div style="max-width:1100px;margin:0 auto;">
-      <a href="about.html" style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;border-radius:14px;background:linear-gradient(135deg,#0D1B2A,#1B4D3E);color:white;text-decoration:none;transition:transform 0.2s ease,box-shadow 0.2s ease;gap:1.5rem;flex-wrap:wrap" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(13,27,42,0.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-        <div style="flex:1;min-width:240px">
-          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.12em;color:rgba(244,162,97,0.9);font-weight:600;margin-bottom:0.35rem">New to PLE?</div>
-          <div style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;line-height:1.3">Understand why this platform exists and how you can help shape the post-labor future</div>
+  <!-- ═══ WHY BANNER ═══ -->
+  <section style="padding:2rem 1.5rem 0">
+    <div style="max-width:1100px;margin:0 auto">
+      <a href="about.html" class="why-banner reveal">
+        <div class="why-banner-icon">💡</div>
+        <div class="why-banner-text">
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-dawn);font-weight:600;margin-bottom:0.3rem">New to post-labor economics?</div>
+          <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;line-height:1.35">Understand why this platform exists — and why the future of work matters to everyone</div>
         </div>
-        <div style="font-size:0.9rem;font-weight:500;color:rgba(244,162,97,0.9);white-space:nowrap;display:flex;align-items:center;gap:0.4rem">Read the story <span style="font-size:1.2rem">→</span></div>
+        <div style="font-size:0.9rem;font-weight:500;color:var(--color-dawn);white-space:nowrap;display:flex;align-items:center;gap:0.35rem;position:relative;z-index:1">Read the story <span style="font-size:1.2rem;transition:transform .2s">→</span></div>
       </a>
     </div>
   </section>
 
-  <!-- Latest Content -->
-  <section class="section section-muted">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Latest from the Community</h2>
-        <p class="section-description">
-          Research, analysis, and policy frameworks from contributors building the post-labor future.
-        </p>
+  <!-- ═══ HOW IT WORKS ═══ -->
+  <section class="hiw-section">
+    <div class="hiw-inner">
+      <div style="text-align:center;margin-bottom:0.5rem">
+        <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:var(--color-dawn);margin-bottom:0.5rem" class="reveal">How It Works</div>
+        <h2 style="font-family:'Fraunces',serif;font-size:clamp(1.5rem,3.5vw,2.25rem);font-weight:700;color:var(--color-horizon);letter-spacing:-0.02em" class="reveal">Three ways to shape the future</h2>
       </div>
-      <div id="featured-section" style="display:none;margin-bottom:2rem">
-        <h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.75rem">⭐ Editor's Picks</h3>
-        <div id="featured-content" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem"></div>
-      </div>
-      <div id="latest-content">
-        <div class="loading"><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div>
-      </div>
-      <div class="section-footer" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-        <a href="content.html" class="btn btn-outline">Browse All Content <i data-lucide="arrow-right"></i></a>
-        <a href="projects.html" class="btn btn-outline">View Projects <i data-lucide="arrow-right"></i></a>
+      <div class="hiw-grid reveal">
+        <div class="hiw-step">
+          <div class="hiw-num" style="background:var(--color-horizon)">1</div>
+          <h3>Learn</h3>
+          <p>Read research articles, explore learning paths, and browse the glossary to build your understanding.</p>
+          <div class="hiw-arrow">→</div>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-num" style="background:var(--color-dawn)">2</div>
+          <h3>Contribute</h3>
+          <p>Write articles, join projects, discuss ideas, and add your expertise to the collective knowledge base.</p>
+          <div class="hiw-arrow">→</div>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-num" style="background:var(--color-sky,#6B9AC4)">3</div>
+          <h3>Govern</h3>
+          <p>Propose policies, vote on changes, and shape the direction of the movement through democratic participation.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Community Activity -->
-  <section class="section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Community Pulse</h2>
-        <p class="section-description">Active proposals, discussions, and platform activity.</p>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;">
-        <!-- Recent Proposals -->
+  <!-- ═══ LATEST CONTENT ═══ -->
+  <section style="padding:clamp(3rem,6vw,5rem) 1.5rem;background:#F5F3EF">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2rem;flex-wrap:wrap;gap:1rem" class="reveal">
         <div>
-          <h3 class="subsection-title">Recent Proposals</h3>
-          <div id="recent-proposals">
-            <div class="loading"><div class="loading-spinner"></div></div>
-          </div>
-          <div class="subsection-footer">
-            <a href="proposals.html" class="btn btn-ghost btn-sm">View All Proposals</a>
-          </div>
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:var(--color-dawn);margin-bottom:0.4rem">From the Community</div>
+          <h2 style="font-family:'Fraunces',serif;font-size:clamp(1.5rem,3.5vw,2.25rem);font-weight:700;color:var(--color-horizon);letter-spacing:-0.02em">Latest Content</h2>
         </div>
-        
-        <!-- Active Discussions -->
-        <div>
-          <h3 class="subsection-title">Active Discussions</h3>
-          <div id="recent-discussions">
-            <div class="loading"><div class="loading-spinner"></div></div>
-          </div>
-          <div class="subsection-footer">
-            <a href="discussions.html" class="btn btn-ghost btn-sm">View All Discussions</a>
-          </div>
+        <a href="content.html" style="font-size:0.85rem;color:var(--color-horizon);text-decoration:none;font-weight:500;display:flex;align-items:center;gap:0.3rem">Browse all →</a>
+      </div>
+      <div id="featured-section" style="display:none;margin-bottom:1.5rem" class="reveal">
+        <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.75rem">⭐ Editor's Picks</div>
+        <div id="featured-content" class="content-grid-hp"></div>
+      </div>
+      <div id="latest-content" class="reveal">
+        <div class="content-grid-hp"><div class="content-card-hp" style="min-height:180px"><div class="skeleton skeleton-line" style="height:0.7rem;width:30%"></div><div class="skeleton skeleton-line" style="height:1.1rem;width:80%;margin-top:0.8rem"></div><div class="skeleton skeleton-line" style="width:100%;margin-top:0.6rem"></div><div class="skeleton skeleton-line" style="width:60%;margin-top:0.3rem"></div></div><div class="content-card-hp" style="min-height:180px"><div class="skeleton skeleton-line" style="height:0.7rem;width:40%"></div><div class="skeleton skeleton-line" style="height:1.1rem;width:70%;margin-top:0.8rem"></div><div class="skeleton skeleton-line" style="width:90%;margin-top:0.6rem"></div><div class="skeleton skeleton-line" style="width:50%;margin-top:0.3rem"></div></div></div>
+      </div>
+      <div style="text-align:center;margin-top:2rem" class="reveal">
+        <a href="content.html" class="btn btn-outline" style="border-radius:100px;padding:0.7rem 1.75rem">Browse All Content →</a>
+        <a href="projects.html" class="btn btn-outline" style="border-radius:100px;padding:0.7rem 1.75rem;margin-left:0.5rem">View Projects →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ COMMUNITY PULSE ═══ -->
+  <section style="padding:clamp(3rem,6vw,5rem) 1.5rem">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="text-align:center;margin-bottom:2rem" class="reveal">
+        <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:var(--color-dawn);margin-bottom:0.4rem">Live Activity</div>
+        <h2 style="font-family:'Fraunces',serif;font-size:clamp(1.5rem,3.5vw,2.25rem);font-weight:700;color:var(--color-horizon);letter-spacing:-0.02em">Community Pulse</h2>
+      </div>
+      <div class="pulse-grid reveal">
+        <div class="pulse-col">
+          <div class="pulse-col-head"><h3>Proposals</h3><a href="proposals.html" style="font-size:0.75rem;color:var(--color-horizon);text-decoration:none">View all →</a></div>
+          <div class="pulse-col-body" id="recent-proposals"><div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem">Loading...</div></div>
         </div>
-        
-        <!-- Activity Feed -->
-        <div>
-          <h3 class="subsection-title">Platform Activity</h3>
-          <div class="activity-feed" id="activity-feed">
-            <div class="activity-feed-header">Latest Updates</div>
-            <div class="loading"><div class="loading-spinner"></div></div>
-          </div>
+        <div class="pulse-col">
+          <div class="pulse-col-head"><h3>Discussions</h3><a href="discussions.html" style="font-size:0.75rem;color:var(--color-horizon);text-decoration:none">View all →</a></div>
+          <div class="pulse-col-body" id="recent-discussions"><div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem">Loading...</div></div>
+        </div>
+        <div class="pulse-col">
+          <div class="pulse-col-head"><h3>Activity</h3><a href="activity.html" style="font-size:0.75rem;color:var(--color-horizon);text-decoration:none">View all →</a></div>
+          <div class="pulse-col-body" id="activity-feed"><div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem">Loading...</div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <style>
-    @media(max-width:900px) { [style*="grid-template-columns:repeat(3"] { grid-template-columns:1fr !important; } }
-  </style>
-
-  <!-- Community Preview -->
-  <section class="section" style="padding-bottom:0;">
-    <div class="container" style="text-align:center;">
-      <h2 class="section-title">Built By Community</h2>
-      <p class="section-description">Contributors shaping the post-labor future</p>
-      <div id="member-preview" style="display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;margin:1.5rem 0 1rem;"></div>
-      <a href="community.html" style="font-size:0.9rem;color:var(--color-horizon,#1B4D3E);">Meet the full community &rarr;</a>
+  <!-- ═══ VISION QUOTE ═══ -->
+  <section class="vision-section">
+    <div class="vision-inner reveal">
+      <div class="vision-quote">The question is no longer whether machines will replace human labor — but whether humanity will be ready to thrive when they do.</div>
+      <div class="vision-attr">The founding premise of Post-Labor Economics</div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="section section-primary">
-    <div class="container">
-      <div class="cta-content">
-        <h2 class="cta-title">Ready to Shape the Future?</h2>
-        <p class="cta-description">
-          Join a growing community of thinkers, researchers, and advocates working toward 
-          economic systems that serve human flourishing.
-        </p>
-        <div class="cta-actions">
-          <a href="register.html" class="btn btn-light btn-lg" data-auth="logged-out">
-            Create Your Account
-          </a>
-          <a href="content-editor.html" class="btn btn-light btn-lg" data-auth="logged-in" style="display:none">
-            Write Something
-          </a>
-          <a href="proposals.html" class="btn btn-outline-light btn-lg">
-            Browse Proposals
-          </a>
-        </div>
+  <!-- ═══ COMMUNITY PREVIEW ═══ -->
+  <section class="members-section">
+    <div style="max-width:700px;margin:0 auto" class="reveal">
+      <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:var(--color-dawn);margin-bottom:0.4rem">Community</div>
+      <h2 style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--color-horizon);margin-bottom:1.25rem">Built by people who believe in what comes next</h2>
+      <div id="member-preview" style="display:flex;justify-content:center;flex-wrap:wrap;margin-bottom:1rem"></div>
+      <a href="community.html" style="font-size:0.85rem;color:var(--color-horizon);text-decoration:none;font-weight:500">Meet the full community →</a>
+    </div>
+  </section>
+
+  <!-- ═══ FINAL CTA ═══ -->
+  <section class="hp-cta">
+    <div class="cta-inner reveal">
+      <h2 style="font-family:'Fraunces',serif;font-size:clamp(2rem,4.5vw,3rem);font-weight:700;margin-bottom:0.75rem;line-height:1.15">Ready to shape the future?</h2>
+      <p style="font-size:1.05rem;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto">Join researchers, policymakers, technologists, and citizens working toward economic systems that serve human flourishing.</p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
+        <a href="register.html" class="btn-hero-primary" data-auth="logged-out">Create Your Account →</a>
+        <a href="content-editor.html" class="btn-hero-primary" data-auth="logged-in" style="display:none">Write Something →</a>
+        <a href="about.html" class="btn-hero-outline">Our Story</a>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- ═══ FOOTER ═══ -->
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">
-        <div class="footer-brand">
-          <div class="logo">
-            <span class="logo-symbol">L/0</span>
-            <span class="logo-text">Post-Labor Economics</span>
-          </div>
-          <p class="footer-tagline">Prosperity Beyond Work</p>
-        </div>
-        
-        <div class="footer-links">
-          <h4>Platform</h4>
-          <a href="projects.html">Projects</a>
-          <a href="content.html">Content</a>
-          <a href="proposals.html">Proposals</a>
-          <a href="discussions.html">Discussions</a>
-          <a href="architecture.html">Architecture</a>
-          <a href="search.html">Search</a>
-        </div>
-        
-        <div class="footer-links">
-          <h4>Resources</h4>
-          <a href="about.html">About</a>
-          <a href="community.html">Community</a>
-          <a href="gato.html">GATO Framework</a>
-          <a href="prime.html">THE PRIME</a>
-        </div>
-        
-        <div class="footer-links">
-          <h4>Connect</h4>
-          <a href="https://discord.gg/postlabor" target="_blank">Discord</a>
-          <a href="https://github.com/sillinous/ple-platform" target="_blank">GitHub</a>
-        </div>
+        <div class="footer-brand"><div class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></div><p class="footer-tagline">Prosperity Beyond Work</p></div>
+        <div class="footer-links"><h4>Platform</h4><a href="projects.html">Projects</a><a href="content.html">Content</a><a href="proposals.html">Proposals</a><a href="discussions.html">Discussions</a><a href="architecture.html">Architecture</a><a href="search.html">Search</a></div>
+        <div class="footer-links"><h4>Resources</h4><a href="about.html">About</a><a href="community.html">Community</a><a href="series.html">Learning Paths</a><a href="glossary.html">Glossary</a><a href="api-docs.html">API Docs</a></div>
+        <div class="footer-links"><h4>Connect</h4><a href="https://github.com/sillinous/ple-platform" target="_blank">GitHub</a><a href="/api/rss">RSS Feed</a></div>
       </div>
-      
-      <div class="footer-bottom">
-        <p>&copy; 2025 Post-Labor Economics. Open source and community-driven.</p>
-      </div>
+      <div class="footer-bottom"><p>&copy; 2025 Post-Labor Economics. Open source and community-driven.</p></div>
     </div>
   </footer>
 
   <script type="module">
-    import { proposals, activity, formatDate, initPage } from './src/scripts/api.js';
-    
-    // Load live stats
-    async function loadStats() {
-      try {
-        const [cR, pR, prR, dR] = await Promise.allSettled([
+    import { initPage, updateAuthUI, proposals, activity, formatDate } from './src/scripts/api.js';
+
+    // Stats
+    async function loadStats(){
+      try{
+        const [cR,pR,prR,dR]=await Promise.allSettled([
           fetch('/api/content?limit=1&status=published').then(r=>r.json()),
           fetch('/api/projects?limit=1').then(r=>r.json()),
-          proposals.list({limit:1}),
+          fetch('/api/proposals?limit=1').then(r=>r.json()),
           fetch('/api/discussions?limit=1').then(r=>r.json())
         ]);
-        if(cR.status==='fulfilled') document.getElementById('content-count').textContent = cR.value.total||0;
-        if(pR.status==='fulfilled') document.getElementById('projects-count').textContent = pR.value.total||0;
-        if(prR.status==='fulfilled') document.getElementById('proposals-count').textContent = prR.value.total||0;
-        if(dR.status==='fulfilled') document.getElementById('elements-count').textContent = dR.value.total||0;
-      } catch(e) { console.error('Stats:', e); }
+        const animate=(el,val)=>{el.dataset.target=val;let cur=0;const step=Math.max(1,Math.ceil(val/30));const iv=setInterval(()=>{cur=Math.min(cur+step,val);el.textContent=cur;if(cur>=val)clearInterval(iv);},40);};
+        if(cR.status==='fulfilled')animate(document.getElementById('content-count'),cR.value.total||0);
+        if(pR.status==='fulfilled')animate(document.getElementById('projects-count'),pR.value.total||0);
+        if(prR.status==='fulfilled')animate(document.getElementById('proposals-count'),prR.value.total||0);
+        if(dR.status==='fulfilled')animate(document.getElementById('elements-count'),dR.value.total||0);
+      }catch(e){}
     }
 
-    // Load latest content
-    async function loadContent() {
-      try {
-        // Load featured content first
-        try {
-          const fr=await fetch('/api/content?featured=true&status=published&limit=3');const fd=await fr.json();
-          const featured=fd.content||[];
-          if(featured.length){
-            document.getElementById('featured-section').style.display='block';
-            document.getElementById('featured-content').innerHTML=featured.map(c=>{
-              const tagName=t=>typeof t==='string'?t:t.name;
-              return`<a href="content-view.html?id=${c.slug||c.id}" style="display:block;padding:1.25rem;border:2px solid rgba(245,158,11,0.3);border-radius:12px;text-decoration:none;color:inherit;background:linear-gradient(135deg,rgba(245,158,11,0.03),transparent);transition:box-shadow 0.2s">
-                <div style="font-size:0.7rem;color:#F59E0B;font-weight:600;margin-bottom:0.4rem">⭐ FEATURED</div>
-                <h4 style="font-family:'Fraunces',serif;font-size:1.05rem;margin-bottom:0.3rem">${c.title}</h4>
-                <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.5">${c.excerpt||(c.body||'').replace(/[#*`>\[\]]/g,'').substring(0,100)+'...'}</p>
-              </a>`}).join('');
-          }
-        }catch(e){}
-
-        const data = await fetch('/api/content?limit=4&status=published').then(r=>r.json());
-        const el = document.getElementById('latest-content');
-        if (!data.content?.length) { el.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Content coming soon.</p>'; return; }
-        el.innerHTML = `<div class="element-grid">${data.content.map(c => {
-          const tagName=t=>typeof t==='string'?t:t.name;
-          const tags = (c.tags||[]).slice(0,2).map(t=>`<span style="font-size:0.65rem;padding:0.1rem 0.4rem;border-radius:100px;background:rgba(27,77,62,0.08);color:var(--color-horizon,#1B4D3E)">${tagName(t)}</span>`).join(' ');
-          const words=(c.body||'').split(/\s+/).length;
-          const readTime=Math.max(1,Math.ceil(words/200));
-          return `
-          <a href="content-view.html?id=${c.slug||c.id}" class="element-card" style="text-decoration:none;color:inherit;cursor:pointer;transition:box-shadow 0.2s;">
-            <div class="element-card-header" style="display:flex;justify-content:space-between;align-items:center;">
-              <span class="element-code goal" style="font-size:0.7rem">${(c.contentType||'article').replace('_',' ').toUpperCase()}</span>
-              <span style="font-size:0.7rem;color:var(--text-muted,#888)">${readTime} min read</span>
-            </div>
-            <h4 class="element-title">${c.title}</h4>
-            <p class="element-description">${c.excerpt||(c.body||'').substring(0,120)+'...'}</p>
-            ${tags ? `<div style="margin-top:0.5rem">${tags}</div>` : ''}
-          </a>`;
-        }).join('')}</div>`;
-      } catch(e) { document.getElementById('latest-content').innerHTML=''; }
+    // Content
+    async function loadContent(){
+      try{
+        try{const fr=await fetch('/api/content?featured=true&status=published&limit=3');const fd=await fr.json();const feat=fd.content||[];
+          if(feat.length){document.getElementById('featured-section').style.display='block';
+            document.getElementById('featured-content').innerHTML=feat.map(c=>cardHTML(c,true)).join('');
+          }}catch(e){}
+        const data=await fetch('/api/content?limit=4&status=published').then(r=>r.json());
+        const el=document.getElementById('latest-content');
+        if(!data.content?.length){el.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:2rem">Content coming soon.</p>';return;}
+        el.innerHTML='<div class="content-grid-hp">'+data.content.map(c=>cardHTML(c,false)).join('')+'</div>';
+      }catch(e){document.getElementById('latest-content').innerHTML='';}
+    }
+    function cardHTML(c,feat){
+      const tagName=t=>typeof t==='string'?t:t.name;
+      const tags=(c.tags||[]).slice(0,2).map(t=>'<span class="cc-tag">'+tagName(t)+'</span>').join(' ');
+      const words=(c.body||'').split(/\s+/).length;const rt=Math.max(1,Math.ceil(words/200));
+      return`<a href="content-view.html?id=${c.slug||c.id}" class="content-card-hp"${feat?' style="border-color:rgba(245,158,11,0.2)"':''}>
+        ${feat?'<div style="font-size:0.65rem;color:#D97706;font-weight:600;margin-bottom:0.3rem">⭐ FEATURED</div>':''}
+        <div class="cc-type">${(c.contentType||'article').replace('_',' ')}</div>
+        <div class="cc-title">${c.title}</div>
+        <div class="cc-excerpt">${c.excerpt||(c.body||'').replace(/[#*\`>\[\]]/g,'').substring(0,110)+'...'}</div>
+        <div class="cc-meta"><div>${tags}</div><span>${rt} min read</span></div>
+      </a>`;
     }
 
-    // Load recent discussions
-    async function loadDiscussions() {
-      try {
-        const data = await fetch('/api/discussions?limit=3').then(r=>r.json());
-        const el = document.getElementById('recent-discussions');
-        if (!data.discussions?.length) { el.innerHTML='<p style="color:var(--text-muted)">No discussions yet.</p>'; return; }
-        el.innerHTML = data.discussions.map(d => `
-          <a href="discussion-view.html?id=${d.id}" style="display:block;padding:0.75rem 0;border-bottom:1px solid var(--color-gray-50,#eee);text-decoration:none;color:inherit;">
-            <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;">${d.title||'Untitled'}</div>
-            <div style="font-size:0.8rem;color:var(--text-muted,#888);display:flex;gap:0.75rem;">
-              <span>${d.author?.name||'Anonymous'}</span>
-              <span>${d.replyCount||0} replies</span>
-            </div>
-          </a>
-        `).join('');
-      } catch(e) { document.getElementById('recent-discussions').innerHTML=''; }
+    // Discussions
+    async function loadDiscussions(){
+      try{const data=await fetch('/api/discussions?limit=4').then(r=>r.json());
+        const el=document.getElementById('recent-discussions');
+        if(!data.discussions?.length){el.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:0.85rem">No discussions yet.</div>';return;}
+        el.innerHTML=data.discussions.map(d=>`<a href="discussion-view.html?id=${d.id}" class="pulse-item"><div class="pulse-item-title">${d.title||'Untitled'}</div><div class="pulse-item-meta"><span>${d.author?.name||'Anonymous'}</span><span>${d.replyCount||0} replies</span></div></a>`).join('');
+      }catch(e){document.getElementById('recent-discussions').innerHTML='';}
     }
-    
-    // Load recent proposals
-    async function loadProposals() {
-      try {
-        const data = await proposals.list({ limit: 3 });
-        const container = document.getElementById('recent-proposals');
-        
-        if (data.proposals.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No proposals yet. Be the first!</p><a href="proposal-create.html" class="btn btn-primary">Create Proposal</a></div>';
-          lucide.createIcons(); return;
-        }
-        
-        container.innerHTML = data.proposals.map(p => `
-          <div class="proposal-card">
-            <div class="proposal-card-header">
-              <span class="proposal-type-badge ${p.proposalType}">${p.proposalType.replace('_', ' ')}</span>
-            </div>
-            <h4 class="proposal-title"><a href="proposal-view.html?id=${p.id}">${p.title}</a></h4>
-            <p class="proposal-excerpt">${p.content.substring(0, 150)}${p.content.length > 150 ? '...' : ''}</p>
-            <div class="proposal-meta">
-              <span class="proposal-meta-item"><i data-lucide="user"></i>${p.author?.name || 'Anonymous'}</span>
-              <span class="proposal-meta-item"><i data-lucide="clock"></i>${formatDate(p.createdAt)}</span>
-            </div>
-          </div>
-        `).join('');
-        lucide.createIcons();
-      } catch (e) {
-        document.getElementById('recent-proposals').innerHTML = '<p style="color:var(--text-muted)">Unable to load proposals.</p>';
-      }
+
+    // Proposals
+    async function loadProposals(){
+      try{const data=await proposals.list({limit:4});const el=document.getElementById('recent-proposals');
+        if(!data.proposals?.length){el.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:0.85rem">No proposals yet. <a href="proposal-create.html" style="color:var(--color-horizon)">Create one →</a></div>';return;}
+        el.innerHTML=data.proposals.map(p=>`<a href="proposal-view.html?id=${p.id}" class="pulse-item"><div class="pulse-item-title">${p.title}</div><div class="pulse-item-meta"><span style="text-transform:capitalize;color:var(--color-dawn);font-weight:500">${(p.proposalType||'').replace('_',' ')}</span><span>${p.author?.name||'Anonymous'}</span></div></a>`).join('');
+      }catch(e){document.getElementById('recent-proposals').innerHTML='';}
     }
-    
-    // Load activity feed
-    async function loadActivity() {
-      try {
-        const data = await activity.list({ limit: 5 });
-        const container = document.getElementById('activity-feed');
-        
-        if (data.activities.length === 0) {
-          container.innerHTML = '<div class="activity-feed-header">Latest Updates</div><p style="color:var(--text-muted);padding:1rem 0">Activity will appear as the community grows.</p>';
-          return;
-        }
-        
-        container.innerHTML = `<div class="activity-feed-header">Latest Updates</div>${data.activities.map(a => `
-          <div class="activity-item"><div class="activity-icon"><i data-lucide="${getIcon(a.action)}"></i></div><div class="activity-content"><div class="activity-description">${a.description}</div><div class="activity-time">${formatDate(a.createdAt)}</div></div></div>
-        `).join('')}`;
-        lucide.createIcons();
-      } catch (e) {
-        document.getElementById('activity-feed').innerHTML = '<div class="activity-feed-header">Latest Updates</div>';
-      }
+
+    // Activity
+    async function loadActivity(){
+      try{const data=await activity.list({limit:5});const el=document.getElementById('activity-feed');
+        if(!data.activities?.length){el.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:0.85rem">Activity will appear as the community grows.</div>';return;}
+        el.innerHTML=data.activities.map(a=>`<div class="pulse-item" style="cursor:default"><div class="pulse-item-title">${a.description}</div><div class="pulse-item-meta"><span>${formatDate(a.createdAt)}</span></div></div>`).join('');
+      }catch(e){}
     }
-    
-    function getIcon(a) {
-      return {'user_registered':'user-plus','proposal_created':'file-plus','vote_cast':'vote','discussion_created':'message-square','reply_created':'reply'}[a]||'activity';
-    }
-    
-    async function loadMembers() {
-      try {
-        const r = await fetch('/api/auth?action=members');
-        const data = await r.json();
-        const el = document.getElementById('member-preview');
-        if (!el) return;
-        const members = (data.members || []).slice(0, 8);
-        el.innerHTML = members.map(m => {
-          const ini = (m.displayName||'?').split(' ').map(w=>w[0]).join('').toUpperCase();
-          return `<a href="profile.html?id=${m.id}" title="${m.displayName}" style="width:48px;height:48px;border-radius:50%;background:var(--color-horizon,#1B4D3E);color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;text-decoration:none;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">${ini}</a>`;
+
+    // Members
+    async function loadMembers(){
+      try{const r=await fetch('/api/auth?action=members');const d=await r.json();
+        const el=document.getElementById('member-preview');if(!el)return;
+        el.innerHTML=(d.members||[]).slice(0,10).map(m=>{
+          const ini=(m.displayName||'?').split(' ').map(w=>w[0]).join('').toUpperCase();
+          return`<a href="profile.html?id=${m.id}" title="${m.displayName}" class="member-ring">${ini}</a>`;
         }).join('');
-      } catch(e) {}
+      }catch(e){}
     }
-    
-    await initPage();
-    loadStats();
-    loadContent();
-    loadProposals();
-    loadDiscussions();
-    loadActivity();
-    loadMembers();
-    lucide.createIcons();
+
+    // Scroll reveal
+    function initReveals(){
+      const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.12,rootMargin:'0px 0px -30px 0px'});
+      document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+    }
+
+    await initPage();updateAuthUI();
+    loadStats();loadContent();loadProposals();loadDiscussions();loadActivity();loadMembers();
+    initReveals();lucide.createIcons();
   </script>
 </body>
 </html>

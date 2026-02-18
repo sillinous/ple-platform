@@ -88,6 +88,9 @@
     .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
     .reveal.visible{opacity:1;transform:translateY(0)}
     .reveal-delay-1{transition-delay:.1s}.reveal-delay-2{transition-delay:.2s}.reveal-delay-3{transition-delay:.3s}
+    .rd1{transition-delay:.08s}.rd2{transition-delay:.16s}.rd3{transition-delay:.24s}
+    .faq-item.open .faq-icon{transform:rotate(45deg)}
+    .faq-item.open .faq-answer{max-height:200px}
     @media(max-width:768px){.problem-grid{grid-template-columns:1fr}.approach-grid{grid-template-columns:1fr}.platform-map{grid-template-columns:repeat(3,1fr)}.bar-label{min-width:80px;font-size:.7rem}.live-stats-row{gap:1.5rem}}
     @media(max-width:480px){.platform-map{grid-template-columns:repeat(2,1fr)}}
   </style>
@@ -193,6 +196,37 @@
     </div>
   </section>
 
+  <!-- ═══ WHO IS THIS FOR? ═══ -->
+  <section class="why-section muted">
+    <div class="section-inner">
+      <div class="section-eyebrow reveal">Who Is This For?</div>
+      <h2 class="section-heading reveal">Everyone has a role to play</h2>
+      <p class="section-body reveal">Post-labor economics isn't an academic exercise. It's a movement that needs diverse perspectives to get it right.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem;margin-top:2.5rem">
+        <div class="reveal rd1" style="background:white;border-radius:14px;padding:1.75rem;border:1px solid rgba(0,0,0,0.05);transition:transform .3s,box-shadow .3s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.07)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:2rem;margin-bottom:0.75rem">🔬</div>
+          <h3 style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin-bottom:0.4rem;color:var(--color-horizon)">Researchers</h3>
+          <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted,#777)">Contribute studies, analyze data, and build the evidence base for policy proposals.</p>
+        </div>
+        <div class="reveal rd2" style="background:white;border-radius:14px;padding:1.75rem;border:1px solid rgba(0,0,0,0.05);transition:transform .3s,box-shadow .3s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.07)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:2rem;margin-bottom:0.75rem">⚖️</div>
+          <h3 style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin-bottom:0.4rem;color:var(--color-horizon)">Policymakers</h3>
+          <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted,#777)">Find frameworks and proposals ready for legislative adaptation and pilot testing.</p>
+        </div>
+        <div class="reveal rd3" style="background:white;border-radius:14px;padding:1.75rem;border:1px solid rgba(0,0,0,0.05);transition:transform .3s,box-shadow .3s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.07)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:2rem;margin-bottom:0.75rem">💻</div>
+          <h3 style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin-bottom:0.4rem;color:var(--color-horizon)">Technologists</h3>
+          <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted,#777)">Help build tools, analyze automation patterns, and ensure tech serves humanity.</p>
+        </div>
+        <div class="reveal rd1" style="background:white;border-radius:14px;padding:1.75rem;border:1px solid rgba(0,0,0,0.05);transition:transform .3s,box-shadow .3s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.07)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:2rem;margin-bottom:0.75rem">🌍</div>
+          <h3 style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin-bottom:0.4rem;color:var(--color-horizon)">Citizens</h3>
+          <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted,#777)">Your voice matters. Learn, discuss, vote on proposals, and help shape what comes next.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="why-section dark">
     <div class="section-inner">
       <div class="section-eyebrow reveal">The Platform</div>
@@ -209,10 +243,75 @@
   </section>
 
   <section class="why-section" style="text-align:center;padding-top:4rem;padding-bottom:2rem;">
-    <div class="reveal" style="font-family:'Fraunces',serif;font-size:6rem;font-weight:300;color:var(--color-horizon);opacity:.15;margin-bottom:1rem;letter-spacing:-0.05em">L/0</div>
+    <!-- Animated SVG rings around L/0 -->
+    <div class="reveal" style="position:relative;width:200px;height:200px;margin:0 auto 1.5rem">
+      <svg viewBox="0 0 200 200" style="position:absolute;inset:0;width:100%;height:100%">
+        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(27,77,62,0.08)" stroke-width="1"><animate attributeName="r" values="88;92;88" dur="6s" repeatCount="indefinite"/></circle>
+        <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(244,162,97,0.1)" stroke-width="1"><animate attributeName="r" values="68;72;68" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="100" cy="100" r="50" fill="none" stroke="rgba(107,154,196,0.1)" stroke-width="1"><animate attributeName="r" values="48;52;48" dur="4s" repeatCount="indefinite"/></circle>
+      </svg>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Fraunces',serif;font-size:3.5rem;font-weight:300;color:var(--color-horizon);opacity:0.25;letter-spacing:-0.05em">L/0</div>
+    </div>
     <div class="section-eyebrow reveal">The Symbol</div>
     <h2 class="section-heading reveal" style="text-align:center;max-width:500px;margin:0 auto 1rem">The threshold between Labor and Zero</h2>
     <p class="section-body reveal" style="text-align:center;max-width:540px;margin:0 auto;">The forward slash represents passage — movement from a world defined by labor toward one defined by choice. It's not the end of work. It's the beginning of freedom.</p>
+  </section>
+
+  <!-- ═══ FAQ ═══ -->
+  <section class="why-section muted">
+    <div class="section-inner">
+      <div style="text-align:center;margin-bottom:2.5rem">
+        <div class="section-eyebrow reveal">Common Questions</div>
+        <h2 class="section-heading reveal" style="text-align:center">Frequently Asked</h2>
+      </div>
+      <div style="max-width:720px;margin:0 auto" class="reveal">
+        <div class="faq-item" onclick="this.classList.toggle('open')" style="cursor:pointer;padding:1.25rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--color-horizon)">Are you anti-work?</h3>
+            <span class="faq-icon" style="font-size:1.5rem;color:var(--color-dawn);transition:transform .3s;font-weight:300">+</span>
+          </div>
+          <div class="faq-answer" style="max-height:0;overflow:hidden;transition:max-height .4s ease;font-size:0.9rem;line-height:1.7;color:var(--text-muted,#666)">
+            <div style="padding-top:0.75rem">No. We're pro-choice. We believe people should be free to work on what matters to them — not forced into labor for survival. The goal is expanding human agency, not eliminating productivity.</div>
+          </div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')" style="cursor:pointer;padding:1.25rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--color-horizon)">Isn't this just UBI advocacy?</h3>
+            <span class="faq-icon" style="font-size:1.5rem;color:var(--color-dawn);transition:transform .3s;font-weight:300">+</span>
+          </div>
+          <div class="faq-answer" style="max-height:0;overflow:hidden;transition:max-height .4s ease;font-size:0.9rem;line-height:1.7;color:var(--text-muted,#666)">
+            <div style="padding-top:0.75rem">UBI is one tool we study, but post-labor economics is broader. We explore robot taxes, universal basic services, cooperative ownership, shortened work weeks, public investment funds, and entirely new economic models. The question isn't "what single policy?" but "what system redesign?"</div>
+          </div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')" style="cursor:pointer;padding:1.25rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--color-horizon)">How can I contribute?</h3>
+            <span class="faq-icon" style="font-size:1.5rem;color:var(--color-dawn);transition:transform .3s;font-weight:300">+</span>
+          </div>
+          <div class="faq-answer" style="max-height:0;overflow:hidden;transition:max-height .4s ease;font-size:0.9rem;line-height:1.7;color:var(--text-muted,#666)">
+            <div style="padding-top:0.75rem">Create an account and start anywhere: write articles, comment on discussions, vote on proposals, join projects, or simply read and share. Every perspective strengthens the movement.</div>
+          </div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')" style="cursor:pointer;padding:1.25rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--color-horizon)">Is this a political movement?</h3>
+            <span class="faq-icon" style="font-size:1.5rem;color:var(--color-dawn);transition:transform .3s;font-weight:300">+</span>
+          </div>
+          <div class="faq-answer" style="max-height:0;overflow:hidden;transition:max-height .4s ease;font-size:0.9rem;line-height:1.7;color:var(--text-muted,#666)">
+            <div style="padding-top:0.75rem">We're nonpartisan. The transition away from labor-dependent economics affects everyone regardless of political orientation. Our governance is democratic, our research is evidence-based, and all perspectives are welcome.</div>
+          </div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')" style="cursor:pointer;padding:1.25rem 0">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--color-horizon)">How is the platform governed?</h3>
+            <span class="faq-icon" style="font-size:1.5rem;color:var(--color-dawn);transition:transform .3s;font-weight:300">+</span>
+          </div>
+          <div class="faq-answer" style="max-height:0;overflow:hidden;transition:max-height .4s ease;font-size:0.9rem;line-height:1.7;color:var(--text-muted,#666)">
+            <div style="padding-top:0.75rem">Transparently. Anyone can submit proposals. Members vote on changes. Architecture decisions are documented publicly. The platform is open source, and all governance activity is visible in the activity feed.</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="final-cta">
@@ -259,7 +358,7 @@
     }, { threshold: 0.3 });
     const bc = document.getElementById('bar-chart'); if(bc) barObserver.observe(bc);
 
-    // Live stats
+    // Live stats with animated counters
     try {
       const [cR,pR,prR,mR] = await Promise.allSettled([
         fetch('/api/content?limit=1&status=published').then(r=>r.json()),
@@ -267,10 +366,11 @@
         fetch('/api/proposals?limit=1').then(r=>r.json()),
         fetch('/api/auth?action=members').then(r=>r.json())
       ]);
-      if(cR.status==='fulfilled') document.getElementById('ls-content').textContent=cR.value.total||cR.value.content?.length||0;
-      if(pR.status==='fulfilled') document.getElementById('ls-projects').textContent=pR.value.total||pR.value.projects?.length||0;
-      if(prR.status==='fulfilled') document.getElementById('ls-proposals').textContent=prR.value.total||prR.value.proposals?.length||0;
-      if(mR.status==='fulfilled') document.getElementById('ls-members').textContent=mR.value.members?.length||0;
+      const animate=(el,val)=>{if(!el||!val)return;let cur=0;const step=Math.max(1,Math.ceil(val/25));const iv=setInterval(()=>{cur=Math.min(cur+step,val);el.textContent=cur;if(cur>=val)clearInterval(iv);},50);};
+      if(cR.status==='fulfilled') animate(document.getElementById('ls-content'),cR.value.total||cR.value.content?.length||0);
+      if(pR.status==='fulfilled') animate(document.getElementById('ls-projects'),pR.value.total||pR.value.projects?.length||0);
+      if(prR.status==='fulfilled') animate(document.getElementById('ls-proposals'),prR.value.total||prR.value.proposals?.length||0);
+      if(mR.status==='fulfilled') animate(document.getElementById('ls-members'),mR.value.members?.length||0);
     } catch(e){}
   </script>
 </body>
