@@ -5,7 +5,7 @@
 // POST /api/seed?action=status — returns current seed state
 // GET  /api/seed — returns knowledge base metadata
 
-import { getDB, initDB } from './lib/db.mjs';
+import { getDb, getCurrentUser, logActivity, jsonResponse } from './lib/db.mjs';
 
 export default async function handler(req) {
   try {
@@ -51,8 +51,7 @@ export default async function handler(req) {
     const authHeader = req.headers.get('authorization');
     if (!authHeader) return json(401, { error: 'Authentication required' });
     
-    const sql = getDB();
-    await initDB();
+    const sql = await getDb();
 
     const token = authHeader.replace('Bearer ', '');
     const sessions = await sql`SELECT user_id FROM sessions WHERE token = ${token} AND expires_at > NOW()`;
