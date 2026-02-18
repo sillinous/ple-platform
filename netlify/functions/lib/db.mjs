@@ -266,7 +266,15 @@ async function runMigrations() {
   )`;
 
   // Migration: ensure featured_at column exists (may be missing from older DB versions)
-  await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS featured_at TIMESTAMP`.catch(() => {});
+  try {
+    await sql`DO $$ BEGIN
+      ALTER TABLE content_items ADD COLUMN featured_at TIMESTAMP;
+    EXCEPTION WHEN duplicate_column THEN
+      NULL;
+    END $$`;
+  } catch (e) {
+    console.log('Migration featured_at:', e.message);
+  }
 
   // Content Versions (for version history)
   await sql`CREATE TABLE IF NOT EXISTS content_versions (
