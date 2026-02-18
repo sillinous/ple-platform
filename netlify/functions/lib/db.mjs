@@ -265,6 +265,9 @@ async function runMigrations() {
     metadata JSONB DEFAULT '{}'
   )`;
 
+  // Migration: ensure featured_at column exists (may be missing from older DB versions)
+  await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS featured_at TIMESTAMP`.catch(() => {});
+
   // Content Versions (for version history)
   await sql`CREATE TABLE IF NOT EXISTS content_versions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
