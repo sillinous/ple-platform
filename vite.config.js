@@ -38,6 +38,7 @@ export default defineConfig({
         series: 'series.html',
         'api-docs': 'api-docs.html',
         seed: 'seed.html',
+        chat: 'chat.html',
         'ai-chat': 'ai-chat.html',
       }
     }
