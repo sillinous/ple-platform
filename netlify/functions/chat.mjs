@@ -292,3 +292,5 @@ function json(status, data) {
     }
   });
 }
+
+export const config = { path: '/api/chat' };

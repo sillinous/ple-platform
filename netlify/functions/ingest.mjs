@@ -224,3 +224,5 @@ function json(status, data) {
     headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
   });
 }
+
+export const config = { path: '/api/ingest' };
