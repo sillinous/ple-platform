@@ -28,3 +28,5 @@
 [context.deploy-preview.environment]
   NODE_ENV = "preview"
 
+
+# v2 deploy - knowledge base + seed function
