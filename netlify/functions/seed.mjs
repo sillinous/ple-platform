@@ -47,9 +47,9 @@ export default async function handler(req) {
       return json(405, { error: 'Method not allowed' });
     }
 
-    // Auth check — require admin
+    // Auth check — require admin (or bootstrap mode to promote first user)
     const authHeader = req.headers.get('authorization');
-    if (!authHeader) return json(401, { error: 'Authentication required' });
+    if (!authHeader) return json(401, { error: 'Authentication required. Pass Bearer token.' });
     
     const sql = await getDb();
 
@@ -59,10 +59,19 @@ export default async function handler(req) {
     
     const users = await sql`SELECT id, role FROM users WHERE id = ${sessions[0].user_id}`;
     if (!users.length) return json(401, { error: 'User not found' });
-    const user = users[0];
+    let user = users[0];
     
+    // Bootstrap: if action=bootstrap, promote first user to admin (only if no admins exist)
+    if (action === 'bootstrap') {
+      const admins = await sql`SELECT id FROM users WHERE role = 'admin'`;
+      if (admins.length) return json(200, { message: 'Admin already exists', admin_id: admins[0].id });
+      await sql`UPDATE users SET role = 'admin' WHERE id = ${user.id}`;
+      user = { ...user, role: 'admin' };
+      return json(200, { message: 'Bootstrapped! You are now admin.', user_id: user.id });
+    }
+
     if (user.role !== 'admin' && user.role !== 'editor') {
-      return json(403, { error: 'Admin or editor role required for seeding' });
+      return json(403, { error: 'Admin or editor role required. Use action=bootstrap first if no admin exists.' });
     }
 
     // ACTION: preview — show what would be inserted
