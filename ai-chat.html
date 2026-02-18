@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="AI-powered Q&A assistant grounded in the Post-Labor Economics knowledge base.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Assistant | Post-Labor Economics</title>
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .chat-container { max-width: 860px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; height: calc(100vh - 68px); }
+    .chat-header { text-align: center; padding: 1.5rem 0 1rem; flex-shrink: 0; }
+    .chat-header h1 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin: 0; }
+    .chat-header p { color: var(--text-muted); font-size: 0.9rem; margin: 0.25rem 0 0; }
+    .chat-header .kb-badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.72rem; font-weight: 600; background: rgba(27,77,62,0.08); color: var(--color-horizon); margin-top: 0.5rem; }
+    .chat-header .kb-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #2a9d8f; }
+
+    .messages { flex: 1; overflow-y: auto; padding: 0.5rem 0; display: flex; flex-direction: column; gap: 1rem; scroll-behavior: smooth; }
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+    .msg { max-width: 88%; padding: 0.85rem 1.1rem; border-radius: 14px; font-size: 0.92rem; line-height: 1.65; animation: msgIn 0.3s ease; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .msg-user { align-self: flex-end; background: var(--color-horizon); color: #fff; border-bottom-right-radius: 4px; }
+    .msg-ai { align-self: flex-start; background: var(--bg-secondary); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+    .msg-ai strong, .msg-ai b { color: var(--color-horizon); }
+    .msg-ai code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.85em; }
+    .msg-ai ul, .msg-ai ol { margin: 0.5rem 0; padding-left: 1.3rem; }
+    .msg-ai li { margin-bottom: 0.25rem; }
+    .msg-ai p { margin: 0 0 0.5rem; }
+    .msg-ai p:last-child { margin: 0; }
+
+    .msg-system { align-self: center; background: none; border: none; color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 0.5rem; max-width: 100%; }
+
+    .typing { align-self: flex-start; background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 0.85rem 1.3rem; border-radius: 14px; border-bottom-left-radius: 4px; display: none; }
+    .typing-dots { display: flex; gap: 4px; }
+    .typing-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: bounce 1.4s infinite ease-in-out; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+    .input-area { flex-shrink: 0; padding: 1rem 0 0.5rem; border-top: 1px solid var(--border-color); }
+    .input-row { display: flex; gap: 0.5rem; }
+    .chat-input { flex: 1; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.92rem; font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); outline: none; resize: none; min-height: 44px; max-height: 120px; transition: border-color 0.2s; }
+    .chat-input:focus { border-color: var(--color-horizon); }
+    .chat-input::placeholder { color: var(--text-muted); }
+    .send-btn { padding: 0 1rem; border-radius: 12px; border: none; background: var(--color-horizon); color: white; font-size: 0.9rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; transition: all 0.2s; white-space: nowrap; }
+    .send-btn:hover { background: #164032; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .send-btn svg { width: 16px; height: 16px; }
+
+    .quick-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 0.5rem 0; }
+    .quick-btn { padding: 0.35rem 0.75rem; border-radius: 100px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-secondary); font-size: 0.78rem; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .quick-btn:hover { border-color: var(--color-horizon); color: var(--color-horizon); background: rgba(27,77,62,0.04); }
+
+    .source-tag { display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; }
+    .source-tag::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #2a9d8f; }
+
+    @media (max-width: 768px) {
+      .chat-container { padding: 1rem; }
+      .msg { max-width: 95%; }
+      .quick-actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+      <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.querySelector('.nav-menu').classList.toggle('open')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <nav class="nav-menu">
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="content.html" class="nav-link">Content</a>
+        <a href="proposals.html" class="nav-link">Proposals</a>
+        <a href="discussions.html" class="nav-link">Discussions</a>
+        <a href="architecture.html" class="nav-link">Architecture</a>
+      </nav>
+      <div class="header-actions">
+        <a href="tags.html" class="nav-link">Tags</a>
+        <a href="search.html" class="nav-link" style="padding:0.4rem;display:flex;" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+        <a href="profile.html" class="nav-link" data-user-name></a>
+        <button class="btn btn-ghost" id="logout-btn">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="chat-container">
+      <div class="chat-header">
+        <h1>PLE Assistant</h1>
+        <p>Ask anything about Post-Labor Economics — grounded in the knowledge base</p>
+        <div class="kb-badge" id="kb-status">Knowledge Base v2.0 — 10 concepts, 12 examples</div>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="msg msg-system">
+          Ask me about the Pyramid of Prosperity, automation trends, David Shapiro's framework, or any PLE concept.
+        </div>
+      </div>
+
+      <div class="typing" id="typing">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="input-area">
+        <div class="quick-actions" id="quick-actions">
+          <button class="quick-btn" onclick="askQuick('What is Post-Labor Economics?')">What is PLE?</button>
+          <button class="quick-btn" onclick="askQuick('Explain the Pyramid of Prosperity')">Pyramid of Prosperity</button>
+          <button class="quick-btn" onclick="askQuick('What are the 16 income streams?')">16 Income Streams</button>
+          <button class="quick-btn" onclick="askQuick('How does the Pyramid of Power protect democracy?')">Pyramid of Power</button>
+          <button class="quick-btn" onclick="askQuick('What real-world examples prove PLE works?')">Real-World Examples</button>
+          <button class="quick-btn" onclick="askQuick('What happens to human purpose after labor?')">Life After Labor</button>
+        </div>
+        <div class="input-row">
+          <textarea class="chat-input" id="input" placeholder="Ask about PLE frameworks, concepts, or examples..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { updateAuthUI } from './src/scripts/api.js';
+    lucide.createIcons();
+    const t = localStorage.getItem('ple_token');
+    if (t) {
+      try {
+        const r = await fetch('/api/auth?action=me', { headers: { 'Authorization': `Bearer ${t}` } });
+        if (r.ok) {
+          const u = await r.json();
+          const name = u.user?.displayName || u.displayName;
+          const el = document.querySelector('[data-user-name]');
+          if (el && name) el.textContent = name;
+        }
+      } catch(e){}
+    }
+    document.getElementById('logout-btn')?.addEventListener('click', () => {
+      localStorage.removeItem('ple_token');
+      window.location.href = '/login';
+    });
+  </script>
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('send-btn');
+    const typingEl = document.getElementById('typing');
+    const quickActions = document.getElementById('quick-actions');
+
+    let history = [];
+    let token = localStorage.getItem('ple_token');
+
+    // Auto-resize textarea
+    inputEl.addEventListener('input', () => {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+    });
+
+    // Load KB status
+    async function loadKBStatus() {
+      try {
+        const r = await fetch('/api/chat?action=context');
+        if (r.ok) {
+          const d = await r.json();
+          document.getElementById('kb-status').textContent =
+            `Knowledge Base v${d.kb_version || '2.0'} — ${d.kb_articles || 10} seed articles, ${Math.round(d.context_length/1024)}KB context`;
+        }
+      } catch (e) {}
+    }
+    loadKBStatus();
+
+    function addMessage(content, role) {
+      const div = document.createElement('div');
+      div.className = `msg msg-${role}`;
+
+      if (role === 'ai') {
+        // Simple markdown rendering
+        let html = content
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>')
+          .replace(/^### (.+)$/gm, '<strong>$1</strong>')
+          .replace(/^## (.+)$/gm, '<strong>$1</strong>')
+          .replace(/^[•\-] (.+)$/gm, '<li>$1</li>')
+          .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+          .replace(/\n{2,}/g, '</p><p>')
+          .replace(/\n/g, '<br>');
+        html = '<p>' + html + '</p>';
+        html = html.replace(/<p><\/p>/g, '');
+
+        div.innerHTML = html;
+
+        // Add source tag
+        const sourceTag = document.createElement('div');
+        sourceTag.className = 'source-tag';
+        sourceTag.textContent = 'Grounded in PLE Knowledge Base';
+        div.appendChild(sourceTag);
+      } else {
+        div.textContent = content;
+      }
+
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const msg = inputEl.value.trim();
+      if (!msg) return;
+
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      sendBtn.disabled = true;
+      quickActions.style.display = 'none';
+
+      addMessage(msg, 'user');
+      history.push({ role: 'user', content: msg });
+
+      // Show typing
+      typingEl.style.display = 'block';
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const r = await fetch('/api/chat', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ message: msg, history: history.slice(-6) })
+        });
+
+        typingEl.style.display = 'none';
+
+        if (r.ok) {
+          const data = await r.json();
+          const response = data.response || 'I couldn\'t generate a response. Please try again.';
+          addMessage(response, 'ai');
+          history.push({ role: 'assistant', content: response });
+        } else {
+          const err = await r.json().catch(() => ({}));
+          addMessage(`Sorry, I encountered an error: ${err.error || 'Unknown error'}. Please try again.`, 'ai');
+        }
+      } catch (e) {
+        typingEl.style.display = 'none';
+        addMessage('Connection error. Please check your network and try again.', 'ai');
+      }
+
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+
+    function askQuick(question) {
+      inputEl.value = question;
+      sendMessage();
+    }
+  </script>
+</body>
+</html>

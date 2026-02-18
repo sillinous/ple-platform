@@ -3,7 +3,7 @@
     "name": "Post Labor Economics - Shapiro Sources",
     "description": "Structured knowledge base derived from David Shapiro's Post-Labor Economics framework, Substack series, YouTube content, podcast appearances, and published writings. This is a reusable data source for seeding content, generating references, and powering multiple solutions across the PLE platform.",
     "source_notebook": "NotebookLM: Post Labor Economics - Shapiro Sources",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "created": "2026-02-18",
     "author": "David Shapiro",
     "license": "Content derived from publicly available sources for platform use",
@@ -16,18 +16,22 @@
       "https://daveshap.substack.com/p/what-do-i-mean-when-i-say-post-labor",
       "https://medium.com/@dave-shap/what-is-post-labor-economics-a-gentle-introduction-81aa265abbe0",
       "https://jimruttshow.blubrry.net/david-shapiro/",
-      "https://www.youtube.com/@DaveShap"
-    ]
+      "https://www.youtube.com/@DaveShap",
+      "https://daveshap.substack.com/p/post-labor-economics-pt-2-the-decline",
+      "https://daveshap.substack.com/p/post-labor-economics-pt-3-power-and",
+      "https://daveshap.substack.com/p/post-labor-economics-pt-6-life-after",
+      "https://daveshap.substack.com/p/post-labor-economics-update",
+      "https://daveshap.substack.com/p/laborzero-updates-book-update"
+    ],
+    "updated": "2026-02-18"
   },
-
   "framework": {
     "name": "Post-Labor Economics (PLE)",
     "symbol": "L/0",
-    "symbol_meaning": "Labor Zero — abolishing the need for obligatory human labor",
-    "core_thesis": "AI, automation, and robotics will eliminate obligatory human labor within our lifetimes. This isn't about banning work — it's about making work voluntary rather than coerced. The transition requires new frameworks for distributing prosperity and preserving democratic power.",
-    "philosophy": "Structured Optimism — the belief that a better future is possible, combined with the rigor and discipline to actually build it.",
+    "symbol_meaning": "Labor Zero \u2014 abolishing the need for obligatory human labor",
+    "core_thesis": "AI, automation, and robotics will eliminate obligatory human labor within our lifetimes. This isn't about banning work \u2014 it's about making work voluntary rather than coerced. The transition requires new frameworks for distributing prosperity and preserving democratic power.",
+    "philosophy": "Structured Optimism \u2014 the belief that a better future is possible, combined with the rigor and discipline to actually build it.",
     "tagline": "Prosperity Beyond Work",
-
     "six_part_series": [
       {
         "part": 1,
@@ -38,25 +42,25 @@
       {
         "part": 2,
         "title": "The Decline of Labor",
-        "summary": "The commensurate reduction in demand for human labor over time, and the dangers of undermining labor power. The four basic human economic offerings — strength, dexterity, cognition, and empathy — are all increasingly automatable.",
+        "summary": "The commensurate reduction in demand for human labor over time, and the dangers of undermining labor power. The four basic human economic offerings \u2014 strength, dexterity, cognition, and empathy \u2014 are all increasingly automatable.",
         "key_insight": "Once machines are better, faster, cheaper, and safer than humans at any given economically valuable activity, it becomes economically irrelevant to hire a human for that job."
       },
       {
         "part": 3,
         "title": "Power and Social Contracts",
         "summary": "The fraying of social contracts and balance of power in society, currently predicated upon a wage-labor negotiation in exchange for prosperity. What happens when that negotiation breaks down?",
-        "key_insight": "The entire Western world's social contract is predicated upon the promise that prosperity will increase under capitalism and democracy — but more and more people feel this isn't working."
+        "key_insight": "The entire Western world's social contract is predicated upon the promise that prosperity will increase under capitalism and democracy \u2014 but more and more people feel this isn't working."
       },
       {
         "part": 4,
         "title": "Measurements and KPI",
         "summary": "For any economic framework to be viable, it must be testable, measurable, and falsifiable. Like a body temperature reading that is both descriptive and prescriptive, good economic metrics diagnose problems and point to solutions.",
-        "key_insight": "Metrics diagnose the decoupling disease, prescribe ownership cures, and prove this isn't one magic fix — it's a dynamic, testable path forward."
+        "key_insight": "Metrics diagnose the decoupling disease, prescribe ownership cures, and prove this isn't one magic fix \u2014 it's a dynamic, testable path forward."
       },
       {
         "part": 5,
         "title": "Concrete Interventions",
-        "summary": "The Pyramid of Prosperity and Pyramid of Power — two complementary frameworks that combine proven mechanisms from around the world into a coherent system for redistributing prosperity and reallocating power.",
+        "summary": "The Pyramid of Prosperity and Pyramid of Power \u2014 two complementary frameworks that combine proven mechanisms from around the world into a coherent system for redistributing prosperity and reallocating power.",
         "key_insight": "These aren't abstract wishes or utopian hand-waving; they're drawn from real-world trials across towns, states, and nations."
       },
       {
@@ -66,7 +70,6 @@
         "key_insight": "The post-labor economy foregrounds technology as the engine of material abundance, freeing humanity to direct energies toward deeper fulfillments beyond employment."
       }
     ],
-
     "pyramid_of_prosperity": {
       "description": "A hierarchical framework organizing solutions from universal foundations to individual peaks, ensuring layered income sources replace waning wages. Analogous to Maslow's hierarchy but for economic security.",
       "layers": [
@@ -74,35 +77,54 @@
           "level": 1,
           "name": "Universals",
           "description": "Universal Basic Income, Universal Healthcare, Universal Basic Services. The unconditional floor of prosperity for all citizens.",
-          "examples": ["UBI pilots worldwide", "Nordic universal healthcare", "Catalonia income trials"]
+          "examples": [
+            "UBI pilots worldwide",
+            "Nordic universal healthcare",
+            "Catalonia income trials"
+          ]
         },
         {
           "level": 2,
           "name": "Collectively Owned Public Assets",
           "description": "Sovereign wealth funds, land value taxes, and publicly owned infrastructure that socialize communal wealth.",
-          "examples": ["Alaska Permanent Fund", "Norway Government Pension Fund", "Singapore sovereign wealth"]
+          "examples": [
+            "Alaska Permanent Fund",
+            "Norway Government Pension Fund",
+            "Singapore sovereign wealth"
+          ]
         },
         {
           "level": 3,
           "name": "Collectively Owned Private Assets",
           "description": "Cooperatives, DAOs, community-owned enterprises, and employee-owned businesses that democratize enterprise.",
-          "examples": ["Mondragon Corporation", "German Mittelstand", "Community land trusts"]
+          "examples": [
+            "Mondragon Corporation",
+            "German Mittelstand",
+            "Community land trusts"
+          ]
         },
         {
           "level": 4,
           "name": "Individual Private Assets",
           "description": "Conventional stocks, bonds, businesses, rental properties. Everyone becomes essentially a venture capitalist.",
-          "examples": ["Employee stock ownership plans", "Micro-investing platforms", "Index fund democratization"]
+          "examples": [
+            "Employee stock ownership plans",
+            "Micro-investing platforms",
+            "Index fund democratization"
+          ]
         },
         {
           "level": 5,
           "name": "Residual Wages",
           "description": "Work that persists in niches where human traits remain irreplaceable, though comprising a shrinking portion of future earnings.",
-          "examples": ["Empathy-based caregiving", "Creative arts", "Human-to-human connection services"]
+          "examples": [
+            "Empathy-based caregiving",
+            "Creative arts",
+            "Human-to-human connection services"
+          ]
         }
       ]
     },
-
     "pyramid_of_power": {
       "description": "A framework for civic resilience through stacked innovations that progress from secure foundations to evolutionary governance, ensuring democratic agency as labor power declines.",
       "layers": [
@@ -133,7 +155,6 @@
         }
       ]
     },
-
     "economic_agency_principles": [
       {
         "name": "Time Sovereignty",
@@ -160,26 +181,28 @@
         "description": "Push all decisions to the lowest effective level. Those most affected by decisions have the most say."
       }
     ],
-
     "manifesto_principles": [
-      "Broaden capital ownership — make everyone an investor, not just a laborer",
-      "Predistribution over redistribution — build ownership into the system, don't just patch after the fact",
-      "Measurable and incremental implementation — clear metrics, pilot programs, gradual scaling",
-      "Compatible with market dynamics — maintain price signals while ensuring no one falls through cracks",
-      "Subsidiarity — push decisions to the lowest effective level",
-      "Radical transparency — enforce real-time disclosure in markets and governance",
+      "Broaden capital ownership \u2014 make everyone an investor, not just a laborer",
+      "Predistribution over redistribution \u2014 build ownership into the system, don't just patch after the fact",
+      "Measurable and incremental implementation \u2014 clear metrics, pilot programs, gradual scaling",
+      "Compatible with market dynamics \u2014 maintain price signals while ensuring no one falls through cracks",
+      "Subsidiarity \u2014 push decisions to the lowest effective level",
+      "Radical transparency \u2014 enforce real-time disclosure in markets and governance",
       "Post-labor society preserves individual agency while providing universal security"
     ]
   },
-
   "key_concepts": {
     "labor_zero": "The state where obligatory human labor has been abolished through automation. Not the end of human activity, but the end of coerced work for survival.",
     "great_decoupling": "The growing divergence between productivity growth and wage growth. Productivity has risen 60% since 1979 while wages rose only 16%.",
     "four_human_offerings": "The four basic economic contributions humans make: Strength (physical labor), Dexterity (fine motor skills), Cognition (thinking/analysis), and Empathy (human connection). Each is progressively being automated.",
     "structured_optimism": "The PLE philosophy: a better future is possible, and we pair that optimism with rigor and discipline to build it. No wishful thinking, no doom and gloom.",
-    "solarpunk_future": "The aspirational vision of PLE — a decentralized, sustainable, abundant future powered by technology and governed democratically."
+    "solarpunk_future": "The aspirational vision of PLE \u2014 a decentralized, sustainable, abundant future powered by technology and governed democratically.",
+    "economic_agency_paradox": "Automation promises productive efficiency but threatens to eliminate labor income. Without wages, consumer purchasing power disappears. The solution: transform everyone from laborers into investors.",
+    "investment_based_future": "Instead of preserving human jobs in an economy that no longer needs them, PLE creates new forms of economic participation through AI-assisted investing and universal asset tokenization.",
+    "universal_asset_tokenization": "Everything of economic value becomes investable through standardized digital tokens \u2014 from local businesses to automated infrastructure. Your bank becomes the front-end for ownership.",
+    "labor_sacralization": "Society sacralizes labor \u2014 treats it as inherently virtuous and identity-defining. This cultural belief makes the transition harder because people resist the idea that work could be optional.",
+    "sixteen_income_streams": "16 independent, modular sources of property income (dividends, royalties, equity flows) that can be distributed through existing banking infrastructure. Not UBI alone \u2014 a pluralistic system."
   },
-
   "historical_context": [
     {
       "era": "Agricultural Revolution",
@@ -191,7 +214,7 @@
     },
     {
       "era": "Manufacturing Peak (1979)",
-      "description": "American manufacturing peaked and has since seen headcount cut in half while output tripled — 600% efficiency gain."
+      "description": "American manufacturing peaked and has since seen headcount cut in half while output tripled \u2014 600% efficiency gain."
     },
     {
       "era": "Digital Revolution",
@@ -199,77 +222,310 @@
     },
     {
       "era": "AI Inflection (2020s)",
-      "description": "Large language models and generative AI demonstrate that cognitive labor — the last 'safe' category — is now automatable."
+      "description": "Large language models and generative AI demonstrate that cognitive labor \u2014 the last 'safe' category \u2014 is now automatable."
+    },
+    {
+      "era": "Productivity-Pay Decoupling (1979-present)",
+      "description": "Since 1979, US worker productivity soared over 80% but average hourly compensation crawled up only ~29% after inflation. Workers capture a shrinking slice of the value they create."
+    },
+    {
+      "era": "Prime-Age Labor Decline (1953-present)",
+      "description": "US prime-age male labor force participation peaked at ~97% in 1953, sliding to ~89.2% by 2025. Manufacturing employment fell from 19.5M (1979) to 12.75M (2025) despite output tripling."
+    },
+    {
+      "era": "AI Code Generation (2025)",
+      "description": "By mid-2025, Google and Microsoft report nearly half of all code they write is AI-generated. AI handles 10M therapy sessions yearly. 80% of US workers see at least 10% of duties affected."
     }
   ],
-
   "real_world_examples": [
-    {"name": "Alaska Permanent Fund", "type": "sovereign_wealth", "description": "Annual dividend to every Alaska resident from oil revenues — a working model of universal resource distribution."},
-    {"name": "Mondragon Corporation", "type": "cooperative", "description": "Spain's largest worker cooperative with 80,000+ employees — proof that democratic enterprise works at scale."},
-    {"name": "Nordic Model", "type": "universal_services", "description": "Universal healthcare, education, and social safety nets combined with competitive market economies."},
-    {"name": "German Mittelstand", "type": "distributed_ownership", "description": "Family-owned mid-sized enterprises forming the backbone of Europe's largest economy — distributed capital ownership in practice."},
-    {"name": "Singapore Sovereign Wealth", "type": "sovereign_wealth", "description": "Government-managed investment funds generating returns for public services — national-scale investment for citizens."},
-    {"name": "Catalonia Basic Income Trial", "type": "ubi_pilot", "description": "Regional basic income experiment demonstrating reduced poverty with sustained economic growth."},
-    {"name": "Finland UBI Experiment", "type": "ubi_pilot", "description": "Two-year national experiment showing improved wellbeing and modest employment effects."},
-    {"name": "Swiss Canton System", "type": "subsidiarity", "description": "Decentralized governance where local cantons retain significant autonomy — distributed decision-making creating stability and innovation."}
+    {
+      "name": "Alaska Permanent Fund",
+      "type": "sovereign_wealth",
+      "description": "Annual dividend to every Alaska resident from oil revenues \u2014 a working model of universal resource distribution."
+    },
+    {
+      "name": "Mondragon Corporation",
+      "type": "cooperative",
+      "description": "Spain's largest worker cooperative with 80,000+ employees \u2014 proof that democratic enterprise works at scale."
+    },
+    {
+      "name": "Nordic Model",
+      "type": "universal_services",
+      "description": "Universal healthcare, education, and social safety nets combined with competitive market economies."
+    },
+    {
+      "name": "German Mittelstand",
+      "type": "distributed_ownership",
+      "description": "Family-owned mid-sized enterprises forming the backbone of Europe's largest economy \u2014 distributed capital ownership in practice."
+    },
+    {
+      "name": "Singapore Sovereign Wealth",
+      "type": "sovereign_wealth",
+      "description": "Government-managed investment funds generating returns for public services \u2014 national-scale investment for citizens."
+    },
+    {
+      "name": "Catalonia Basic Income Trial",
+      "type": "ubi_pilot",
+      "description": "Regional basic income experiment demonstrating reduced poverty with sustained economic growth."
+    },
+    {
+      "name": "Finland UBI Experiment",
+      "type": "ubi_pilot",
+      "description": "Two-year national experiment showing improved wellbeing and modest employment effects."
+    },
+    {
+      "name": "Swiss Canton System",
+      "type": "subsidiarity",
+      "description": "Decentralized governance where local cantons retain significant autonomy \u2014 distributed decision-making creating stability and innovation."
+    },
+    {
+      "name": "16 Property Income Streams",
+      "type": "banking_integration",
+      "description": "PLE identified 16 market-based property interventions \u2014 dividends, royalties, equity units \u2014 all clearable through existing banks. From oil dividends to co-op rebates to ESOP distributions."
+    },
+    {
+      "name": "REI Member Rebates",
+      "type": "cooperative",
+      "description": "REI distributes member rebates as a consumer cooperative \u2014 a working model of shared ownership returns through normal retail participation."
+    },
+    {
+      "name": "Publix ESOP",
+      "type": "employee_ownership",
+      "description": "Publix Super Markets is one of the largest employee-owned companies in the US via ESOP \u2014 proving broad employee ownership works at massive scale."
+    },
+    {
+      "name": "FedNow Real-Time Payments",
+      "type": "infrastructure",
+      "description": "The Federal Reserve's FedNow system enables instant payments \u2014 the infrastructure needed to distribute multiple property income streams efficiently."
+    }
   ],
-
   "seed_content": [
     {
       "id": "seed-rise-of-automation",
       "title": "The Rise of Automation: A Historical Perspective",
       "content_type": "article",
-      "tags": ["automation", "history", "technology", "labor"],
+      "tags": [
+        "automation",
+        "history",
+        "technology",
+        "labor"
+      ],
       "excerpt": "From the agricultural revolution to artificial intelligence, automation has repeatedly reshaped human civilization. Understanding this trajectory is essential for navigating what comes next.",
-      "body": "## The Unstoppable March of Machine Capability\n\nHumanity has been automating labor for centuries. Each wave follows the same pattern: a new general-purpose technology emerges, disrupts existing work, causes social upheaval, and eventually creates new forms of prosperity — for those positioned to benefit.\n\nBut this time may be different. Not because the pattern has changed, but because the scope has.\n\n### The Agricultural Precedent\n\nTwo centuries ago, over 90% of the American workforce was employed in agriculture. Today, that figure is under 2%. The transition wasn't painless — it involved decades of displacement, migration, and social conflict. But it ultimately freed humanity to build an industrial civilization of unprecedented abundance.\n\nThe lesson isn't that \"new jobs always appear.\" The lesson is that automation fundamentally restructures society, and the outcomes depend entirely on how we manage the transition.\n\n### Manufacturing's Rise and Fall\n\nAmerican manufacturing employment peaked in 1979. In the decades since, total headcount has been cut roughly in half — yet output has *tripled*. That represents a 600% improvement in labor efficiency in just four and a half decades.\n\nThe jobs didn't simply \"move\" to services. They were automated away. And the pattern that swept through agriculture and manufacturing is now sweeping through the knowledge economy.\n\n### The Cognitive Frontier\n\nWhat makes the current wave of automation different is its target: cognitive work. Previous revolutions automated physical tasks — strength and dexterity. AI automates thinking, analysis, writing, coding, and creativity.\n\nDavid Shapiro's framework identifies four basic human economic offerings:\n\n1. **Strength** — largely automated by the Industrial Revolution\n2. **Dexterity** — increasingly automated by modern robotics\n3. **Cognition** — now being automated by AI and large language models\n4. **Empathy** — the last frontier, where human connection remains irreplaceable (for now)\n\nOnce machines are better, faster, cheaper, and safer than humans at any given economically valuable activity, it becomes economically irrelevant to hire a human for that job. This isn't ideology — it's market mechanics.\n\n### What History Tells Us\n\nHistory shows that automation *always* creates more total wealth. But it doesn't automatically distribute that wealth fairly. The Agricultural Revolution created agricultural barons. The Industrial Revolution created industrial magnates. Each transition concentrated wealth among those who owned the machines.\n\nThe question isn't whether AI will create abundance. It's whether that abundance will be shared.\n\nThat's why Post-Labor Economics exists: not to prevent automation, but to ensure the transition benefits everyone. The policy interventions, ownership structures, and governance innovations we develop now will determine whether the AI revolution produces shared prosperity or unprecedented inequality.\n\n---\n\n*This article is part of the PLE Foundations series, exploring the core framework of Post-Labor Economics as developed by David Shapiro.*"
+      "body": "## The Unstoppable March of Machine Capability\n\nHumanity has been automating labor for centuries. Each wave follows the same pattern: a new general-purpose technology emerges, disrupts existing work, causes social upheaval, and eventually creates new forms of prosperity \u2014 for those positioned to benefit.\n\nBut this time may be different. Not because the pattern has changed, but because the scope has.\n\n### The Agricultural Precedent\n\nTwo centuries ago, over 90% of the American workforce was employed in agriculture. Today, that figure is under 2%. The transition wasn't painless \u2014 it involved decades of displacement, migration, and social conflict. But it ultimately freed humanity to build an industrial civilization of unprecedented abundance.\n\nThe lesson isn't that \"new jobs always appear.\" The lesson is that automation fundamentally restructures society, and the outcomes depend entirely on how we manage the transition.\n\n### Manufacturing's Rise and Fall\n\nAmerican manufacturing employment peaked in 1979. In the decades since, total headcount has been cut roughly in half \u2014 yet output has *tripled*. That represents a 600% improvement in labor efficiency in just four and a half decades.\n\nThe jobs didn't simply \"move\" to services. They were automated away. And the pattern that swept through agriculture and manufacturing is now sweeping through the knowledge economy.\n\n### The Cognitive Frontier\n\nWhat makes the current wave of automation different is its target: cognitive work. Previous revolutions automated physical tasks \u2014 strength and dexterity. AI automates thinking, analysis, writing, coding, and creativity.\n\nDavid Shapiro's framework identifies four basic human economic offerings:\n\n1. **Strength** \u2014 largely automated by the Industrial Revolution\n2. **Dexterity** \u2014 increasingly automated by modern robotics\n3. **Cognition** \u2014 now being automated by AI and large language models\n4. **Empathy** \u2014 the last frontier, where human connection remains irreplaceable (for now)\n\nOnce machines are better, faster, cheaper, and safer than humans at any given economically valuable activity, it becomes economically irrelevant to hire a human for that job. This isn't ideology \u2014 it's market mechanics.\n\n### What History Tells Us\n\nHistory shows that automation *always* creates more total wealth. But it doesn't automatically distribute that wealth fairly. The Agricultural Revolution created agricultural barons. The Industrial Revolution created industrial magnates. Each transition concentrated wealth among those who owned the machines.\n\nThe question isn't whether AI will create abundance. It's whether that abundance will be shared.\n\nThat's why Post-Labor Economics exists: not to prevent automation, but to ensure the transition benefits everyone. The policy interventions, ownership structures, and governance innovations we develop now will determine whether the AI revolution produces shared prosperity or unprecedented inequality.\n\n---\n\n*This article is part of the PLE Foundations series, exploring the core framework of Post-Labor Economics as developed by David Shapiro.*"
     },
     {
       "id": "seed-pyramid-prosperity",
       "title": "The Pyramid of Prosperity: A Framework for Post-Labor Income",
       "content_type": "article",
-      "tags": ["pyramid-of-prosperity", "framework", "UBI", "policy", "economics"],
-      "excerpt": "How do we shore up household income after jobs go away? The Pyramid of Prosperity organizes proven interventions into a layered framework — from universal guarantees to individual investment.",
-      "body": "## Beyond Wages: Building Layered Income for Everyone\n\nThe central question of Post-Labor Economics is deceptively simple: **how do people sustain income when machines do most of the work?**\n\nDavid Shapiro's Pyramid of Prosperity provides an answer. Not through a single silver-bullet policy, but through a *layered system* of income sources that work together — much like Maslow's hierarchy provides a framework for understanding human needs at multiple levels.\n\n### The Five Layers\n\nImagine the Pyramid of Prosperity as a nutritional guide for economic health. Foundational elements sustain life, while higher tiers enhance vitality.\n\n#### Layer 1: Universals\n\nThe broadest base. Universal Basic Income, Universal Healthcare, Universal Basic Services. These provide an unconditional floor of prosperity for every citizen — no means testing, no bureaucratic gatekeeping.\n\nReal-world proof: Finland's UBI experiment demonstrated improved wellbeing. Catalonia's income trials showed reduced poverty with sustained growth. The Alaska Permanent Fund has distributed oil dividends to every resident for decades.\n\n#### Layer 2: Collectively Owned Public Assets\n\nSovereign wealth funds, land value taxes, and publicly owned infrastructure. The idea is simple: resources that belong to everyone should generate returns for everyone.\n\nNorway's Government Pension Fund holds over $1.5 trillion in assets managed on behalf of its citizens. Singapore's sovereign wealth funds generate returns that fund public services. These aren't theoretical — they're operational at national scale.\n\n#### Layer 3: Collectively Owned Private Assets\n\nCooperatives, community enterprises, employee-owned businesses, and DAOs. This layer democratizes enterprise itself.\n\nThe Mondragon Corporation in Spain employs 80,000+ people as a worker cooperative. Germany's *Mittelstand* — family-owned mid-sized enterprises — forms the backbone of Europe's largest economy. Community land trusts in the UK and US provide permanent affordable housing.\n\n#### Layer 4: Individual Private Assets\n\nStocks, bonds, businesses, rental properties. This doesn't change from today's capitalism — except that *everyone* participates meaningfully. As Shapiro puts it: \"Your 'job' in the future is to be an investor.\"\n\nThe lower layers of the Pyramid generate the capital that enables universal participation in private markets. Employee stock ownership plans, micro-investing platforms, and index fund democratization are already moving in this direction.\n\n#### Layer 5: Residual Wages\n\nWork persists in niches where human traits remain irreplaceable — empathy-based caregiving, creative arts, human connection. But these comprise a shrinking portion of future earnings, perhaps 20%.\n\n### Why This Works\n\nThe beauty of the Pyramid is its compatibility with market dynamics. It maintains price signals by rewarding investment and effort in the upper strata, yet ensures no one falls through cracks at the foundation.\n\nDiversified income sources buffer shocks — much like portfolio theory in finance. If one layer underperforms, others compensate. The system is resilient by design.\n\nCritically, this isn't a radical departure from capitalism. It's an *evolution* that broadens capital ownership to include everyone. As Shapiro argues: \"AI, automation, and robotics don't break capitalism — they force us to double down on it.\"\n\n### Getting There From Here\n\nEvery layer of the Pyramid has real-world precedent. The path from here to there is incremental, measurable, and testable. No revolution required — just determined, evidence-based policy-making.\n\n---\n\n*This article is part of the PLE Frameworks series, explaining the core models of Post-Labor Economics.*"
+      "tags": [
+        "pyramid-of-prosperity",
+        "framework",
+        "UBI",
+        "policy",
+        "economics"
+      ],
+      "excerpt": "How do we shore up household income after jobs go away? The Pyramid of Prosperity organizes proven interventions into a layered framework \u2014 from universal guarantees to individual investment.",
+      "body": "## Beyond Wages: Building Layered Income for Everyone\n\nThe central question of Post-Labor Economics is deceptively simple: **how do people sustain income when machines do most of the work?**\n\nDavid Shapiro's Pyramid of Prosperity provides an answer. Not through a single silver-bullet policy, but through a *layered system* of income sources that work together \u2014 much like Maslow's hierarchy provides a framework for understanding human needs at multiple levels.\n\n### The Five Layers\n\nImagine the Pyramid of Prosperity as a nutritional guide for economic health. Foundational elements sustain life, while higher tiers enhance vitality.\n\n#### Layer 1: Universals\n\nThe broadest base. Universal Basic Income, Universal Healthcare, Universal Basic Services. These provide an unconditional floor of prosperity for every citizen \u2014 no means testing, no bureaucratic gatekeeping.\n\nReal-world proof: Finland's UBI experiment demonstrated improved wellbeing. Catalonia's income trials showed reduced poverty with sustained growth. The Alaska Permanent Fund has distributed oil dividends to every resident for decades.\n\n#### Layer 2: Collectively Owned Public Assets\n\nSovereign wealth funds, land value taxes, and publicly owned infrastructure. The idea is simple: resources that belong to everyone should generate returns for everyone.\n\nNorway's Government Pension Fund holds over $1.5 trillion in assets managed on behalf of its citizens. Singapore's sovereign wealth funds generate returns that fund public services. These aren't theoretical \u2014 they're operational at national scale.\n\n#### Layer 3: Collectively Owned Private Assets\n\nCooperatives, community enterprises, employee-owned businesses, and DAOs. This layer democratizes enterprise itself.\n\nThe Mondragon Corporation in Spain employs 80,000+ people as a worker cooperative. Germany's *Mittelstand* \u2014 family-owned mid-sized enterprises \u2014 forms the backbone of Europe's largest economy. Community land trusts in the UK and US provide permanent affordable housing.\n\n#### Layer 4: Individual Private Assets\n\nStocks, bonds, businesses, rental properties. This doesn't change from today's capitalism \u2014 except that *everyone* participates meaningfully. As Shapiro puts it: \"Your 'job' in the future is to be an investor.\"\n\nThe lower layers of the Pyramid generate the capital that enables universal participation in private markets. Employee stock ownership plans, micro-investing platforms, and index fund democratization are already moving in this direction.\n\n#### Layer 5: Residual Wages\n\nWork persists in niches where human traits remain irreplaceable \u2014 empathy-based caregiving, creative arts, human connection. But these comprise a shrinking portion of future earnings, perhaps 20%.\n\n### Why This Works\n\nThe beauty of the Pyramid is its compatibility with market dynamics. It maintains price signals by rewarding investment and effort in the upper strata, yet ensures no one falls through cracks at the foundation.\n\nDiversified income sources buffer shocks \u2014 much like portfolio theory in finance. If one layer underperforms, others compensate. The system is resilient by design.\n\nCritically, this isn't a radical departure from capitalism. It's an *evolution* that broadens capital ownership to include everyone. As Shapiro argues: \"AI, automation, and robotics don't break capitalism \u2014 they force us to double down on it.\"\n\n### Getting There From Here\n\nEvery layer of the Pyramid has real-world precedent. The path from here to there is incremental, measurable, and testable. No revolution required \u2014 just determined, evidence-based policy-making.\n\n---\n\n*This article is part of the PLE Frameworks series, explaining the core models of Post-Labor Economics.*"
     },
     {
       "id": "seed-pyramid-power",
       "title": "The Pyramid of Power: Preserving Democracy After Labor",
       "content_type": "article",
-      "tags": ["pyramid-of-power", "governance", "democracy", "framework", "social-contract"],
-      "excerpt": "If labor power erodes, civic equilibrium collapses. The Pyramid of Power builds democratic resilience through stacked innovations — from immutable rights to forkable governance.",
-      "body": "## When Workers Lose Leverage, Democracy Needs New Foundations\n\nThe social contract underlying modern democracy rests on a negotiation: workers provide labor, and in exchange they receive wages, rights, and political voice. Employers need workers, so workers have leverage. This leverage is the hidden engine of democratic stability.\n\nBut what happens when employers no longer need workers?\n\n### The Power Crisis\n\nAs automation erodes the demand for human labor, it simultaneously erodes the *bargaining power* that sustains democratic governance. If capital no longer needs labor, the implicit threat of a general strike — the ultimate democratic check — becomes meaningless.\n\nThis isn't a distant theoretical concern. Union membership has been declining for decades. Gig work has atomized collective bargaining. AI threatens to accelerate both trends exponentially.\n\nDavid Shapiro's Pyramid of Power addresses this directly: if the old sources of democratic leverage are disappearing, we need to build new ones.\n\n### The Five Layers of Civic Resilience\n\n#### Layer 1: Immutable Civic Bedrock\n\nFundamental rights that *cannot* be removed by any government, corporation, or algorithmic system. This is the constitutional foundation — but upgraded for the AI age. Rights to privacy, economic participation, information access, and algorithmic transparency become as fundamental as free speech and due process.\n\n#### Layer 2: Freedom to Transact\n\nThe practical ability to engage in economic activity without gatekeepers. Legal frameworks modernized for AI-speed transactions while protecting human agency. No citizen should be locked out of economic participation by algorithmic discrimination or corporate monopoly.\n\n#### Layer 3: Radical Transparency\n\nReal-time, machine-readable disclosure of all market-relevant information — and of governmental activity. If every transaction and decision is transparent, corruption and rent-seeking become far more difficult. This layer creates the informational infrastructure for genuine accountability.\n\n#### Layer 4: Direct Programmable Democracy\n\nLiquid democracy — where citizens can vote directly on issues or delegate their vote to trusted representatives on a topic-by-topic basis. Programmable voting enabled by secure technology. This isn't mob rule; it's granular democratic participation that reflects actual citizen preferences.\n\n#### Layer 5: Forkable Constitutional Meta-Governance\n\nThe most radical layer: the ability for communities to \"fork\" governance structures and experiment with new models. Just as open-source software allows anyone to fork a codebase and try a different approach, forkable governance allows democratic experimentation.\n\nIf your city wants to try a different tax structure or democratic model, the framework allows it — with built-in measurement and comparison.\n\n### Why Both Pyramids Are Needed\n\nThe Pyramid of Prosperity solves the income problem: how do people sustain themselves without wages? The Pyramid of Power solves the *agency* problem: how do people maintain democratic leverage without labor power?\n\nNeither works without the other. Prosperity without power creates comfortable subjects. Power without prosperity creates angry mobs. Together, they form the foundation of a functional post-labor society.\n\n### The Stakes\n\nIf labor power erodes without replacement, the civic equilibrium collapses. History shows what happens when large populations lose economic agency: social unrest, authoritarianism, and civilizational decline.\n\nThe Pyramid of Power is an insurance policy against that outcome — built from proven components, assembled into a coherent framework for democratic resilience.\n\n---\n\n*This article is part of the PLE Frameworks series, explaining the core models of Post-Labor Economics.*"
+      "tags": [
+        "pyramid-of-power",
+        "governance",
+        "democracy",
+        "framework",
+        "social-contract"
+      ],
+      "excerpt": "If labor power erodes, civic equilibrium collapses. The Pyramid of Power builds democratic resilience through stacked innovations \u2014 from immutable rights to forkable governance.",
+      "body": "## When Workers Lose Leverage, Democracy Needs New Foundations\n\nThe social contract underlying modern democracy rests on a negotiation: workers provide labor, and in exchange they receive wages, rights, and political voice. Employers need workers, so workers have leverage. This leverage is the hidden engine of democratic stability.\n\nBut what happens when employers no longer need workers?\n\n### The Power Crisis\n\nAs automation erodes the demand for human labor, it simultaneously erodes the *bargaining power* that sustains democratic governance. If capital no longer needs labor, the implicit threat of a general strike \u2014 the ultimate democratic check \u2014 becomes meaningless.\n\nThis isn't a distant theoretical concern. Union membership has been declining for decades. Gig work has atomized collective bargaining. AI threatens to accelerate both trends exponentially.\n\nDavid Shapiro's Pyramid of Power addresses this directly: if the old sources of democratic leverage are disappearing, we need to build new ones.\n\n### The Five Layers of Civic Resilience\n\n#### Layer 1: Immutable Civic Bedrock\n\nFundamental rights that *cannot* be removed by any government, corporation, or algorithmic system. This is the constitutional foundation \u2014 but upgraded for the AI age. Rights to privacy, economic participation, information access, and algorithmic transparency become as fundamental as free speech and due process.\n\n#### Layer 2: Freedom to Transact\n\nThe practical ability to engage in economic activity without gatekeepers. Legal frameworks modernized for AI-speed transactions while protecting human agency. No citizen should be locked out of economic participation by algorithmic discrimination or corporate monopoly.\n\n#### Layer 3: Radical Transparency\n\nReal-time, machine-readable disclosure of all market-relevant information \u2014 and of governmental activity. If every transaction and decision is transparent, corruption and rent-seeking become far more difficult. This layer creates the informational infrastructure for genuine accountability.\n\n#### Layer 4: Direct Programmable Democracy\n\nLiquid democracy \u2014 where citizens can vote directly on issues or delegate their vote to trusted representatives on a topic-by-topic basis. Programmable voting enabled by secure technology. This isn't mob rule; it's granular democratic participation that reflects actual citizen preferences.\n\n#### Layer 5: Forkable Constitutional Meta-Governance\n\nThe most radical layer: the ability for communities to \"fork\" governance structures and experiment with new models. Just as open-source software allows anyone to fork a codebase and try a different approach, forkable governance allows democratic experimentation.\n\nIf your city wants to try a different tax structure or democratic model, the framework allows it \u2014 with built-in measurement and comparison.\n\n### Why Both Pyramids Are Needed\n\nThe Pyramid of Prosperity solves the income problem: how do people sustain themselves without wages? The Pyramid of Power solves the *agency* problem: how do people maintain democratic leverage without labor power?\n\nNeither works without the other. Prosperity without power creates comfortable subjects. Power without prosperity creates angry mobs. Together, they form the foundation of a functional post-labor society.\n\n### The Stakes\n\nIf labor power erodes without replacement, the civic equilibrium collapses. History shows what happens when large populations lose economic agency: social unrest, authoritarianism, and civilizational decline.\n\nThe Pyramid of Power is an insurance policy against that outcome \u2014 built from proven components, assembled into a coherent framework for democratic resilience.\n\n---\n\n*This article is part of the PLE Frameworks series, explaining the core models of Post-Labor Economics.*"
     },
     {
       "id": "seed-gentle-introduction",
       "title": "What Is Post-Labor Economics? A Gentle Introduction",
       "content_type": "article",
-      "tags": ["introduction", "PLE", "basics", "automation", "economics"],
+      "tags": [
+        "introduction",
+        "PLE",
+        "basics",
+        "automation",
+        "economics"
+      ],
       "excerpt": "A primer for newcomers: what post-labor economics means, why it matters, and what the framework proposes for a world where machines do most of the work.",
-      "body": "## If Machines Do the Work, What Do Humans Do?\n\nPost-Labor Economics (PLE) starts with a simple observation: technology is making human labor increasingly optional. Not in some distant science-fiction future, but *now* — incrementally, sector by sector, task by task.\n\nThis isn't inherently bad. In fact, it could be the greatest liberation in human history. But only if we prepare for it.\n\n### The Core Idea\n\nPLE is a framework for navigating the transition from an economy based on human labor to one based on automated production. It asks: if machines generate the wealth, how do we ensure everyone benefits?\n\nThe answer isn't a single policy. It's a system of interlocking solutions:\n\n- **Income replacement** through layered sources (the Pyramid of Prosperity)\n- **Democratic preservation** through new forms of civic power (the Pyramid of Power)\n- **Measurable implementation** through clear metrics and pilot programs\n- **Incremental transition** that evolves existing systems rather than replacing them\n\n### What PLE Is NOT\n\nPLE is not anti-work. It's pro-choice. People should be free to work on what matters to them — not forced into labor for survival.\n\nPLE is not just UBI. Universal Basic Income is one tool, but the framework encompasses robot taxes, sovereign wealth funds, cooperative ownership, shortened work weeks, universal basic services, and entirely new economic models.\n\nPLE is not anti-capitalist. It maintains market dynamics, price signals, and investment incentives. It broadens who gets to participate in capitalism, not who gets to destroy it.\n\nPLE is not partisan. The transition away from labor-dependent economics affects everyone regardless of political orientation.\n\n### Why Now?\n\nThree forces are converging:\n\n1. **AI can now automate cognitive work** — writing, analysis, coding, creative tasks. The last \"safe\" category of human labor is no longer safe.\n2. **Productivity and wages have decoupled** — since 1979, productivity rose 60% while wages rose only 16%. The gains flow to capital, not workers.\n3. **The social contract is fraying** — when the promise of \"work hard and prosper\" stops working, political instability follows.\n\n### How to Get Involved\n\nPLE is an open movement. You can contribute by:\n\n- Reading the foundational articles in this series\n- Joining discussions about specific policies and proposals\n- Contributing your expertise in economics, technology, governance, or any relevant field\n- Voting on proposals that shape the platform's direction\n- Simply spreading awareness that these questions need answers\n\nThe future of work is being decided now. The question is whether it will be decided *for* you or *by* you.\n\n---\n\n*Based on David Shapiro's Post-Labor Economics framework. Learn more at the PLE series page.*"
+      "body": "## If Machines Do the Work, What Do Humans Do?\n\nPost-Labor Economics (PLE) starts with a simple observation: technology is making human labor increasingly optional. Not in some distant science-fiction future, but *now* \u2014 incrementally, sector by sector, task by task.\n\nThis isn't inherently bad. In fact, it could be the greatest liberation in human history. But only if we prepare for it.\n\n### The Core Idea\n\nPLE is a framework for navigating the transition from an economy based on human labor to one based on automated production. It asks: if machines generate the wealth, how do we ensure everyone benefits?\n\nThe answer isn't a single policy. It's a system of interlocking solutions:\n\n- **Income replacement** through layered sources (the Pyramid of Prosperity)\n- **Democratic preservation** through new forms of civic power (the Pyramid of Power)\n- **Measurable implementation** through clear metrics and pilot programs\n- **Incremental transition** that evolves existing systems rather than replacing them\n\n### What PLE Is NOT\n\nPLE is not anti-work. It's pro-choice. People should be free to work on what matters to them \u2014 not forced into labor for survival.\n\nPLE is not just UBI. Universal Basic Income is one tool, but the framework encompasses robot taxes, sovereign wealth funds, cooperative ownership, shortened work weeks, universal basic services, and entirely new economic models.\n\nPLE is not anti-capitalist. It maintains market dynamics, price signals, and investment incentives. It broadens who gets to participate in capitalism, not who gets to destroy it.\n\nPLE is not partisan. The transition away from labor-dependent economics affects everyone regardless of political orientation.\n\n### Why Now?\n\nThree forces are converging:\n\n1. **AI can now automate cognitive work** \u2014 writing, analysis, coding, creative tasks. The last \"safe\" category of human labor is no longer safe.\n2. **Productivity and wages have decoupled** \u2014 since 1979, productivity rose 60% while wages rose only 16%. The gains flow to capital, not workers.\n3. **The social contract is fraying** \u2014 when the promise of \"work hard and prosper\" stops working, political instability follows.\n\n### How to Get Involved\n\nPLE is an open movement. You can contribute by:\n\n- Reading the foundational articles in this series\n- Joining discussions about specific policies and proposals\n- Contributing your expertise in economics, technology, governance, or any relevant field\n- Voting on proposals that shape the platform's direction\n- Simply spreading awareness that these questions need answers\n\nThe future of work is being decided now. The question is whether it will be decided *for* you or *by* you.\n\n---\n\n*Based on David Shapiro's Post-Labor Economics framework. Learn more at the PLE series page.*"
     },
     {
       "id": "seed-social-contract",
       "title": "The Fraying Social Contract: Why Post-Labor Policy Is Urgent",
       "content_type": "article",
-      "tags": ["social-contract", "politics", "labor-power", "democracy", "urgency"],
+      "tags": [
+        "social-contract",
+        "politics",
+        "labor-power",
+        "democracy",
+        "urgency"
+      ],
       "excerpt": "The implicit deal between workers, employers, and government is breaking down. Without intervention, the consequences could reshape democracy itself.",
-      "body": "## The Deal That Built Modern Society\n\nEvery stable society rests on a social contract — an implicit agreement between the governed and those who govern. In the post-war Western world, that contract looked roughly like this:\n\n- **Workers** provide productive labor\n- **Employers** provide wages, benefits, and stability\n- **Government** provides infrastructure, regulation, and safety nets\n- **Everyone** benefits from rising prosperity\n\nThis arrangement produced the greatest period of shared prosperity in human history. The middle class expanded. Living standards rose. Democracy stabilized.\n\nBut the contract had a hidden dependency: it only works when labor has *leverage*.\n\n### The Leverage Problem\n\nWhen employers need workers, workers can negotiate. They can strike. They can vote for pro-labor policies. They can demand better conditions. This leverage is the invisible architecture of democratic capitalism.\n\nNeoliberal policies have been eroding this leverage for decades: weakening unions, normalizing gig work, offshoring manufacturing, and prioritizing shareholder returns over worker welfare. The Great Decoupling — where productivity rises while wages stagnate — is the measurable result.\n\nAI threatens to complete what neoliberalism started. If employers genuinely don't need human workers, the entire basis for labor's bargaining power disappears.\n\n### What Happens When the Contract Breaks\n\nHistory is clear on this point. When large populations lose economic agency, the results include:\n\n- **Political radicalization** — people turn to extremist leaders who promise restoration\n- **Social unrest** — from the French Revolution to the Arab Spring, economic dispossession drives instability\n- **Democratic erosion** — authoritarian governments offer order in exchange for freedom\n- **Civilizational decline** — societies that can't manage transitions eventually collapse\n\nWe're already seeing early signals: rising populism, declining trust in institutions, widening inequality, and increasing social fragmentation.\n\n### The Window of Opportunity\n\nThe good news: we're still in the early stages of the transition. AI hasn't fully replaced human cognitive labor yet. There's still time to build new frameworks.\n\nBut the window is narrowing. Every year that passes without proactive policy makes the eventual adjustment harder and more disruptive.\n\nPost-Labor Economics isn't about predicting doom. It's about preventing it — by building the income structures, governance innovations, and social adaptations that will sustain prosperity and democracy through the transition.\n\nThe social contract needs to be rewritten. The question is whether we'll rewrite it thoughtfully, through democratic deliberation, or whether it will be rewritten for us by crisis.\n\n---\n\n*This article is part of the PLE Context series, examining the forces driving the need for post-labor policy.*"
+      "body": "## The Deal That Built Modern Society\n\nEvery stable society rests on a social contract \u2014 an implicit agreement between the governed and those who govern. In the post-war Western world, that contract looked roughly like this:\n\n- **Workers** provide productive labor\n- **Employers** provide wages, benefits, and stability\n- **Government** provides infrastructure, regulation, and safety nets\n- **Everyone** benefits from rising prosperity\n\nThis arrangement produced the greatest period of shared prosperity in human history. The middle class expanded. Living standards rose. Democracy stabilized.\n\nBut the contract had a hidden dependency: it only works when labor has *leverage*.\n\n### The Leverage Problem\n\nWhen employers need workers, workers can negotiate. They can strike. They can vote for pro-labor policies. They can demand better conditions. This leverage is the invisible architecture of democratic capitalism.\n\nNeoliberal policies have been eroding this leverage for decades: weakening unions, normalizing gig work, offshoring manufacturing, and prioritizing shareholder returns over worker welfare. The Great Decoupling \u2014 where productivity rises while wages stagnate \u2014 is the measurable result.\n\nAI threatens to complete what neoliberalism started. If employers genuinely don't need human workers, the entire basis for labor's bargaining power disappears.\n\n### What Happens When the Contract Breaks\n\nHistory is clear on this point. When large populations lose economic agency, the results include:\n\n- **Political radicalization** \u2014 people turn to extremist leaders who promise restoration\n- **Social unrest** \u2014 from the French Revolution to the Arab Spring, economic dispossession drives instability\n- **Democratic erosion** \u2014 authoritarian governments offer order in exchange for freedom\n- **Civilizational decline** \u2014 societies that can't manage transitions eventually collapse\n\nWe're already seeing early signals: rising populism, declining trust in institutions, widening inequality, and increasing social fragmentation.\n\n### The Window of Opportunity\n\nThe good news: we're still in the early stages of the transition. AI hasn't fully replaced human cognitive labor yet. There's still time to build new frameworks.\n\nBut the window is narrowing. Every year that passes without proactive policy makes the eventual adjustment harder and more disruptive.\n\nPost-Labor Economics isn't about predicting doom. It's about preventing it \u2014 by building the income structures, governance innovations, and social adaptations that will sustain prosperity and democracy through the transition.\n\nThe social contract needs to be rewritten. The question is whether we'll rewrite it thoughtfully, through democratic deliberation, or whether it will be rewritten for us by crisis.\n\n---\n\n*This article is part of the PLE Context series, examining the forces driving the need for post-labor policy.*"
     },
     {
       "id": "seed-real-world-models",
       "title": "Real-World Models: Post-Labor Economics Already in Action",
       "content_type": "article",
-      "tags": ["examples", "UBI", "sovereign-wealth", "cooperatives", "policy"],
-      "excerpt": "The Pyramid of Prosperity isn't theoretical. Every layer has working examples — from Alaska's permanent fund to Mondragon's worker cooperative to Finland's UBI experiment.",
-      "body": "## These Aren't Ideas. They're Operating Systems.\n\nOne of the most powerful aspects of the Post-Labor Economics framework is that it doesn't require inventing anything new. Every layer of the Pyramid of Prosperity has working examples somewhere in the world. The challenge isn't proving these approaches work — it's combining and scaling them.\n\n### Universal Income: Already Tested\n\n**Alaska Permanent Fund** — Since 1982, every Alaska resident has received an annual dividend from the state's oil wealth fund. It's not enough to live on alone, but it demonstrates the mechanics of universal income distribution at scale.\n\n**Finland's UBI Experiment (2017-2018)** — Two thousand unemployed Finns received €560/month with no conditions. Results: improved wellbeing, slight increase in employment, and no evidence of the \"laziness\" critics predicted.\n\n**Stockton SEED Program** — Five hundred residents of Stockton, California received $500/month for two years. Full-time employment *increased* among recipients, from 28% to 40%.\n\n### Sovereign Wealth: Already Operating\n\n**Norway's Government Pension Fund** — Worth over $1.5 trillion, it's the world's largest sovereign wealth fund. It owns roughly 1.5% of all publicly listed companies globally, generating returns that fund Norwegian public services.\n\n**Singapore's GIC and Temasek** — Two sovereign wealth funds managing hundreds of billions, demonstrating that national-scale investment management is not only possible but profitable.\n\nThese funds prove that collective asset ownership can generate meaningful returns for citizens without distorting markets.\n\n### Democratic Enterprise: Already Scaling\n\n**Mondragon Corporation** — Based in the Basque Country of Spain, Mondragon is a federation of cooperatives with 80,000+ worker-owners. It's the tenth-largest Spanish company by revenue and the largest business group in the Basque Country. Workers vote on management, share profits, and have a direct stake in the enterprise.\n\n**German *Mittelstand*** — While not cooperatives, Germany's family-owned mid-sized enterprises demonstrate that distributed ownership (as opposed to Wall Street-style shareholder capitalism) can sustain economic competitiveness at a national level.\n\n**Community Land Trusts** — Operating in the US and UK, CLTs hold land in permanent community ownership, providing affordable housing and preventing speculative price inflation.\n\n### The Pattern\n\nIn every case, the same pattern emerges: broadening ownership creates stability, reduces inequality, and sustains economic dynamism. The PLE framework doesn't ask \"can this work?\" — it asks \"how do we combine what already works into a coherent system?\"\n\n### What's Missing\n\nThe missing piece isn't any individual policy — it's the *integration*. No country has yet assembled all five layers of the Pyramid of Prosperity into a coherent national strategy. That's the work ahead of us.\n\n---\n\n*This article is part of the PLE Evidence series, documenting real-world implementations of post-labor policies.*"
+      "tags": [
+        "examples",
+        "UBI",
+        "sovereign-wealth",
+        "cooperatives",
+        "policy"
+      ],
+      "excerpt": "The Pyramid of Prosperity isn't theoretical. Every layer has working examples \u2014 from Alaska's permanent fund to Mondragon's worker cooperative to Finland's UBI experiment.",
+      "body": "## These Aren't Ideas. They're Operating Systems.\n\nOne of the most powerful aspects of the Post-Labor Economics framework is that it doesn't require inventing anything new. Every layer of the Pyramid of Prosperity has working examples somewhere in the world. The challenge isn't proving these approaches work \u2014 it's combining and scaling them.\n\n### Universal Income: Already Tested\n\n**Alaska Permanent Fund** \u2014 Since 1982, every Alaska resident has received an annual dividend from the state's oil wealth fund. It's not enough to live on alone, but it demonstrates the mechanics of universal income distribution at scale.\n\n**Finland's UBI Experiment (2017-2018)** \u2014 Two thousand unemployed Finns received \u20ac560/month with no conditions. Results: improved wellbeing, slight increase in employment, and no evidence of the \"laziness\" critics predicted.\n\n**Stockton SEED Program** \u2014 Five hundred residents of Stockton, California received $500/month for two years. Full-time employment *increased* among recipients, from 28% to 40%.\n\n### Sovereign Wealth: Already Operating\n\n**Norway's Government Pension Fund** \u2014 Worth over $1.5 trillion, it's the world's largest sovereign wealth fund. It owns roughly 1.5% of all publicly listed companies globally, generating returns that fund Norwegian public services.\n\n**Singapore's GIC and Temasek** \u2014 Two sovereign wealth funds managing hundreds of billions, demonstrating that national-scale investment management is not only possible but profitable.\n\nThese funds prove that collective asset ownership can generate meaningful returns for citizens without distorting markets.\n\n### Democratic Enterprise: Already Scaling\n\n**Mondragon Corporation** \u2014 Based in the Basque Country of Spain, Mondragon is a federation of cooperatives with 80,000+ worker-owners. It's the tenth-largest Spanish company by revenue and the largest business group in the Basque Country. Workers vote on management, share profits, and have a direct stake in the enterprise.\n\n**German *Mittelstand*** \u2014 While not cooperatives, Germany's family-owned mid-sized enterprises demonstrate that distributed ownership (as opposed to Wall Street-style shareholder capitalism) can sustain economic competitiveness at a national level.\n\n**Community Land Trusts** \u2014 Operating in the US and UK, CLTs hold land in permanent community ownership, providing affordable housing and preventing speculative price inflation.\n\n### The Pattern\n\nIn every case, the same pattern emerges: broadening ownership creates stability, reduces inequality, and sustains economic dynamism. The PLE framework doesn't ask \"can this work?\" \u2014 it asks \"how do we combine what already works into a coherent system?\"\n\n### What's Missing\n\nThe missing piece isn't any individual policy \u2014 it's the *integration*. No country has yet assembled all five layers of the Pyramid of Prosperity into a coherent national strategy. That's the work ahead of us.\n\n---\n\n*This article is part of the PLE Evidence series, documenting real-world implementations of post-labor policies.*"
     },
     {
       "id": "seed-metrics-matter",
       "title": "What Gets Measured Gets Managed: KPIs for the Post-Labor Transition",
       "content_type": "article",
-      "tags": ["metrics", "KPI", "measurement", "data", "economics"],
-      "excerpt": "Any economic framework must be testable and falsifiable. Here are the measurements that track the great decoupling — and the indicators that will tell us if interventions are working.",
-      "body": "## You Can't Fix What You Can't See\n\nDavid Shapiro insists that Post-Labor Economics must be measurable and falsifiable. If your body temperature is 104°F, you know you have a fever. Good economic metrics should work the same way — both descriptive (what's happening) and prescriptive (what to do about it).\n\n### Tracking the Great Decoupling\n\nThe most important metrics measure the growing divergence between productivity and prosperity:\n\n**Labor Share of Income** — What percentage of GDP goes to workers versus capital owners? This has been declining across all developed economies since the 1980s. If automation accelerates the decline, interventions are needed. If PLE policies stabilize or reverse it, they're working.\n\n**Productivity-Wage Gap** — The ratio between productivity growth and median wage growth. In the US, productivity grew 60% since 1979 while wages grew only 16%. This gap is the single clearest signal that the old social contract is breaking.\n\n**Automation Displacement Rate** — How quickly are tasks being automated? Not just \"how many jobs are lost\" (which misses the nuance) but \"what percentage of economically valuable tasks can machines now perform better and cheaper than humans?\"\n\n### Measuring Ownership Breadth\n\nThe Pyramid of Prosperity's effectiveness depends on broadening capital ownership:\n\n**Asset Ownership Distribution** — What percentage of the population owns productive assets (stocks, bonds, real estate, business equity)? Currently, the top 10% of Americans own 93% of stocks. PLE aims to flatten this.\n\n**Universal Income Coverage** — What percentage of citizens receive some form of non-labor income (dividends, UBI, sovereign fund distributions)?\n\n**Cooperative and Shared-Ownership Employment** — What percentage of workers are employed by cooperatives, employee-owned enterprises, or community-owned businesses?\n\n### Measuring Democratic Resilience\n\n**Voter Participation Rates** — Higher participation generally indicates a healthier democracy.\n\n**Policy Responsiveness** — How well do government policies reflect citizen preferences? Research shows this correlation has weakened significantly in the US.\n\n**Transparency Indices** — How accessible is government and corporate decision-making? Can citizens track how their representatives vote, how public funds are spent, how algorithms affect their lives?\n\n### The Dashboard Approach\n\nNo single metric tells the whole story. PLE proposes a dashboard of interlocking indicators — similar to how a doctor monitors multiple vital signs, not just temperature.\n\nThe power of this approach is accountability. If a PLE intervention is implemented and the metrics don't improve, the intervention needs revision. If metrics show improvement, we scale up.\n\nThis is what separates PLE from utopian hand-waving: everything is testable, everything is measurable, and everything is accountable to real-world outcomes.\n\n---\n\n*This article is part of the PLE Methodology series, covering the analytical tools of Post-Labor Economics.*"
+      "tags": [
+        "metrics",
+        "KPI",
+        "measurement",
+        "data",
+        "economics"
+      ],
+      "excerpt": "Any economic framework must be testable and falsifiable. Here are the measurements that track the great decoupling \u2014 and the indicators that will tell us if interventions are working.",
+      "body": "## You Can't Fix What You Can't See\n\nDavid Shapiro insists that Post-Labor Economics must be measurable and falsifiable. If your body temperature is 104\u00b0F, you know you have a fever. Good economic metrics should work the same way \u2014 both descriptive (what's happening) and prescriptive (what to do about it).\n\n### Tracking the Great Decoupling\n\nThe most important metrics measure the growing divergence between productivity and prosperity:\n\n**Labor Share of Income** \u2014 What percentage of GDP goes to workers versus capital owners? This has been declining across all developed economies since the 1980s. If automation accelerates the decline, interventions are needed. If PLE policies stabilize or reverse it, they're working.\n\n**Productivity-Wage Gap** \u2014 The ratio between productivity growth and median wage growth. In the US, productivity grew 60% since 1979 while wages grew only 16%. This gap is the single clearest signal that the old social contract is breaking.\n\n**Automation Displacement Rate** \u2014 How quickly are tasks being automated? Not just \"how many jobs are lost\" (which misses the nuance) but \"what percentage of economically valuable tasks can machines now perform better and cheaper than humans?\"\n\n### Measuring Ownership Breadth\n\nThe Pyramid of Prosperity's effectiveness depends on broadening capital ownership:\n\n**Asset Ownership Distribution** \u2014 What percentage of the population owns productive assets (stocks, bonds, real estate, business equity)? Currently, the top 10% of Americans own 93% of stocks. PLE aims to flatten this.\n\n**Universal Income Coverage** \u2014 What percentage of citizens receive some form of non-labor income (dividends, UBI, sovereign fund distributions)?\n\n**Cooperative and Shared-Ownership Employment** \u2014 What percentage of workers are employed by cooperatives, employee-owned enterprises, or community-owned businesses?\n\n### Measuring Democratic Resilience\n\n**Voter Participation Rates** \u2014 Higher participation generally indicates a healthier democracy.\n\n**Policy Responsiveness** \u2014 How well do government policies reflect citizen preferences? Research shows this correlation has weakened significantly in the US.\n\n**Transparency Indices** \u2014 How accessible is government and corporate decision-making? Can citizens track how their representatives vote, how public funds are spent, how algorithms affect their lives?\n\n### The Dashboard Approach\n\nNo single metric tells the whole story. PLE proposes a dashboard of interlocking indicators \u2014 similar to how a doctor monitors multiple vital signs, not just temperature.\n\nThe power of this approach is accountability. If a PLE intervention is implemented and the metrics don't improve, the intervention needs revision. If metrics show improvement, we scale up.\n\nThis is what separates PLE from utopian hand-waving: everything is testable, everything is measurable, and everything is accountable to real-world outcomes.\n\n---\n\n*This article is part of the PLE Methodology series, covering the analytical tools of Post-Labor Economics.*"
+    },
+    {
+      "id": "seed-decline-of-labor",
+      "title": "The Decline of Labor: Why Your Job Is Disappearing (And What Replaces It)",
+      "content_type": "article",
+      "tags": [
+        "labor-decline",
+        "automation",
+        "wages",
+        "productivity",
+        "economics"
+      ],
+      "excerpt": "Prime-age male labor participation has fallen from 97% to 89% since the 1950s. Manufacturing shed 7 million jobs while tripling output. The decline isn't coming \u2014 it's been happening for decades.",
+      "body": "## The Numbers Don't Lie\n\nThe decline of labor isn't a prediction about the future. It's a description of the present \u2014 and the past.\n\nConsider the data: US prime-age male labor force participation peaked at approximately 97% in 1953. By mid-2025, it had fallen to around 89.2%. That's nearly one in ten prime-age men who have exited the workforce entirely.\n\nManufacturing tells an even sharper story. Employment peaked at 19.5 million jobs in 1979 \u2014 roughly 22% of the workforce. Today it stands at about 12.75 million, just 7.9% of total employment. Yet manufacturing output has more than tripled in that period. We produce far more with far fewer people.\n\n### The Productivity-Pay Gap\n\nThe most damning metric is the productivity-pay decoupling. Since 1979, US worker productivity has soared over 80%. But average hourly compensation crawled up only about 29% after inflation, with median wage growth even flatter.\n\nPeople are producing more value than ever before. They're capturing a shrinking share of it. This isn't a temporary glitch \u2014 it's a structural shift in how economic value flows.\n\n### The Four Frontiers of Automation\n\nDavid Shapiro identifies four basic human economic offerings, each progressively under siege:\n\n**Strength** was automated first. The internal combustion tractor slashed the US farm workforce from 41% in 1900 to about 1.4% today.\n\n**Dexterity** followed. Robots in factories produce millions of units annually. Manufacturing's share of employment has fallen from 26% in 1960 to under 8% by 2025.\n\n**Cognition** is the current frontier. By mid-2025, Google and Microsoft report that nearly half of all code they write is AI-generated. ChatGPT surpassed humans on the bar exam by 2023. Studies estimate 80% of the US workforce could see at least 10% of their duties affected by AI.\n\n**Empathy** remains the last bastion \u2014 therapy, caregiving, human connection. But even here, AI companions like Replika served over 30 million users by 2025, and AI therapists handled 10 million sessions yearly.\n\n### Not Just America\n\nThis is a global pattern. Globalization compounded automation's effects as China, India, and former Soviet nations effectively doubled the global labor pool, creating surplus that suppresses wages in developed countries.\n\nThe emergence of \"superstar firms\" \u2014 highly productive, capital-intensive entities that generate immense revenues with minimal staff \u2014 amplifies the shift. Companies like Amazon and Google achieve dominance through scale and technology rather than mass employment.\n\n### What This Means\n\nThe decline of labor isn't a crisis to be feared. It's a transition to be managed. Every percentage point of labor participation that drops is an opportunity to build alternative income structures \u2014 if we're prepared.\n\nThat preparation is what Post-Labor Economics provides: the frameworks, metrics, and interventions to ensure that as labor declines, prosperity doesn't decline with it.\n\n---\n\n*Based on David Shapiro's Post-Labor Economics Part 2: The Decline of Labor.*"
+    },
+    {
+      "id": "seed-life-after-labor",
+      "title": "Life After Labor: What Does Human Flourishing Look Like?",
+      "content_type": "article",
+      "tags": [
+        "life-after-labor",
+        "wellbeing",
+        "community",
+        "purpose",
+        "future"
+      ],
+      "excerpt": "If machines do the work, what do humans do? The answer isn't idle luxury \u2014 it's a fundamental redesign of community, purpose, and daily life around genuine human flourishing.",
+      "body": "## Beyond the Paycheck: Designing for Human Thriving\n\nThe most common objection to post-labor economics is existential: \"But what would people *do*?\"\n\nIt's a revealing question. It assumes that without compulsory labor, humans would collapse into purposelessness. But the evidence suggests the opposite.\n\n### The Burnout Epidemic\n\nGlobal burnout rates have reached 66% amid return-to-office mandates. Movements like China's *tang ping* (lying flat) and America's \"bed rotting\" signal collective exhaustion with the current system. Workers aren't finding meaning in their jobs \u2014 they're finding depletion.\n\nThe current arrangement doesn't produce flourishing. It produces exhaustion with occasional vacations.\n\n### Reclaiming Time Sovereignty\n\nThe first gift of a post-labor economy is time. David Shapiro identifies *time sovereignty* as a foundational principle of economic agency \u2014 control over one's schedule and enough discretionary time to pursue wellbeing and opportunity.\n\nA single parent working multiple jobs with unpredictable schedules has virtually no time sovereignty. This limits their ability to pursue education, start a business, participate in community, or simply be present with their children.\n\nPost-labor economics doesn't just free people from drudgery. It returns the most precious resource: time.\n\n### Community by Design\n\nResearch spanning 50 urban revitalization projects since 2010 shows that neighborhoods incorporating regular incidental contact, physical proximity to shared spaces, and variety in activities report 25% higher resident retention and satisfaction.\n\nWalkable cities demonstrate this powerfully. Amsterdam's 400 kilometers of bike paths correlate with 25% fewer depression diagnoses among daily commuters. Walkability scores link to 20% improvements in cognitive function.\n\nPost-labor life isn't about isolated leisure. It's about redesigning our built environment around human connection.\n\n### The New Migrations\n\nUrban exoduses are already underway, with young adults migrating to small towns at decade-high rates. Places leveraging broadband infrastructure attract creatives and remote workers, boosting local economies. Wilson, North Carolina has seen 40% increases in foot traffic in art hubs since investing in community broadband.\n\nAs work becomes optional and location-independent, people will choose communities based on quality of life rather than proximity to employers.\n\n### Purpose Without Obligation\n\nThe deepest insight from Post-Labor Economics Part 6 is that purpose doesn't require obligation. Humans create, connect, explore, and build naturally \u2014 when freed from survival pressure.\n\nVolunteerism, open-source contribution, artistic creation, scientific curiosity, caregiving, mentorship, community building \u2014 these aren't what people do when they're avoiding work. They're what people do when they're free to follow genuine interest.\n\nThe question isn't \"what will people do without jobs?\" It's \"what could humanity achieve if everyone had the freedom to contribute their best?\"\n\n---\n\n*Based on David Shapiro's Post-Labor Economics Part 6: Life After Labor.*"
+    },
+    {
+      "id": "seed-sixteen-streams",
+      "title": "16 Income Streams That Replace Your Paycheck",
+      "content_type": "article",
+      "tags": [
+        "income-streams",
+        "property-income",
+        "banking",
+        "dividends",
+        "policy"
+      ],
+      "excerpt": "PLE has mapped 16 independent sources of property income \u2014 dividends, royalties, equity flows \u2014 all distributable through your existing bank account. This is what post-labor income looks like in practice.",
+      "body": "## Direct Deposit for Ownership\n\nThe most practical question in post-labor economics: where does the money come from if not a paycheck?\n\nDavid Shapiro's team has mapped 16 independent, modular sources of property income \u2014 dividends, royalties, and equity units tied to real assets. Every single one of them is already legal or operational somewhere today. The proposal is to systematize and combine them.\n\n### The Banking Front-End\n\nCritically, all 16 streams can be cleared, tracked, and reinvested through your existing banking relationship. You don't need to day-trade, chase side gigs, or manage 12 apps. It all shows up in your bank account \u2014 like direct deposit for ownership.\n\nBuying in is as easy as applying to a credit union or joining a co-op. If you qualify by geography, employment, or activity, you're in.\n\n### The Streams\n\nThese income sources span the full Pyramid of Prosperity:\n\n**Universal Layer:** Sovereign wealth fund dividends (like Alaska's Permanent Fund), public data royalties, spectrum usage fees, carbon dividend payments.\n\n**Collectively Owned Public:** Land value tax distributions, public infrastructure revenue shares, municipal utility dividends.\n\n**Collectively Owned Private:** Worker cooperative patronage dividends (like REI's member rebates), community development financial institution returns, community solar/wind farm payments.\n\n**Individual Private:** ESOP distributions (like Publix), platform cooperative equity, micro-investment fund returns, peer-to-peer lending yields.\n\nEach stream has real-world precedent. The Alaska Permanent Fund distributes oil revenue. REI distributes member rebates. Publix distributes employee ownership returns. Community solar farms distribute energy revenue.\n\n### The Compounding Effect\n\nOver time, all of these streams compound and snowball. Each dividend or royalty isn't just income \u2014 it's reinvested into the same mechanisms that produced it. The system becomes self-reinforcing.\n\nA proposed federal match accelerates this: $1 in bonus credit for your first $3 of verified property income, capped around $1,200/year. It's like a Saver's Credit for the post-labor economy.\n\nWhen a dividend fund underperforms, a small pooled insurance mechanism backfills a portion \u2014 like FDIC insurance for co-ops and DAOs.\n\n### Infrastructure Already Exists\n\nNone of this requires exotic technology. FedNow and RTP already handle instant payments. ESOPs, patronage co-ops, and public trusts already exist. The regulatory tools \u2014 tokenized deposits, qualified dividends, reinsurance pools \u2014 are proven in other domains.\n\nWhat's needed now is coordination, standardization, and pilot testing.\n\n### UBI Is Necessary But Not Sufficient\n\nUniversal Basic Income is one tool. But PLE argues it's not enough on its own. Nor is a single national sovereign wealth fund. The transition demands a far more granular, decentralized, and pluralistic set of systems.\n\n16 streams. Your bank account. That's the post-labor income system.\n\n---\n\n*Based on David Shapiro's Post-Labor Economics Update, May 2025.*"
     }
-  ]
+  ],
+  "book": {
+    "title": "The Great Decoupling",
+    "author": "David Shapiro",
+    "status": "In progress",
+    "expected": "2026",
+    "description": "Comprehensive book on post-labor economics covering the full framework from automation history through concrete interventions to life after labor."
+  },
+  "substack_index": {
+    "base_url": "https://daveshap.substack.com",
+    "tag_url": "https://daveshap.substack.com/t/post-labor-economics",
+    "known_articles": [
+      {
+        "title": "I'm Starting a Movement (L/0)",
+        "url": "https://daveshap.substack.com/p/im-starting-a-movement",
+        "date": "2025-12-30"
+      },
+      {
+        "title": "The Cultural AI Landmine",
+        "url": "https://daveshap.substack.com/p/the-cultural-ai-landmine-that-silicon",
+        "date": "2025-12-26"
+      },
+      {
+        "title": "Macroeconomics of the Future",
+        "url": "https://daveshap.substack.com/p/what-happens-when-agi-nukes-the-jobs",
+        "date": "2025-12-16"
+      },
+      {
+        "title": "Pyramids Visualized",
+        "url": "https://daveshap.substack.com/p/the-pyramids-of-prosperity-and-power",
+        "date": "2025-11-21"
+      },
+      {
+        "title": "PLE Manifesto",
+        "url": "https://daveshap.substack.com/p/a-post-labor-economics-manifesto",
+        "date": "2024-11-09"
+      },
+      {
+        "title": "What Do I Mean by PLE?",
+        "url": "https://daveshap.substack.com/p/what-do-i-mean-when-i-say-post-labor",
+        "date": "2024-11-17"
+      },
+      {
+        "title": "PLE in Six Steps",
+        "url": "https://daveshap.substack.com/p/understanding-post-labor-economics",
+        "date": "2025-07-11"
+      },
+      {
+        "title": "Pt 1: Rise of Automation",
+        "url": "https://daveshap.substack.com/p/post-labor-economics-pt-i-the-rise",
+        "date": "2025-07-19"
+      },
+      {
+        "title": "Pt 2: Decline of Labor",
+        "url": "https://daveshap.substack.com/p/post-labor-economics-pt-2-the-decline",
+        "date": "2025-07-22"
+      },
+      {
+        "title": "Pt 3: Power and Social Contracts",
+        "url": "https://daveshap.substack.com/p/post-labor-economics-pt-3-power-and",
+        "date": "2025-07-25"
+      },
+      {
+        "title": "Pt 5: Concrete Interventions",
+        "url": "https://daveshap.substack.com/p/post-labor-economics-pt-5-concrete",
+        "date": "2025-07-27"
+      },
+      {
+        "title": "Pt 6: Life After Labor",
+        "url": "https://daveshap.substack.com/p/post-labor-economics-pt-6-life-after",
+        "date": "2025-07-28"
+      },
+      {
+        "title": "16 Income Streams Update",
+        "url": "https://daveshap.substack.com/p/post-labor-economics-update",
+        "date": "2025-05-11"
+      },
+      {
+        "title": "L/0 + Book Update",
+        "url": "https://daveshap.substack.com/p/laborzero-updates-book-update",
+        "date": "2026-01-03"
+      },
+      {
+        "title": "Power: Realist View of Leverage",
+        "url": "https://daveshap.substack.com/p/if-labor-power-erodes-then-the-civic",
+        "date": "2025-12-21"
+      }
+    ]
+  }
 }
