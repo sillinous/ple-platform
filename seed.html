@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seed Content | Admin | PLE</title>
+  <link rel="icon" type="image/svg+xml" href="ple-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/brand.css">
+  <link rel="stylesheet" href="src/styles/app.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+      <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="admin.html" class="nav-link">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container" style="max-width:900px;padding-top:2rem">
+      <div style="margin-bottom:2rem">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-dawn);font-weight:600;margin-bottom:0.3rem">Admin Tool</div>
+        <h1 style="font-family:'Fraunces',serif;font-size:2rem;font-weight:700;color:var(--color-horizon)">Knowledge Base &amp; Content Seeder</h1>
+        <p style="color:var(--text-muted);margin-top:0.5rem">Seed the content section from the Shapiro Sources knowledge base. This uses the reusable data layer at <code>/data/knowledge-base.json</code>.</p>
+      </div>
+
+      <!-- Knowledge Base Info -->
+      <div id="kb-info" style="background:var(--bg-secondary,#f8f8f6);border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem">
+        <h2 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.75rem">📚 Knowledge Base</h2>
+        <div id="kb-meta" style="color:var(--text-muted);font-size:0.9rem">Loading...</div>
+      </div>
+
+      <!-- Current State -->
+      <div id="seed-status" style="background:var(--bg-secondary,#f8f8f6);border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem">
+        <h2 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.75rem">📊 Current Seed Status</h2>
+        <div id="status-body" style="color:var(--text-muted);font-size:0.9rem">Loading...</div>
+      </div>
+
+      <!-- Preview -->
+      <div id="preview-section" style="background:white;border:1px solid var(--border-color,#e5e2dd);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem">
+        <h2 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.75rem">👁️ Preview</h2>
+        <div id="preview-body" style="font-size:0.9rem">Loading preview...</div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem">
+        <button onclick="seedContent()" id="seed-btn" class="btn btn-primary" style="border-radius:100px;padding:0.75rem 2rem">
+          🌱 Seed Content Now
+        </button>
+        <button onclick="refreshAll()" class="btn btn-outline" style="border-radius:100px;padding:0.75rem 2rem">
+          🔄 Refresh Status
+        </button>
+        <a href="content.html" class="btn btn-outline" style="border-radius:100px;padding:0.75rem 2rem">
+          Browse Content →
+        </a>
+      </div>
+
+      <!-- Results -->
+      <div id="results" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:1.5rem;margin-bottom:2rem">
+        <h2 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.75rem;color:#166534">✅ Seed Results</h2>
+        <div id="results-body" style="font-size:0.9rem;color:#166534"></div>
+      </div>
+
+      <!-- Knowledge Base Access Info -->
+      <div style="background:rgba(69,123,157,0.06);border:1px solid rgba(69,123,157,0.15);border-radius:12px;padding:1.5rem;margin-bottom:2rem">
+        <h2 style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;margin-bottom:0.75rem;color:#3a6f96">🔗 Reusable API Endpoints</h2>
+        <div style="font-size:0.85rem;line-height:1.8;color:var(--text-secondary,#555)">
+          <p>The knowledge base is accessible via these endpoints for use across solutions:</p>
+          <div style="margin-top:0.75rem;display:grid;gap:0.5rem">
+            <code style="background:rgba(0,0,0,0.04);padding:0.4rem 0.75rem;border-radius:6px;display:block"><strong>GET</strong> /api/seed → Knowledge base metadata</code>
+            <code style="background:rgba(0,0,0,0.04);padding:0.4rem 0.75rem;border-radius:6px;display:block"><strong>POST</strong> /api/seed?action=knowledge → Full knowledge base JSON</code>
+            <code style="background:rgba(0,0,0,0.04);padding:0.4rem 0.75rem;border-radius:6px;display:block"><strong>POST</strong> /api/seed?action=preview → Preview what would be seeded</code>
+            <code style="background:rgba(0,0,0,0.04);padding:0.4rem 0.75rem;border-radius:6px;display:block"><strong>POST</strong> /api/seed?action=status → Check seed status</code>
+            <code style="background:rgba(0,0,0,0.04);padding:0.4rem 0.75rem;border-radius:6px;display:block"><strong>POST</strong> /api/seed?action=content → Execute seeding</code>
+          </div>
+          <p style="margin-top:0.75rem">The raw knowledge base file is also available at: <code>/data/knowledge-base.json</code></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initPage, updateAuthUI } from './src/scripts/api.js';
+    await initPage(); updateAuthUI();
+
+    const token = localStorage.getItem('ple_token');
+    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    async function loadKBInfo() {
+      try {
+        const r = await fetch('/api/seed');
+        const data = await r.json();
+        document.getElementById('kb-meta').innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 2rem">
+            <div><strong>Name:</strong> ${data.name}</div>
+            <div><strong>Version:</strong> ${data.version}</div>
+            <div><strong>Source Documents:</strong> ${data.source_count}</div>
+            <div><strong>Seed Articles:</strong> ${data.seed_articles}</div>
+            <div><strong>Series Parts:</strong> ${data.framework.series_parts}</div>
+            <div><strong>Prosperity Layers:</strong> ${data.framework.prosperity_layers}</div>
+            <div><strong>Power Layers:</strong> ${data.framework.power_layers}</div>
+            <div><strong>Real-World Examples:</strong> ${data.real_world_examples}</div>
+            <div><strong>Core Concepts:</strong> ${data.concepts.join(', ')}</div>
+          </div>
+        `;
+      } catch(e) { document.getElementById('kb-meta').textContent = 'Error loading: ' + e.message; }
+    }
+
+    async function loadStatus() {
+      try {
+        const r = await fetch('/api/seed?action=status', { method: 'POST', headers });
+        const data = await r.json();
+        if (data.error) { document.getElementById('status-body').textContent = data.error; return; }
+        document.getElementById('status-body').innerHTML = `
+          <p><strong>${data.seeded_count}</strong> of <strong>${data.total_available}</strong> articles already seeded.</p>
+          ${data.items.length ? `<div style="margin-top:0.5rem">${data.items.map(i =>
+            `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.04);display:flex;justify-content:space-between">
+              <span>${i.title}</span>
+              <span style="font-size:0.75rem;color:${i.status==='published'?'#166534':'#b45309'}">${i.status}</span>
+            </div>`
+          ).join('')}</div>` : ''}
+        `;
+      } catch(e) { document.getElementById('status-body').textContent = 'Sign in as admin to view.'; }
+    }
+
+    async function loadPreview() {
+      try {
+        const r = await fetch('/api/seed?action=preview', { method: 'POST', headers });
+        const data = await r.json();
+        if (data.error) { document.getElementById('preview-body').textContent = data.error; return; }
+        document.getElementById('preview-body').innerHTML = `
+          <p style="margin-bottom:0.75rem"><strong>${data.new}</strong> new articles to seed, <strong>${data.existing}</strong> already exist.</p>
+          ${data.items.map(i => `
+            <div style="padding:0.5rem 0;border-bottom:1px solid rgba(0,0,0,0.04);display:flex;justify-content:space-between;align-items:center;gap:1rem">
+              <div>
+                <div style="font-weight:500">${i.title}</div>
+                <div style="font-size:0.75rem;color:var(--text-muted)">${i.tags.join(', ')} · ${Math.round(i.body_length/5)} words</div>
+              </div>
+              <span style="font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:100px;white-space:nowrap;${
+                i.already_exists
+                  ? 'background:rgba(234,179,8,0.1);color:#b45309'
+                  : 'background:rgba(34,197,94,0.1);color:#166534'
+              }">${i.already_exists ? 'Exists' : 'Ready'}</span>
+            </div>
+          `).join('')}
+        `;
+        // Disable button if nothing to seed
+        if (data.new === 0) {
+          document.getElementById('seed-btn').disabled = true;
+          document.getElementById('seed-btn').textContent = '✅ All Content Seeded';
+        }
+      } catch(e) { document.getElementById('preview-body').textContent = 'Sign in as admin to preview.'; }
+    }
+
+    window.seedContent = async function() {
+      const btn = document.getElementById('seed-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Seeding...';
+
+      try {
+        const r = await fetch('/api/seed?action=content', { method: 'POST', headers });
+        const data = await r.json();
+        
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.style.display = 'block';
+        
+        if (data.error) {
+          resultsDiv.style.background = '#fef2f2';
+          resultsDiv.style.borderColor = '#fca5a5';
+          document.getElementById('results-body').innerHTML = `<span style="color:#991b1b">Error: ${data.error}</span>`;
+          btn.disabled = false;
+          btn.textContent = '🌱 Retry Seed';
+          return;
+        }
+
+        document.getElementById('results-body').innerHTML = `
+          <p><strong>${data.seeded}</strong> articles created, <strong>${data.skipped}</strong> skipped (already exist).</p>
+          <div style="margin-top:0.5rem">${data.results.map(r => `
+            <div style="padding:0.2rem 0;font-size:0.85rem">
+              ${r.status === 'created' ? '✅' : '⏭️'} ${r.title || r.slug} — <em>${r.status}</em>${r.reason ? ` (${r.reason})` : ''}
+            </div>
+          `).join('')}</div>
+        `;
+
+        btn.textContent = '✅ Seeding Complete';
+        // Refresh status and preview
+        await loadStatus();
+        await loadPreview();
+      } catch(e) {
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('results-body').textContent = 'Error: ' + e.message;
+        btn.disabled = false;
+        btn.textContent = '🌱 Retry Seed';
+      }
+    };
+
+    window.refreshAll = async function() {
+      await Promise.all([loadKBInfo(), loadStatus(), loadPreview()]);
+    };
+
+    loadKBInfo();
+    loadStatus();
+    loadPreview();
+  </script>
+</body>
+</html>

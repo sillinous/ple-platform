@@ -37,6 +37,7 @@ export default defineConfig({
         activity: 'activity.html',
         series: 'series.html',
         'api-docs': 'api-docs.html',
+        seed: 'seed.html',
       }
     }
   }
