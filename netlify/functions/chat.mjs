@@ -52,8 +52,14 @@ export default async function handler(req) {
     });
 
     if (!response.ok) {
-      console.error('Anthropic API error:', response.status);
-      return json(502, { error: 'AI service error', fallback: true });
+      const errData = await response.json().catch(() => ({}));
+      const errMsg = errData?.error?.message || `Status ${response.status}`;
+      console.error('Anthropic API error:', response.status, errMsg);
+      return json(502, { 
+        error: 'AI service error', 
+        detail: errMsg,
+        fallback: true 
+      });
     }
 
     const aiResponse = await response.json();
