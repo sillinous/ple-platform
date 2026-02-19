@@ -32,7 +32,7 @@ export default async function handler(req) {
   // GET — show pipeline status and recent discoveries
   if (req.method === 'GET') {
     try {
-      const db = getDb();
+      const db = await getDb();
       const discoveries = await db`
         SELECT id, source, title, url, relevance_score, status, discovered_at
         FROM discovery_queue
@@ -76,7 +76,7 @@ export default async function handler(req) {
   const url = new URL(req.url, 'http://localhost');
   const action = url.searchParams.get('action') || 'run';
 
-  const db = getDb();
+  const db = await getDb();
 
   // Ensure discovery_queue table exists
   await db`
