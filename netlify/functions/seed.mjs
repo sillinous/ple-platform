@@ -75,7 +75,7 @@ export default async function handler(req) {
     const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
     if (!authHeader) return json(401, { error: 'Authentication required. Pass Bearer token.' });
     
-    const sql = await getDb();
+    // sql already declared above for init check
     const user = await getCurrentUser(req);
     if (!user) return json(401, { error: 'Invalid or expired session' });
     
