@@ -177,14 +177,17 @@ export default async function handler(req) {
           // Parse response — Composio wraps data differently
           let posts = [];
           const raw = hnData?.data;
-          if (typeof raw === 'string') {
-            try { const parsed = JSON.parse(raw); posts = parsed?.hits || parsed?.results || []; } catch(e) { posts = []; }
-          } else if (raw?.hits) {
-            posts = raw.hits;
-          } else if (raw?.results) {
-            posts = raw.results;
-          } else if (Array.isArray(raw)) {
-            posts = raw;
+          // Composio wraps HN response in { response_data: ... }
+          let innerData = raw;
+          if (raw?.response_data) innerData = raw.response_data;
+          if (typeof innerData === 'string') {
+            try { const parsed = JSON.parse(innerData); posts = parsed?.hits || parsed?.results || parsed || []; } catch(e) { posts = []; }
+          } else if (innerData?.hits) {
+            posts = innerData.hits;
+          } else if (innerData?.results) {
+            posts = innerData.results;
+          } else if (Array.isArray(innerData)) {
+            posts = innerData;
           }
           results.sources.push({
             name: 'hackernews',
