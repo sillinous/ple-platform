@@ -220,7 +220,7 @@ export default async function handler(req) {
             name: 'news',
             provider: '[COMPOSIO]',
             count: Array.isArray(articles) ? articles.length : 0,
-            raw_keys: typeof rawNews === 'object' ? Object.keys(rawNews || {}).slice(0, 10) : typeof rawNews,
+
             items: Array.isArray(articles) ? articles.slice(0, 10).map(a => ({
               title: a.title || '',
               url: a.link || a.url || '',
@@ -247,7 +247,7 @@ export default async function handler(req) {
             name: 'web',
             provider: '[COMPOSIO]',
             count: Array.isArray(webResults) ? webResults.length : 0,
-            raw_keys: typeof rd === 'object' ? Object.keys(rd || {}).slice(0, 10) : typeof rd,
+
             items: Array.isArray(webResults) ? webResults.slice(0, 10).map(r => ({
               title: r.title || '',
               url: r.link || r.href || r.url || '',
