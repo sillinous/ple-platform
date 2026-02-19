@@ -212,11 +212,15 @@ export default async function handler(req) {
       if (sources.includes('news')) {
         try {
           const newsData = await composioExecute(composioKey, 'COMPOSIO_SEARCH_NEWS_SEARCH', { query: query + ' economics' });
-          const articles = newsData?.data?.results || [];
+          // Composio response format varies — try multiple paths
+          const rawNews = newsData?.data || newsData;
+          const articles = rawNews?.results || rawNews?.news_results || rawNews?.organic_results || 
+            (Array.isArray(rawNews) ? rawNews : []);
           results.sources.push({
             name: 'news',
             provider: '[COMPOSIO]',
             count: Array.isArray(articles) ? articles.length : 0,
+            raw_keys: typeof rawNews === 'object' ? Object.keys(rawNews || {}).slice(0, 10) : typeof rawNews,
             items: Array.isArray(articles) ? articles.slice(0, 10).map(a => ({
               title: a.title || '',
               url: a.link || a.url || '',
@@ -233,12 +237,15 @@ export default async function handler(req) {
       // [COMPOSIO] DuckDuckGo search
       if (sources.includes('web')) {
         try {
-          const webData = await composioExecute(composioKey, 'COMPOSIO_SEARCH_DUCK_DUCK_GO_SEARCH', { query, num_results: 10 });
-          const webResults = webData?.data?.results || [];
+          const webData = await composioExecute(composioKey, 'COMPOSIO_SEARCH_DUCK_DUCK_GO_SEARCH', { query });
+          const rawWeb = webData?.data || webData;
+          const webResults = rawWeb?.results || rawWeb?.organic_results || 
+            (Array.isArray(rawWeb) ? rawWeb : []);
           results.sources.push({
             name: 'web',
             provider: '[COMPOSIO]',
             count: Array.isArray(webResults) ? webResults.length : 0,
+            raw_keys: typeof rawWeb === 'object' ? Object.keys(rawWeb || {}).slice(0, 10) : typeof rawWeb,
             items: Array.isArray(webResults) ? webResults.slice(0, 10).map(r => ({
               title: r.title || '',
               url: r.link || r.url || '',
@@ -271,18 +278,20 @@ export default async function handler(req) {
 
       try {
         // [COMPOSIO] Semantic Scholar paper search
-        const data = await composioExecute(composioKey, 'SEMANTICSCHOLAR_SEARCH_PAPERS', {
+        const data = await composioExecute(composioKey, 'SEMANTICSCHOLAR_PAPER_RELEVANCE_SEARCH', {
           query,
-          limit: body.limit || 10,
-          fields: 'title,authors,year,abstract,citationCount,url'
+          limit: body.limit || 10
         });
 
-        const papers = data?.data?.data || data?.data?.results || [];
+        const rawPapers = data?.data || data;
+        const papers = rawPapers?.data || rawPapers?.results || rawPapers?.papers || 
+          (Array.isArray(rawPapers) ? rawPapers : []);
 
         const result = {
           query,
           provider: '[COMPOSIO] Semantic Scholar',
           count: Array.isArray(papers) ? papers.length : 0,
+          raw_keys: typeof rawPapers === 'object' ? Object.keys(rawPapers || {}).slice(0, 10) : typeof rawPapers,
           papers: Array.isArray(papers) ? papers.map(p => ({
             title: p.title || '',
             authors: Array.isArray(p.authors) ? p.authors.map(a => a.name || a).join(', ') : '',
