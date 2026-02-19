@@ -239,19 +239,19 @@ export default async function handler(req) {
         try {
           const webData = await composioExecute(composioKey, 'COMPOSIO_SEARCH_DUCK_DUCK_GO_SEARCH', { query });
           const rawWeb = webData?.data || webData;
-          const webResults = rawWeb?.response_data?.results || rawWeb?.response_data || 
-            rawWeb?.results || rawWeb?.organic_results || 
-            (Array.isArray(rawWeb) ? rawWeb : []);
+          // DDG response: { response_data: { ads: [...], results: [...] } }
+          const rd = rawWeb?.response_data || rawWeb;
+          const webResults = rd?.results || rd?.organic_results || 
+            (Array.isArray(rd) ? rd : []);
           results.sources.push({
             name: 'web',
             provider: '[COMPOSIO]',
             count: Array.isArray(webResults) ? webResults.length : 0,
-            raw_keys: typeof rawWeb === 'object' ? Object.keys(rawWeb || {}).slice(0, 10) : typeof rawWeb,
-            raw_sample: JSON.stringify(rawWeb?.response_data || rawWeb).substring(0, 500),
+            raw_keys: typeof rd === 'object' ? Object.keys(rd || {}).slice(0, 10) : typeof rd,
             items: Array.isArray(webResults) ? webResults.slice(0, 10).map(r => ({
               title: r.title || '',
-              url: r.link || r.url || '',
-              snippet: (r.snippet || r.description || '').substring(0, 200)
+              url: r.link || r.href || r.url || '',
+              snippet: (r.snippet || r.body || r.description || '').substring(0, 200)
             })) : []
           });
         } catch (e) {
