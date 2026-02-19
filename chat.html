@@ -98,6 +98,45 @@
   <script type="module">
     import { marked } from 'https://cdn.jsdelivr.net/npm/marked@12/lib/marked.esm.js';
 
+    // Follow-up suggestions by KB section
+    const FOLLOW_UPS = {
+      core: ['What is the L/0 symbol?', 'How is PLE different from UBI?', 'Who created this framework?'],
+      pyramid_of_prosperity: ['What are the 5 layers?', 'How do property interventions work?', 'Show me real-world examples'],
+      pyramid_of_power: ['How does democracy survive automation?', 'What is the Fork Right?', 'Explain the Bedrock layer'],
+      attractor_states: ['What is technofeudalism?', 'How do we reach techno-abundance?', 'What is normalcy bias?'],
+      four_human_offerings: ['Which offerings are already automated?', 'Is empathy the last frontier?', 'What happens when all four are replaced?'],
+      property_interventions: ['What are data royalties?', 'How do credit unions fit in?', 'What is the banking thesis?'],
+      economic_agency: ['What are the agency principles?', 'How do I build financial authority?', 'What is time sovereignty?'],
+      overview: ['Explain the core thesis', 'What problems does PLE solve?', 'How is this structured optimism?']
+    };
+    const DEFAULT_FOLLOW_UPS = ['What are the three attractor states?', 'Explain the 16 property interventions', 'Show me real-world examples'];
+
+    function addFollowUps(sections) {
+      const suggestions = [];
+      for (const s of (sections || [])) {
+        for (const f of (FOLLOW_UPS[s] || [])) {
+          if (!suggestions.includes(f) && suggestions.length < 3) suggestions.push(f);
+        }
+      }
+      if (suggestions.length === 0) suggestions.push(...DEFAULT_FOLLOW_UPS);
+      const asked = new Set(history.filter(m => m.role === 'user').map(m => m.content.toLowerCase()));
+      const filtered = suggestions.filter(s => !asked.has(s.toLowerCase()));
+      if (filtered.length === 0) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'chat-starters';
+      wrap.style.cssText = 'justify-content:flex-start;padding:0.3rem 0 0.5rem;';
+      for (const s of filtered) {
+        const btn = document.createElement('button');
+        btn.className = 'chat-starter';
+        btn.textContent = s;
+        btn.onclick = () => { wrap.remove(); inputEl.value = s; sendMessage(); };
+        wrap.appendChild(btn);
+      }
+      messagesEl.appendChild(wrap);
+      scrollToBottom();
+    }
+
     const messagesEl = document.getElementById('messages');
     const inputEl = document.getElementById('input');
     const sendBtn = document.getElementById('sendBtn');
@@ -160,6 +199,9 @@
         } else if (data.response) {
           addMessage('assistant', data.response, data.context);
           history.push({ role: 'assistant', content: data.response });
+          // Remove old follow-ups and add new ones
+          messagesEl.querySelectorAll('.chat-starters:not(#welcome *)').forEach(el => el.remove());
+          if (data.context?.sections_used) addFollowUps(data.context.sections_used);
         } else {
           addMessage('assistant', data.error || 'Something went wrong. Please try again.');
         }

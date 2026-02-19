@@ -95,50 +95,54 @@
       history.replaceState(null,'',`?q=${encodeURIComponent(q)}`);
       
       const el=document.getElementById('results');
-      el.innerHTML='<div class="searching">Searching...</div>';
-
-      const token=localStorage.getItem('ple_token');
-      const headers=token?{'Authorization':`Bearer ${token}`}:{};
+      el.innerHTML='<div class="searching">Searching across knowledge base, content, proposals & discussions...</div>';
 
       try{
-        const [contentR,projectsR,proposalsR,discussionsR]=await Promise.allSettled([
-          fetch(`/api/content?limit=20`,{headers}).then(r=>r.json()),
-          fetch(`/api/projects?limit=20`,{headers}).then(r=>r.json()),
-          fetch(`/api/proposals?limit=20`,{headers}).then(r=>r.json()),
-          fetch(`/api/discussions?limit=20`,{headers}).then(r=>r.json())
-        ]);
+        const res=await fetch(`/api/smart-search?q=${encodeURIComponent(q)}&scope=all&limit=30`);
+        const data=await res.json();
 
-        const ql=q.toLowerCase();
-        const content=(contentR.status==='fulfilled'?contentR.value.content||[]:[]).filter(c=>(c.title||'').toLowerCase().includes(ql)||(c.excerpt||'').toLowerCase().includes(ql)||(c.body||'').toLowerCase().includes(ql));
-        const projects=(projectsR.status==='fulfilled'?projectsR.value.projects||[]:[]).filter(p=>(p.title||'').toLowerCase().includes(ql)||(p.description||'').toLowerCase().includes(ql));
-        const proposals=(proposalsR.status==='fulfilled'?proposalsR.value.proposals||[]:[]).filter(p=>(p.title||'').toLowerCase().includes(ql)||(p.content||'').toLowerCase().includes(ql));
-        const discussions=(discussionsR.status==='fulfilled'?discussionsR.value.discussions||[]:[]).filter(d=>(d.title||'').toLowerCase().includes(ql)||(d.content||'').toLowerCase().includes(ql));
+        const kbMatches=data.kb_matches||[];
+        const dbResults=data.results||[];
+        const total=kbMatches.length+dbResults.length;
 
-        const total=content.length+projects.length+proposals.length+discussions.length;
-        
-        if(total===0){el.innerHTML='<div class="no-results"><p>No results found for "'+esc(q)+'"</p><p style="font-size:0.85rem;margin-top:0.5rem;">Try different keywords or browse the platform sections above.</p></div>';return;}
+        if(total===0){el.innerHTML='<div class="no-results"><p>No results found for "'+esc(q)+'"</p><p style="font-size:0.85rem;margin-top:0.5rem;">Try different keywords or ask the <a href="/chat" style="color:var(--color-horizon);">AI Assistant</a>.</p></div>';return;}
 
         let html='';
-        if(content.length){
-          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="file-text" style="width:18px;height:18px"></i>Content <span class="result-count">(${content.length})</span></div>`;
-          html+=content.map(c=>`<a href="content-view.html?id=${c.id}" class="result-item"><div class="result-title">${highlight(c.title,q)}</div><div class="result-excerpt">${highlight(trunc(c.excerpt||c.body,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(c.contentType||'article')}</span><span>${cap(c.status)}</span></div></a>`).join('');
+
+        // KB framework matches (highest value — core theory)
+        if(kbMatches.length){
+          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="book-open" style="width:18px;height:18px"></i>Knowledge Base <span class="result-count">(${kbMatches.length})</span></div>`;
+          html+=kbMatches.map(m=>{
+            const section=m.section||m.key||'';
+            const label=section.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+            return `<div class="result-item" style="cursor:default;"><div class="result-title">${highlight(label,q)}</div><div class="result-excerpt">${highlight(trunc(m.text||m.content||m.value||'',200),q)}</div><div class="result-meta"><span class="result-badge">Framework</span><span>${section}</span></div></div>`;
+          }).join('');
           html+='</div>';
         }
-        if(projects.length){
-          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="folder" style="width:18px;height:18px"></i>Projects <span class="result-count">(${projects.length})</span></div>`;
-          html+=projects.map(p=>`<a href="project-view.html?id=${p.id}" class="result-item"><div class="result-title">${highlight(p.title,q)}</div><div class="result-excerpt">${highlight(trunc(p.description,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(p.projectType||'project')}</span><span>${cap(p.status)}</span></div></a>`).join('');
+
+        // Group DB results by type
+        const content=dbResults.filter(r=>r.type==='content');
+        const proposals=dbResults.filter(r=>r.type==='proposal');
+        const discussions=dbResults.filter(r=>r.type==='discussion');
+
+        if(content.length){
+          html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="file-text" style="width:18px;height:18px"></i>Content <span class="result-count">(${content.length})</span></div>`;
+          html+=content.map(c=>`<a href="content-view.html?id=${c.id}" class="result-item"><div class="result-title">${highlight(c.title,q)}</div><div class="result-excerpt">${highlight(trunc(c.excerpt||'',150),q)}</div><div class="result-meta"><span class="result-badge">${cap(c.content_type||'article')}</span><span>${cap(c.status||'')}</span></div></a>`).join('');
           html+='</div>';
         }
         if(proposals.length){
           html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="vote" style="width:18px;height:18px"></i>Proposals <span class="result-count">(${proposals.length})</span></div>`;
-          html+=proposals.map(p=>`<a href="proposal-view.html?id=${p.id}" class="result-item"><div class="result-title">${highlight(p.title,q)}</div><div class="result-excerpt">${highlight(trunc(p.content,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(p.proposalType)}</span><span>${cap(p.status)}</span></div></a>`).join('');
+          html+=proposals.map(p=>`<a href="proposal-view.html?id=${p.id}" class="result-item"><div class="result-title">${highlight(p.title,q)}</div><div class="result-excerpt">${highlight(trunc(p.content||'',150),q)}</div><div class="result-meta"><span class="result-badge">Proposal</span><span>${cap(p.status||'')}</span></div></a>`).join('');
           html+='</div>';
         }
         if(discussions.length){
           html+=`<div class="result-section"><div class="result-section-title"><i data-lucide="message-square" style="width:18px;height:18px"></i>Discussions <span class="result-count">(${discussions.length})</span></div>`;
-          html+=discussions.map(d=>`<a href="discussion-view.html?id=${d.id}" class="result-item"><div class="result-title">${highlight(d.title||'Untitled',q)}</div><div class="result-excerpt">${highlight(trunc(d.content,150),q)}</div><div class="result-meta"><span class="result-badge">${cap(d.type||'general')}</span><span>${d.replyCount||0} replies</span></div></a>`).join('');
+          html+=discussions.map(d=>`<a href="discussion-view.html?id=${d.id}" class="result-item"><div class="result-title">${highlight(d.title||'Untitled',q)}</div><div class="result-excerpt">${highlight(trunc(d.content||'',150),q)}</div><div class="result-meta"><span class="result-badge">Discussion</span><span>${d.reply_count||0} replies</span></div></a>`).join('');
           html+='</div>';
         }
+
+        // AI suggestion
+        html+=`<div style="text-align:center;margin-top:2rem;padding:1rem;background:rgba(244,162,97,0.08);border-radius:10px;"><p style="font-size:0.85rem;color:var(--text-muted,#666);">Want a deeper answer? <a href="/chat" style="color:var(--color-horizon);font-weight:600;">Ask the AI Assistant →</a></p></div>`;
         
         el.innerHTML=html;
         lucide.createIcons();
@@ -160,5 +164,6 @@
       <a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">L/0</a> Post-Labor Economics · Prosperity Beyond Work
     </div>
   </footer>
+<script src="/chat-widget.js" defer></script>
 </body>
 </html>
