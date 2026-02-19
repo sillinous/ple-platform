@@ -174,22 +174,34 @@ export default async function handler(req) {
       if (sources.includes('hackernews')) {
         try {
           const hnData = await composioExecute(composioKey, 'HACKERNEWS_SEARCH_POSTS', { query, size: 10 });
-          const posts = hnData?.data?.results || hnData?.data?.hits || [];
+          // Parse response — Composio wraps data differently
+          let posts = [];
+          const raw = hnData?.data;
+          if (typeof raw === 'string') {
+            try { const parsed = JSON.parse(raw); posts = parsed?.hits || parsed?.results || []; } catch(e) { posts = []; }
+          } else if (raw?.hits) {
+            posts = raw.hits;
+          } else if (raw?.results) {
+            posts = raw.results;
+          } else if (Array.isArray(raw)) {
+            posts = raw;
+          }
           results.sources.push({
             name: 'hackernews',
             provider: '[COMPOSIO]',
             count: posts.length,
-            items: Array.isArray(posts) ? posts.slice(0, 10).map(p => ({
+            items: posts.slice(0, 10).map(p => ({
               title: p.title || p.story_title || '',
               url: p.url || p.story_url || `https://news.ycombinator.com/item?id=${p.objectID || p.id || ''}`,
               points: p.points || p.score || 0,
-              date: p.created_at || p.created_at_i || '',
+              date: p.created_at || '',
               comments: p.num_comments || 0,
               author: p.author || ''
-            })) : []
+            })),
+            _debug_keys: raw ? (typeof raw === 'object' ? Object.keys(raw) : typeof raw) : 'null'
           });
         } catch (e) {
-          results.sources.push({ name: 'hackernews', provider: '[COMPOSIO]', error: e.message });
+          results.sources.push({ name: 'hackernews', provider: '[COMPOSIO]', error: e.message, _debug: e.toString() });
         }
       }
 
@@ -382,7 +394,15 @@ async function composioExecute(apiKey, toolSlug, parameters) {
     throw new Error(`[COMPOSIO] ${toolSlug} failed: ${response.status} ${errText.substring(0, 200)}`);
   }
 
-  return await response.json();
+  const result = await response.json();
+  // Attach raw response shape for debugging
+  result._composio_debug = {
+    status: response.status,
+    successful: result?.successful,
+    data_type: typeof result?.data,
+    data_keys: result?.data && typeof result.data === 'object' && !Array.isArray(result.data) ? Object.keys(result.data) : null
+  };
+  return result;
 }
 
 function json(status, data) {
