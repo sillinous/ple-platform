@@ -239,7 +239,8 @@ export default async function handler(req) {
         try {
           const webData = await composioExecute(composioKey, 'COMPOSIO_SEARCH_DUCK_DUCK_GO_SEARCH', { query });
           const rawWeb = webData?.data || webData;
-          const webResults = rawWeb?.results || rawWeb?.organic_results || 
+          const webResults = rawWeb?.response_data?.results || rawWeb?.response_data || 
+            rawWeb?.results || rawWeb?.organic_results || 
             (Array.isArray(rawWeb) ? rawWeb : []);
           results.sources.push({
             name: 'web',
@@ -278,6 +279,7 @@ export default async function handler(req) {
 
       try {
         // [COMPOSIO] Semantic Scholar paper search
+        // Note: Requires a connected Semantic Scholar account in Composio dashboard
         const data = await composioExecute(composioKey, 'SEMANTICSCHOLAR_PAPER_RELEVANCE_SEARCH', {
           query,
           limit: body.limit || 10
@@ -311,7 +313,15 @@ export default async function handler(req) {
 
         return json(200, result);
       } catch (e) {
-        return json(502, { error: `[COMPOSIO] Semantic Scholar error: ${e.message}`, provider: 'composio' });
+        const isNoConnection = e.message.includes('ConnectedAccountNotFound');
+        return json(isNoConnection ? 200 : 502, { 
+          error: isNoConnection 
+            ? '[COMPOSIO] Semantic Scholar needs a connected account. Set up at composio.dev dashboard.' 
+            : `[COMPOSIO] Semantic Scholar error: ${e.message}`,
+          provider: 'composio',
+          setup_url: isNoConnection ? 'https://app.composio.dev/apps/semanticscholar' : undefined,
+          query
+        });
       }
     }
 
