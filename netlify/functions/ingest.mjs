@@ -1,12 +1,19 @@
-// Substack Ingest — Fetches Shapiro's Substack RSS and discovers new articles
-// POST /api/ingest?action=scan    — Scan RSS for new articles not in KB
-// POST /api/ingest?action=fetch   — Fetch and summarize a specific article URL
-// GET  /api/ingest                — Show current index status
+// Substack Ingest + Composio-Powered Discovery
+// POST /api/ingest?action=scan      — Scan RSS for new articles not in KB
+// POST /api/ingest?action=fetch     — Fetch and summarize a specific article URL
+// POST /api/ingest?action=discover  — [COMPOSIO] Search HN + News for PLE discourse
+// POST /api/ingest?action=academic  — [COMPOSIO] Search Semantic Scholar for PLE papers
+// GET  /api/ingest                  — Show current index status
+//
+// NOTE: Composio API is used for dev/admin discovery only — never exposed to end users.
+// Composio key is stored as COMPOSIO_API_KEY env var (server-side only).
 
 import { getDb, getCurrentUser, logActivity, jsonResponse } from './lib/db.mjs';
 
 const SUBSTACK_RSS = 'https://daveshap.substack.com/feed';
 const SITE_URL = process.env.URL || process.env.DEPLOY_URL || 'https://postlaboreconomics.netlify.app';
+const COMPOSIO_API = 'https://backend.composio.dev/api/v3';
+const COMPOSIO_USER = 'ple-dev-ingest';
 
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
@@ -32,7 +39,13 @@ export default async function handler(req) {
         rss_url: SUBSTACK_RSS,
         indexed_count: indexed.length,
         latest_indexed: indexed.length > 0 ? indexed[0] : null,
-        kb_version: kb._meta?.version
+        kb_version: kb._meta?.version,
+        composio: {
+          configured: !!process.env.COMPOSIO_API_KEY,
+          actions: ['discover (HN + News + Web search)', 'academic (Semantic Scholar)'],
+          note: '[COMPOSIO] Dev-only — not exposed to end users'
+        },
+        actions: ['scan (RSS)', 'fetch (article URL)', 'discover [COMPOSIO]', 'academic [COMPOSIO]']
       });
     }
 
@@ -143,7 +156,142 @@ export default async function handler(req) {
       });
     }
 
-    return json(400, { error: `Unknown action: ${action}. Use: scan, fetch` });
+    // ACTION: discover — [COMPOSIO] Search HN + News for PLE-relevant discourse
+    // Dev-only: uses Composio API for cross-platform content discovery
+    if (action === 'discover') {
+      const composioKey = process.env.COMPOSIO_API_KEY;
+      if (!composioKey) {
+        return json(503, { error: '[COMPOSIO] Not configured. Set COMPOSIO_API_KEY env var.', provider: 'composio' });
+      }
+
+      const body = await req.json().catch(() => ({}));
+      const query = body.query || 'post-labor economics automation UBI';
+      const sources = body.sources || ['hackernews', 'news'];
+
+      const results = { query, sources: [], provider: 'composio', timestamp: new Date().toISOString() };
+
+      // [COMPOSIO] HackerNews search
+      if (sources.includes('hackernews')) {
+        try {
+          const hnData = await composioExecute(composioKey, 'HACKERNEWS_SEARCH_POSTS', { query, size: 10 });
+          const posts = hnData?.data?.results || hnData?.data?.hits || [];
+          results.sources.push({
+            name: 'hackernews',
+            provider: '[COMPOSIO]',
+            count: posts.length,
+            items: Array.isArray(posts) ? posts.slice(0, 10).map(p => ({
+              title: p.title || p.story_title || '',
+              url: p.url || p.story_url || `https://news.ycombinator.com/item?id=${p.objectID || p.id || ''}`,
+              points: p.points || p.score || 0,
+              date: p.created_at || p.created_at_i || '',
+              comments: p.num_comments || 0,
+              author: p.author || ''
+            })) : []
+          });
+        } catch (e) {
+          results.sources.push({ name: 'hackernews', provider: '[COMPOSIO]', error: e.message });
+        }
+      }
+
+      // [COMPOSIO] News search  
+      if (sources.includes('news')) {
+        try {
+          const newsData = await composioExecute(composioKey, 'COMPOSIO_SEARCH_NEWS_SEARCH', { query: query + ' economics' });
+          const articles = newsData?.data?.results || [];
+          results.sources.push({
+            name: 'news',
+            provider: '[COMPOSIO]',
+            count: Array.isArray(articles) ? articles.length : 0,
+            items: Array.isArray(articles) ? articles.slice(0, 10).map(a => ({
+              title: a.title || '',
+              url: a.link || a.url || '',
+              source: a.source || '',
+              snippet: (a.snippet || a.description || '').substring(0, 200),
+              date: a.date || ''
+            })) : []
+          });
+        } catch (e) {
+          results.sources.push({ name: 'news', provider: '[COMPOSIO]', error: e.message });
+        }
+      }
+
+      // [COMPOSIO] DuckDuckGo search
+      if (sources.includes('web')) {
+        try {
+          const webData = await composioExecute(composioKey, 'COMPOSIO_SEARCH_DUCK_DUCK_GO_SEARCH', { query, num_results: 10 });
+          const webResults = webData?.data?.results || [];
+          results.sources.push({
+            name: 'web',
+            provider: '[COMPOSIO]',
+            count: Array.isArray(webResults) ? webResults.length : 0,
+            items: Array.isArray(webResults) ? webResults.slice(0, 10).map(r => ({
+              title: r.title || '',
+              url: r.link || r.url || '',
+              snippet: (r.snippet || r.description || '').substring(0, 200)
+            })) : []
+          });
+        } catch (e) {
+          results.sources.push({ name: 'web', provider: '[COMPOSIO]', error: e.message });
+        }
+      }
+
+      try {
+        await logActivity(user.id, 'composio_discover', 'ingest', null, {
+          query, source_count: results.sources.length, provider: 'composio'
+        });
+      } catch (e) {}
+
+      return json(200, results);
+    }
+
+    // ACTION: academic — [COMPOSIO] Search Semantic Scholar for PLE-relevant papers
+    if (action === 'academic') {
+      const composioKey = process.env.COMPOSIO_API_KEY;
+      if (!composioKey) {
+        return json(503, { error: '[COMPOSIO] Not configured. Set COMPOSIO_API_KEY env var.', provider: 'composio' });
+      }
+
+      const body = await req.json().catch(() => ({}));
+      const query = body.query || 'post-labor economics automation universal basic income';
+
+      try {
+        // [COMPOSIO] Semantic Scholar paper search
+        const data = await composioExecute(composioKey, 'SEMANTICSCHOLAR_SEARCH_PAPERS', {
+          query,
+          limit: body.limit || 10,
+          fields: 'title,authors,year,abstract,citationCount,url'
+        });
+
+        const papers = data?.data?.data || data?.data?.results || [];
+
+        const result = {
+          query,
+          provider: '[COMPOSIO] Semantic Scholar',
+          count: Array.isArray(papers) ? papers.length : 0,
+          papers: Array.isArray(papers) ? papers.map(p => ({
+            title: p.title || '',
+            authors: Array.isArray(p.authors) ? p.authors.map(a => a.name || a).join(', ') : '',
+            year: p.year || '',
+            citations: p.citationCount || 0,
+            abstract: (p.abstract || '').substring(0, 300),
+            url: p.url || ''
+          })) : [],
+          timestamp: new Date().toISOString()
+        };
+
+        try {
+          await logActivity(user.id, 'composio_academic', 'ingest', null, {
+            query, paper_count: result.count, provider: 'composio'
+          });
+        } catch (e) {}
+
+        return json(200, result);
+      } catch (e) {
+        return json(502, { error: `[COMPOSIO] Semantic Scholar error: ${e.message}`, provider: 'composio' });
+      }
+    }
+
+    return json(400, { error: `Unknown action: ${action}. Use: scan, fetch, discover, academic` });
 
   } catch (e) {
     return json(500, { error: e.message });
@@ -216,6 +364,25 @@ function extractSubstackContent(html) {
     excerpt: bodyText.substring(0, 500),
     full_text_length: bodyText.length
   };
+}
+
+// [COMPOSIO] Execute a tool via Composio API — dev/admin only
+async function composioExecute(apiKey, toolSlug, parameters) {
+  const response = await fetch(`${COMPOSIO_API}/tools/${toolSlug}/execute`, {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ parameters, user_id: COMPOSIO_USER })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    throw new Error(`[COMPOSIO] ${toolSlug} failed: ${response.status} ${errText.substring(0, 200)}`);
+  }
+
+  return await response.json();
 }
 
 function json(status, data) {
