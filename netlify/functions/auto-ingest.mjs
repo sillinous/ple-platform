@@ -119,10 +119,8 @@ export default async function handler(req) {
 
       let rssNew = 0;
       for (const item of items) {
-        const text = `${item.title} ${item.description || ''}`.toLowerCase();
-        const isPLE = PLE_KEYWORDS.some(k => text.includes(k));
-        if (!isPLE) continue;
-
+        // All Shapiro Substack articles are PLE-relevant (primary source)
+        // For other RSS feeds, would apply keyword filtering
         try {
           await db`
             INSERT INTO discovery_queue (source, title, url, snippet, author, relevance_score, metadata)
