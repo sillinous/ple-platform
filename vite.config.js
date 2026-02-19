@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import netlifyPlugin from '@netlify/vite-plugin';
 
+// Build timestamp: 2026-02-19T14:10 — force clean deploy
 export default defineConfig({
   plugins: [netlifyPlugin()],
   build: {

@@ -30,3 +30,7 @@
 
 
 # v2 deploy - knowledge base + seed function
+
+# Force clean build
+[build.environment]
+  NETLIFY_CLEAR_CACHE = "true"
