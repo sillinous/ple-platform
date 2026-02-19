@@ -61,10 +61,12 @@ async function listContent(sql, params, user) {
   // Build visibility filter - if not logged in, only show published public content
   const content = await sql`
     SELECT c.*, u.display_name as author_name, u.avatar_url as author_avatar,
-           p.title as project_title
+           p.title as project_title,
+           ae.code as element_code, ae.title as element_title, ae.element_type as element_type_name
     FROM content_items c
     LEFT JOIN users u ON c.author_id = u.id
     LEFT JOIN projects p ON c.project_id = p.id
+    LEFT JOIN architecture_elements ae ON c.element_id = ae.id
     WHERE (${status}::text IS NULL OR c.status = ${status})
       AND (${type}::text IS NULL OR c.content_type = ${type})
       AND (${authorFilter}::uuid IS NULL OR c.author_id = ${authorFilter}::uuid)
@@ -324,6 +326,7 @@ function formatContent(c) {
     author: { id: c.author_id, name: c.author_name, avatar: c.author_avatar },
     reviewer: c.reviewer_id ? { id: c.reviewer_id, name: c.reviewer_name } : null,
     project: c.project_id ? { id: c.project_id, title: c.project_title } : null,
+    element: c.element_id ? { id: c.element_id, code: c.element_code, title: c.element_title, type: c.element_type_name } : null,
     featuredImage: c.featured_image, viewCount: parseInt(c.view_count || 0),
     featuredAt: c.featured_at || null,
     publishedAt: c.published_at, createdAt: c.created_at, updatedAt: c.updated_at

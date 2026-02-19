@@ -42,8 +42,10 @@ async function listDiscussions(sql, params) {
   const [discussions, countResult] = await Promise.all([
     sql`
     SELECT d.*, u.display_name as author_name, u.avatar_url as author_avatar,
+           ae.code as element_code, ae.title as element_title,
            (SELECT COUNT(*) FROM discussions WHERE parent_id = d.id) as reply_count
     FROM discussions d LEFT JOIN users u ON d.author_id = u.id
+    LEFT JOIN architecture_elements ae ON d.element_id = ae.id
     WHERE d.parent_id IS NULL AND d.status = 'active'
       AND (${proposalId}::uuid IS NULL OR d.proposal_id = ${proposalId}::uuid)
       AND (${elementId}::uuid IS NULL OR d.element_id = ${elementId}::uuid)
@@ -139,6 +141,7 @@ function formatDiscussion(d) {
     id: d.id, title: d.title, content: d.content,
     author: { id: d.author_id, name: d.author_name, avatar: d.author_avatar },
     proposalId: d.proposal_id, elementId: d.element_id, parentId: d.parent_id,
+    element: d.element_id ? { id: d.element_id, code: d.element_code, title: d.element_title } : null,
     type: d.discussion_type, status: d.status,
     replyCount: parseInt(d.reply_count || 0),
     createdAt: d.created_at, updatedAt: d.updated_at

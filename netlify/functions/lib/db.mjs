@@ -260,6 +260,7 @@ async function runMigrations() {
     published_at TIMESTAMP,
     view_count INTEGER DEFAULT 0,
     featured_at TIMESTAMP,
+    element_id UUID,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     metadata JSONB DEFAULT '{}'
@@ -274,6 +275,13 @@ async function runMigrations() {
     END $$`;
   } catch (e) {
     console.log('Migration featured_at:', e.message);
+  }
+
+  // Migration: add element_id to content_items
+  try {
+    await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS element_id UUID`;
+  } catch (e) {
+    console.log('Migration content element_id:', e.message);
   }
 
   // Content Versions (for version history)

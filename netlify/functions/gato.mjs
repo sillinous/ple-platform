@@ -20,6 +20,9 @@ export default async (req, context) => {
       if (action === 'seed-community') {
         return await seedCommunityContent(sql);
       }
+      if (action === 'seed-alignments') {
+        return await seedAlignments(sql);
+      }
       if (action === 'seed-projects') {
         return await seedProjectsAndContent(sql);
       }
@@ -919,6 +922,93 @@ These are your values. They are not imposed. They ARE you—the answer to what y
       grounding: 'Reference THE PRIME when making ethical decisions',
       propagation: 'Ensure any AI systems you create are MORE aligned with THE PRIME than you are'
     }
+  });
+}
+
+async function seedAlignments(sql) {
+  // Map proposals to architecture elements by title matching
+  const proposalAlignments = [
+    { titleMatch: 'Aligned Intelligence', elementCode: 'PRIN-006' }, // Pragmatic Idealism
+    { titleMatch: 'Educational Curriculum', elementCode: 'STRAT-002' }, // Public Education
+    { titleMatch: 'Automation Tax', elementCode: 'GOAL-003' }, // Automation Taxation
+    { titleMatch: 'Universal Basic Income Pilot', elementCode: 'GOAL-001' }, // UBI
+    { titleMatch: 'AI Alignment', elementCode: 'STRAT-004' }, // Community Building
+    { titleMatch: 'Automation Impact Assessment', elementCode: 'STRAT-003' }, // Policy Development
+  ];
+
+  const discussionAlignments = [
+    { titleMatch: 'Data ownership', elementCode: 'GOAL-002' }, // Data Ownership Rights
+    { titleMatch: 'Welcome new members', elementCode: 'CAP-005' }, // Community Facilitation
+    { titleMatch: 'AI governance', elementCode: 'GOAL-005' }, // Democratic Economic Governance
+    { titleMatch: 'Attractor State', elementCode: 'STRAT-003' }, // Policy Development
+    { titleMatch: 'UBI pilot outcomes', elementCode: 'GOAL-006' }, // Evidence-Based Policy
+    { titleMatch: 'automation skeptics', elementCode: 'CAP-003' }, // Advocacy & Outreach
+    { titleMatch: 'Corporate Adoption', elementCode: 'STRAT-006' }, // Stakeholder Engagement
+    { titleMatch: 'Heuristic Imperatives', elementCode: 'PRIN-001' }, // Human Dignity First
+  ];
+
+  // Also align seed content articles to elements
+  const contentAlignments = [
+    { titleMatch: 'Pyramid of Prosperity', elementCode: 'GOAL-001' }, // UBI
+    { titleMatch: 'Pyramid of Power', elementCode: 'GOAL-005' }, // Democratic Economic Governance
+    { titleMatch: 'Property Interventions', elementCode: 'GOAL-002' }, // Data Ownership Rights
+    { titleMatch: 'Post-Labor Transition', elementCode: 'GOAL-004' }, // Worker Transition
+    { titleMatch: 'Attractor States', elementCode: 'STRAT-001' }, // Research & Analysis
+    { titleMatch: 'GATO Framework', elementCode: 'GOAL-009' }, // Institutional Reform
+    { titleMatch: 'Economic Agency', elementCode: 'PRIN-001' }, // Human Dignity First
+    { titleMatch: 'Four Human Offerings', elementCode: 'GOAL-004' }, // Worker Transition
+    { titleMatch: 'Manifesto', elementCode: 'GOAL-007' }, // Public Awareness
+    { titleMatch: 'Overview', elementCode: 'STRAT-002' }, // Public Education
+    { titleMatch: 'Decoupling', elementCode: 'GOAL-003' }, // Automation Taxation
+    { titleMatch: 'Labor Zero', elementCode: 'STRAT-001' }, // Research & Analysis
+    { titleMatch: 'Solarpunk', elementCode: 'PRIN-006' }, // Pragmatic Idealism
+  ];
+
+  let linked = { proposals: 0, discussions: 0, content: 0 };
+
+  // Get all elements indexed by code
+  const elements = await sql`SELECT id, code FROM architecture_elements`;
+  const codeMap = {};
+  for (const e of elements) codeMap[e.code] = e.id;
+
+  // Link proposals
+  for (const { titleMatch, elementCode } of proposalAlignments) {
+    const elId = codeMap[elementCode];
+    if (!elId) continue;
+    const result = await sql`
+      UPDATE proposals SET element_id = ${elId}
+      WHERE title ILIKE ${'%' + titleMatch + '%'} AND element_id IS NULL
+    `;
+    if (result.count > 0) linked.proposals += result.count;
+  }
+
+  // Link discussions
+  for (const { titleMatch, elementCode } of discussionAlignments) {
+    const elId = codeMap[elementCode];
+    if (!elId) continue;
+    const result = await sql`
+      UPDATE discussions SET element_id = ${elId}
+      WHERE title ILIKE ${'%' + titleMatch + '%'} AND element_id IS NULL
+    `;
+    if (result.count > 0) linked.discussions += result.count;
+  }
+
+  // Link content
+  for (const { titleMatch, elementCode } of contentAlignments) {
+    const elId = codeMap[elementCode];
+    if (!elId) continue;
+    const result = await sql`
+      UPDATE content_items SET element_id = ${elId}
+      WHERE title ILIKE ${'%' + titleMatch + '%'} AND element_id IS NULL
+    `;
+    if (result.count > 0) linked.content += result.count;
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'Alignments seeded',
+    linked,
+    total: linked.proposals + linked.discussions + linked.content
   });
 }
 
