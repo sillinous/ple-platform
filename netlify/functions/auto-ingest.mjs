@@ -118,9 +118,13 @@ export default async function handler(req) {
       const items = parseRSS(rssText);
 
       let rssNew = 0;
+      const rssDebug = [];
       for (const item of items) {
         // All Shapiro Substack articles are PLE-relevant (primary source)
-        // For other RSS feeds, would apply keyword filtering
+        if (!item.title || !item.link) {
+          rssDebug.push({ skip: 'no title/link', title: item.title, link: item.link });
+          continue;
+        }
         try {
           await db`
             INSERT INTO discovery_queue (source, title, url, snippet, author, relevance_score, metadata)
@@ -130,9 +134,9 @@ export default async function handler(req) {
             ON CONFLICT (url) DO NOTHING
           `;
           rssNew++;
-        } catch (e) { /* duplicate */ }
+        } catch (e) { rssDebug.push({ err: e.message.substring(0, 100), title: item.title }); }
       }
-      results.sources.push({ name: 'substack_rss', total: items.length, new: rssNew });
+      results.sources.push({ name: 'substack_rss', total: items.length, new: rssNew, debug: rssDebug.slice(0, 5) });
       results.new_items += rssNew;
     } catch (e) {
       results.sources.push({ name: 'substack_rss', error: e.message });
