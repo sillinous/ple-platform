@@ -247,6 +247,7 @@ export default async function handler(req) {
             provider: '[COMPOSIO]',
             count: Array.isArray(webResults) ? webResults.length : 0,
             raw_keys: typeof rawWeb === 'object' ? Object.keys(rawWeb || {}).slice(0, 10) : typeof rawWeb,
+            raw_sample: JSON.stringify(rawWeb?.response_data || rawWeb).substring(0, 500),
             items: Array.isArray(webResults) ? webResults.slice(0, 10).map(r => ({
               title: r.title || '',
               url: r.link || r.url || '',
