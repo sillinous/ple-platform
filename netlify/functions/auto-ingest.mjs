@@ -299,7 +299,6 @@ function json(status, data) {
 }
 
 export const config = { 
-  path: '/api/auto-ingest',
-  schedule: '@weekly'
+  path: '/api/auto-ingest'
 };
 // v1771509554
