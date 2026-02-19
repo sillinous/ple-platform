@@ -82,13 +82,13 @@ export default async function handler(req) {
 
   const db = await getDb();
 
-  // Ensure discovery_queue table exists
+  // Ensure discovery_queue table exists with url unique
   await db`
     CREATE TABLE IF NOT EXISTS discovery_queue (
       id SERIAL PRIMARY KEY,
       source VARCHAR(50) NOT NULL,
       title TEXT NOT NULL,
-      url TEXT,
+      url TEXT UNIQUE,
       snippet TEXT,
       author VARCHAR(200),
       relevance_score REAL DEFAULT 0,
@@ -99,11 +99,8 @@ export default async function handler(req) {
       reviewed_by UUID
     )
   `.catch(() => {});
-
-  // Create index for deduplication
-  await db`
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_discovery_url ON discovery_queue(url) WHERE url IS NOT NULL
-  `.catch(() => {});
+  // If table existed without unique, add it
+  await db`ALTER TABLE discovery_queue ADD CONSTRAINT discovery_url_unique UNIQUE (url)`.catch(() => {});
 
   // ACTION: run — execute the full pipeline
   if (action === 'run') {
