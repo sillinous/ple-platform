@@ -1,9 +1,26 @@
 // PLE AI Chat Assistant — RAG-powered Q&A grounded in Knowledge Base
 // POST /api/chat { message, history? }
 // GET  /api/chat — capabilities info
+// Supports OpenRouter (preferred) and direct Anthropic API
 import { getDb, getCurrentUser, logActivity, jsonResponse } from './lib/db.mjs';
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
+// Provider config — OpenRouter first, Anthropic fallback
+const PROVIDERS = [
+  {
+    name: 'openrouter',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    keyEnv: 'OPENROUTER_API_KEY',
+    model: 'anthropic/claude-sonnet-4',
+    format: 'openai', // OpenRouter uses OpenAI-compatible format
+  },
+  {
+    name: 'anthropic',
+    url: 'https://api.anthropic.com/v1/messages',
+    keyEnv: 'ANTHROPIC_API_KEY',
+    model: 'claude-sonnet-4-20250514',
+    format: 'anthropic',
+  }
+];
 
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
@@ -12,11 +29,13 @@ export default async function handler(req) {
 
   try {
     if (req.method === 'GET') {
+      const activeProvider = PROVIDERS.find(p => process.env[p.keyEnv]);
       return json(200, {
         name: 'PLE AI Assistant',
         description: 'AI-powered Q&A grounded in the Post-Labor Economics knowledge base',
         capabilities: ['PLE framework Q&A', 'Pyramids of Prosperity and Power', 'Automation trends', 'Property interventions', 'Attractor states', 'Real-world examples'],
-        model: 'claude-sonnet-4-20250514',
+        provider: activeProvider?.name || 'none (local fallback)',
+        model: activeProvider?.model || 'local-kb',
         kb_version: '2.0.0',
         requires_auth: false
       });
@@ -29,8 +48,10 @@ export default async function handler(req) {
     if (!message || typeof message !== 'string' || !message.trim()) return json(400, { error: 'Message is required' });
     if (message.length > 2000) return json(400, { error: 'Message too long (max 2000 chars)' });
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return json(503, { error: 'AI chat not configured. Set ANTHROPIC_API_KEY env var.', fallback: true });
+    // Find a working provider
+    const provider = PROVIDERS.find(p => process.env[p.keyEnv]);
+    if (!provider) return json(503, { error: 'AI chat not configured. Set OPENROUTER_API_KEY or ANTHROPIC_API_KEY env var.', fallback: true });
+    const apiKey = process.env[provider.keyEnv];
 
     // Load KB
     let kb;
@@ -43,27 +64,56 @@ export default async function handler(req) {
 
     const kbContext = buildContext(kb, message);
     const systemPrompt = buildSystemPrompt(kbContext);
-    const messages = [...(history || []).slice(-6).filter(t => t.role === 'user' || t.role === 'assistant'), { role: 'user', content: message }];
+    const convHistory = [...(history || []).slice(-6).filter(t => t.role === 'user' || t.role === 'assistant'), { role: 'user', content: message }];
 
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, system: systemPrompt, messages })
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      const errMsg = errData?.error?.message || `Status ${response.status}`;
-      console.error('Anthropic API error:', response.status, errMsg);
-      return json(502, { 
-        error: 'AI service error', 
-        detail: errMsg,
-        fallback: true 
+    // Build request based on provider format
+    let response;
+    if (provider.format === 'openai') {
+      // OpenRouter / OpenAI-compatible format
+      response = await fetch(provider.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': 'https://postlaboreconomics.netlify.app',
+          'X-Title': 'PLE AI Assistant'
+        },
+        body: JSON.stringify({
+          model: provider.model,
+          max_tokens: 1500,
+          messages: [{ role: 'system', content: systemPrompt }, ...convHistory]
+        })
+      });
+    } else {
+      // Anthropic native format
+      response = await fetch(provider.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: provider.model, max_tokens: 1500, system: systemPrompt, messages: convHistory })
       });
     }
 
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const errMsg = errData?.error?.message || errData?.error?.code || `Status ${response.status}`;
+      console.error(`${provider.name} API error:`, response.status, errMsg);
+      return json(502, { error: 'AI service error', detail: errMsg, provider: provider.name, fallback: true });
+    }
+
     const aiResponse = await response.json();
-    const assistantMessage = aiResponse.content?.filter(c => c.type === 'text').map(c => c.text).join('\n') || 'Unable to generate response.';
+
+    // Extract message based on format
+    let assistantMessage;
+    if (provider.format === 'openai') {
+      assistantMessage = aiResponse.choices?.[0]?.message?.content || 'Unable to generate response.';
+    } else {
+      assistantMessage = aiResponse.content?.filter(c => c.type === 'text').map(c => c.text).join('\n') || 'Unable to generate response.';
+    }
+
+    // Extract usage
+    const usage = provider.format === 'openai'
+      ? { input_tokens: aiResponse.usage?.prompt_tokens, output_tokens: aiResponse.usage?.completion_tokens, provider: provider.name, model: aiResponse.model }
+      : { input_tokens: aiResponse.usage?.input_tokens, output_tokens: aiResponse.usage?.output_tokens, provider: provider.name, model: provider.model };
 
     // Optional activity log
     try {
@@ -74,7 +124,7 @@ export default async function handler(req) {
     return json(200, {
       response: assistantMessage,
       context: { kb_version: kb._meta.version, sections_used: kbContext.sections_used, source_count: kb._meta.sources.length },
-      usage: { input_tokens: aiResponse.usage?.input_tokens, output_tokens: aiResponse.usage?.output_tokens }
+      usage
     });
 
   } catch (e) {
