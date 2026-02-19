@@ -979,7 +979,7 @@ async function seedAlignments(sql) {
       UPDATE proposals SET element_id = ${elId}
       WHERE title ILIKE ${'%' + titleMatch + '%'} AND element_id IS NULL
     `;
-    if (result.count > 0) linked.proposals += result.count;
+    linked.proposals += result.count || 0;
   }
 
   // Link discussions
@@ -990,7 +990,7 @@ async function seedAlignments(sql) {
       UPDATE discussions SET element_id = ${elId}
       WHERE title ILIKE ${'%' + titleMatch + '%'} AND element_id IS NULL
     `;
-    if (result.count > 0) linked.discussions += result.count;
+    linked.discussions += result.count || 0;
   }
 
   // Link content
@@ -1001,7 +1001,7 @@ async function seedAlignments(sql) {
       UPDATE content_items SET element_id = ${elId}
       WHERE title ILIKE ${'%' + titleMatch + '%'} AND element_id IS NULL
     `;
-    if (result.count > 0) linked.content += result.count;
+    linked.content += result.count || 0;
   }
 
   return jsonResponse({

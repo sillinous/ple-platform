@@ -13,7 +13,7 @@ export default async function handler(req) {
   }
 
   const url = new URL(req.url, 'http://localhost');
-  const db = getDb();
+  const db = await getDb();
 
   // GET — query alignments
   if (req.method === 'GET') {
