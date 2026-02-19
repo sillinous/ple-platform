@@ -368,13 +368,13 @@ function extractSubstackContent(html) {
 
 // [COMPOSIO] Execute a tool via Composio API — dev/admin only
 async function composioExecute(apiKey, toolSlug, parameters) {
-  const response = await fetch(`${COMPOSIO_API}/tools/${toolSlug}/execute`, {
+  const response = await fetch(`${COMPOSIO_API}/tools/execute/${toolSlug}`, {
     method: 'POST',
     headers: {
       'x-api-key': apiKey,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ parameters, user_id: COMPOSIO_USER })
+    body: JSON.stringify({ arguments: parameters, user_id: COMPOSIO_USER })
   });
 
   if (!response.ok) {
