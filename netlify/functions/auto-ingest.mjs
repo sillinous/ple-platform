@@ -19,9 +19,13 @@ const COMPOSIO_USER = 'ple-auto-ingest';
 
 const PLE_KEYWORDS = [
   'post-labor', 'post labor', 'ple framework', 'labor zero', 'l/0',
-  'automation economy', 'ai jobs displacement', 'universal basic income ubi',
-  'technofeudalism', 'decoupling labor', 'prosperity beyond work',
-  'david shapiro economics', 'property interventions income'
+  'automation economy', 'ai jobs', 'job displacement', 'universal basic income',
+  'ubi', 'technofeudalism', 'decoupling labor', 'prosperity beyond work',
+  'david shapiro', 'property interventions', 'economic agency',
+  'ai replacing', 'ai economy', 'future of work', 'post-work',
+  'automation unemployment', 'technological unemployment', 'robot tax',
+  'wealth inequality', 'ai dividend', 'machine labor',
+  'solarpunk', 'techno-abundance', 'labor disruption'
 ];
 
 export default async function handler(req) {

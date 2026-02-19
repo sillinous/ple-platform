@@ -47,6 +47,30 @@ export default async function handler(req) {
       return json(405, { error: 'Method not allowed' });
     }
 
+    const sql = await getDb();
+
+    // INITIAL SETUP — only works when DB has zero users (fresh Neon install)
+    if (action === 'init') {
+      const userCount = await sql`SELECT COUNT(*) as c FROM users`.catch(() => [{ c: -1 }]);
+      if (userCount[0]?.c > 0) {
+        return json(403, { error: 'Database already initialized. Use bootstrap with auth.' });
+      }
+      // Create admin account
+      const bcrypt = await import('bcryptjs');
+      const crypto = await import('crypto');
+      const id = crypto.randomUUID();
+      const hash = await bcrypt.hash('admin1234', 10);
+      await sql`
+        INSERT INTO users (id, email, display_name, role, password_hash)
+        VALUES (${id}, 'admin@ple.org', 'PLE Admin', 'admin', ${hash})
+        ON CONFLICT (email) DO NOTHING
+      `;
+      // Fix schema gaps
+      await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS featured_at TIMESTAMP`.catch(()=>{});
+      await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'`.catch(()=>{});
+      return json(200, { status: 'initialized', admin_email: 'admin@ple.org', admin_id: id });
+    }
+
     // Auth check — require admin (or bootstrap mode to promote first user)
     const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
     if (!authHeader) return json(401, { error: 'Authentication required. Pass Bearer token.' });
