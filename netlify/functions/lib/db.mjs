@@ -26,7 +26,12 @@ export async function ensureDatabase() {
     
     const expectedTables = 8; // Number of key tables
     if (parseInt(check[0]?.count) >= expectedTables) {
-      // Tables exist — ensure enriched seed data is applied
+      // Tables exist — run incremental migrations for new columns
+      try {
+        await sql`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS element_id UUID`;
+      } catch (e) { /* already exists */ }
+      
+      // Ensure enriched seed data is applied
       await seedProjects();
       migrationChecked = true;
       return;
