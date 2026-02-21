@@ -27,15 +27,19 @@ export default async (req, context) => {
         return await seedRelationships(sql);
       }
       if (action === 'seed-all') {
-        // Run everything in sequence
         const r1 = await seedRelationships(sql);
         const r2 = await seedAlignments(sql);
         await seedProjectLinks(sql);
+        const r4 = await seedGapContent(sql);
         return jsonResponse({ 
           success: true, message: 'Full metamodel seeded',
           relationships: JSON.parse(await r1.text()),
-          alignments: JSON.parse(await r2.text())
+          alignments: JSON.parse(await r2.text()),
+          gap_content: r4
         });
+      }
+      if (action === 'seed-gap-content') {
+        return jsonResponse(await seedGapContent(sql));
       }
       if (action === 'seed-relationships') {
         return await seedRelationships(sql);
@@ -1249,6 +1253,66 @@ async function seedProjectLinks(sql) {
   });
 }
 
+async function seedGapContent(sql) {
+  // Build code→id map
+  const elements = await sql`SELECT id, code, title FROM architecture_elements`;
+  const c = {};
+  for (const e of elements) c[e.code] = e.id;
+
+  // Discussions targeting orphaned elements
+  const gapDiscussions = [
+    { elementCode: 'GOAL-008', title: 'Building a Post-Labor Coalition: Who are our natural allies?',
+      content: `GOAL-008 calls for uniting diverse stakeholders around shared prosperity goals. But coalition building requires finding common ground across very different communities.\n\nPotential allies I see:\n- Labor unions facing automation pressure\n- Tech workers concerned about AI ethics\n- Faith communities focused on human dignity\n- Environmental groups (overlap with sustainable economics)\n- Disability rights advocates (UBI as independence)\n\nWho else should be at the table? And what shared language can we use that resonates across these groups?`,
+      discussion_type: 'strategy' },
+    { elementCode: 'GOAL-009', title: 'Which institutions need reform first?',
+      content: `GOAL-009 focuses on transforming institutions to support post-labor economic models. But institutions are vast and complex — we need to prioritize.\n\nI'd argue the banking system is the highest-leverage target. Shapiro's property interventions heavily depend on reforming how capital flows to individuals. Credit unions, public banking, and data dividends all require institutional infrastructure that doesn't exist yet.\n\nOthers might argue education (preparing people for post-labor life) or social safety nets (redesigning welfare for dignity).\n\nWhat's your priority list for institutional reform?`,
+      discussion_type: 'policy' },
+    { elementCode: 'PRIN-002', title: 'What counts as evidence in post-labor economics?',
+      content: `PRIN-002 commits us to an evidence-based approach. But what evidence is most valuable for a field that's partly speculative?\n\nSome possibilities:\n- Historical analogues (Industrial Revolution transitions)\n- Pilot program data (UBI experiments, four-day work weeks)\n- Economic modeling and simulation\n- Qualitative research on worker displacement experiences\n- Cross-country comparative policy analysis\n\nHow do we maintain rigor without requiring impossible proof for unprecedented conditions?`,
+      discussion_type: 'research' },
+    { elementCode: 'PRIN-005', title: 'Open source economics: walking the talk',
+      content: `PRIN-005 says "prefer open source tools and open knowledge sharing." This platform itself runs on open source (GitHub: sillinous/ple-platform).\n\nBut open source goes beyond software. How do we apply open principles to:\n- Policy proposals (Creative Commons licensing?)\n- Economic research (open access journals, preprints)\n- Data and models (open datasets for automation impact)\n- Governance (transparent decision-making)\n\nAre there tensions between open knowledge sharing and strategic positioning as a movement?`,
+      discussion_type: 'meta' },
+    { elementCode: 'STRAT-005', title: 'Designing the next UBI pilot: what would you test?',
+      content: `STRAT-005 is about designing and supporting pilot implementations. If you could design the ideal post-labor economics pilot program, what would it look like?\n\nConsiderations:\n- Location (urban vs rural? developed vs developing?)\n- Duration (6 months? 5 years?)\n- Variables to test (basic income level? data dividend? automation tax?)\n- Control groups and measurement\n- Political feasibility\n\nThe Stockton SEED program showed promising results in just 24 months. What would a more comprehensive PLE pilot include beyond just cash transfers?`,
+      discussion_type: 'research' },
+    { elementCode: 'PRIN-003', title: 'Whose voices are missing from this conversation?',
+      content: `PRIN-003 demands inclusive participation — ensuring diverse voices in all decision-making. Let's be honest about who's currently in these conversations and who's not.\n\nPost-labor economics discussions tend to skew toward tech-literate, English-speaking, Global North perspectives. But automation's impact is global, and the people most affected may be least represented.\n\nHow do we actively include:\n- Workers in vulnerable industries (manufacturing, service, logistics)\n- Communities in the Global South\n- People without digital access\n- Those already living in post-industrial economies\n\nInclusion isn't just nice — it's essential for policies that actually work.`,
+      discussion_type: 'meta' },
+    { elementCode: 'CAP-007', title: 'What data do we need to track automation\'s economic impact?',
+      content: `CAP-007 (Data Analysis) is one of our core capabilities, but what specific data should we be collecting and analyzing?\n\nI'd propose tracking:\n- Job displacement rates by sector and region\n- Wage stagnation vs productivity growth gaps\n- New job creation in automation-adjacent fields\n- UBI pilot outcomes across demographics\n- Wealth concentration trends (Gini coefficient changes)\n\nAre there public datasets we should be aggregating? What visualization tools would help communicate these trends?`,
+      discussion_type: 'research' },
+    { elementCode: 'PRIN-010', title: 'Thinking in decades: what does 2050 look like?',
+      content: `PRIN-010 calls for long-term thinking — planning for generational impact. Most economic policy operates on election cycles (2-4 years). Post-labor economics needs to think in decades.\n\nBy 2050, if current trends continue:\n- AGI likely achieved and integrated\n- Most routine cognitive work automated\n- Climate adaptation forcing economic restructuring\n- Global population potentially declining\n\nWhat economic infrastructure should we be building NOW that will matter in 25 years? What's the equivalent of building the interstate highway system — investment that shapes the economy for generations?`,
+      discussion_type: 'strategy' },
+    { elementCode: 'PRIN-009', title: 'Solidarity economy in practice: models worth studying',
+      content: `PRIN-009 says we should model the economic principles we advocate. What does a solidarity economy look like in practice?\n\nExisting models:\n- Mondragon Corporation (worker cooperatives)\n- Emilia-Romagna, Italy (cooperative ecosystem)\n- Platform cooperatives (Stocksy, Up & Go)\n- Mutual aid networks\n- Community land trusts\n\nWhich of these models best aligns with PLE's vision? And how do we scale cooperative economics in a world of massive tech platforms?`,
+      discussion_type: 'research' },
+    { elementCode: 'PRIN-007', title: 'Federated governance: how should PLE organize itself?',
+      content: `PRIN-007 calls for distributing power across community working groups. As this platform grows, we need to think about our own governance structure.\n\nQuestions:\n- How many working groups do we need? (Research, Policy, Outreach, Tech?)\n- How are working group leads selected?\n- What decisions require community-wide votes vs working group autonomy?\n- How do we prevent governance overhead from killing momentum?\n\nThe irony of a post-labor economics project struggling with labor-intensive governance isn't lost on me. What lightweight, effective models have you seen?`,
+      discussion_type: 'meta' },
+  ];
+
+  let created = 0;
+  for (const disc of gapDiscussions) {
+    const elId = c[disc.elementCode];
+    if (!elId) continue;
+
+    // Check if already exists
+    const existing = await sql`SELECT id FROM discussions WHERE title = ${disc.title}`;
+    if (existing.length > 0) continue;
+
+    const id = crypto.randomUUID();
+    await sql`
+      INSERT INTO discussions (id, title, content, discussion_type, element_id, status)
+      VALUES (${id}, ${disc.title}, ${disc.content}, ${disc.discussion_type}, ${elId}, 'active')
+    `;
+    created++;
+  }
+
+  return { success: true, gap_discussions_created: created, targeted_elements: gapDiscussions.length };
+}
+
 async function seedAlignments(sql) {
   // Map proposals to architecture elements by title matching
   const proposalAlignments = [
@@ -1290,6 +1354,17 @@ async function seedAlignments(sql) {
     { titleMatch: 'Flourishing', elementCode: 'PRIN-001' }, // Human Dignity
     { titleMatch: 'Technofeudalism', elementCode: 'STRAT-001' }, // Research
     { titleMatch: '16 Property', elementCode: 'GOAL-002' }, // Data Ownership
+    { titleMatch: 'Decline of Labor', elementCode: 'GOAL-004' }, // Worker Transition
+    { titleMatch: 'Disappearing', elementCode: 'GOAL-004' }, // Worker Transition
+    { titleMatch: 'Real-World Models', elementCode: 'STRAT-005' }, // Pilot Programs
+    { titleMatch: 'Already in Action', elementCode: 'STRAT-005' }, // Pilot Programs
+    { titleMatch: 'Fraying Social Contract', elementCode: 'GOAL-009' }, // Institutional Reform
+    { titleMatch: 'Gentle Introduction', elementCode: 'GOAL-007' }, // Public Awareness
+    { titleMatch: 'What Is Post-Labor', elementCode: 'GOAL-007' }, // Public Awareness
+    { titleMatch: 'Rise of Automation', elementCode: 'STRAT-001' }, // Research
+    { titleMatch: 'Historical Perspective', elementCode: 'STRAT-001' }, // Research
+    { titleMatch: 'KPIs for the Post-Labor', elementCode: 'PRIN-002' }, // Evidence-Based
+    { titleMatch: 'Gets Measured', elementCode: 'PRIN-002' }, // Evidence-Based
   ];
 
   // Link projects to architecture elements
