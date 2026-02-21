@@ -27,6 +27,20 @@ export default async (req, context) => {
         return await seedRelationships(sql);
       }
       if (action === 'seed-all') {
+        // Run everything in sequence
+        const r1 = await seedRelationships(sql);
+        const r2 = await seedAlignments(sql);
+        await seedProjectLinks(sql);
+        return jsonResponse({ 
+          success: true, message: 'Full metamodel seeded',
+          relationships: JSON.parse(await r1.text()),
+          alignments: JSON.parse(await r2.text())
+        });
+      }
+      if (action === 'seed-relationships') {
+        return await seedRelationships(sql);
+      }
+      if (action === 'seed-all') {
         // Full seed: community → relationships → alignments → project links → GATO
         const results = {};
         try { const r = await seedCommunityContent(sql); results.community = 'done'; } catch(e) { results.community = e.message; }
@@ -1233,6 +1247,154 @@ async function seedProjectLinks(sql) {
     message: 'Project links seeded',
     projects_linked: linked
   });
+}
+
+async function seedRelationships(sql) {
+  // Build code→id map
+  const elements = await sql`SELECT id, code FROM architecture_elements`;
+  const c = {};
+  for (const e of elements) c[e.code] = e.id;
+
+  // Clear existing relationships to allow re-seeding
+  await sql`DELETE FROM element_relationships WHERE description LIKE '%[seed]%'`;
+
+  const rels = [];
+
+  // === GOALS achieved by STRATEGIES ===
+  // Each goal maps to the strategies that advance it
+  const goalToStrategy = [
+    ['GOAL-001', ['STRAT-003', 'STRAT-005', 'STRAT-001'], 'achieved_by'],
+    ['GOAL-002', ['STRAT-003', 'STRAT-001'], 'achieved_by'],
+    ['GOAL-003', ['STRAT-003', 'STRAT-006'], 'achieved_by'],
+    ['GOAL-004', ['STRAT-005', 'STRAT-004'], 'achieved_by'],
+    ['GOAL-005', ['STRAT-004', 'STRAT-003', 'STRAT-006'], 'achieved_by'],
+    ['GOAL-006', ['STRAT-001', 'STRAT-005'], 'achieved_by'],
+    ['GOAL-007', ['STRAT-002', 'STRAT-004'], 'achieved_by'],
+    ['GOAL-008', ['STRAT-006', 'STRAT-004'], 'achieved_by'],
+    ['GOAL-009', ['STRAT-003', 'STRAT-006', 'STRAT-001'], 'achieved_by'],
+  ];
+
+  for (const [goal, strategies, relType] of goalToStrategy) {
+    for (const strat of strategies) {
+      if (c[goal] && c[strat]) rels.push([c[goal], c[strat], relType, `${goal} achieved by ${strat} [seed]`]);
+    }
+  }
+
+  // === STRATEGIES enabled by CAPABILITIES ===
+  const stratToCapability = [
+    ['STRAT-001', ['CAP-001', 'CAP-002', 'CAP-007'], 'enabled_by'],
+    ['STRAT-002', ['CAP-004', 'CAP-006'], 'enabled_by'],
+    ['STRAT-003', ['CAP-001', 'CAP-002', 'CAP-007'], 'enabled_by'],
+    ['STRAT-004', ['CAP-005', 'CAP-006', 'CAP-004'], 'enabled_by'],
+    ['STRAT-005', ['CAP-007', 'CAP-001', 'CAP-008'], 'enabled_by'],
+    ['STRAT-006', ['CAP-003', 'CAP-008', 'CAP-006'], 'enabled_by'],
+  ];
+
+  for (const [strat, caps, relType] of stratToCapability) {
+    for (const cap of caps) {
+      if (c[strat] && c[cap]) rels.push([c[strat], c[cap], relType, `${strat} enabled by ${cap} [seed]`]);
+    }
+  }
+
+  // === PRINCIPLES govern GOALS ===
+  const principleToGoal = [
+    ['PRIN-001', ['GOAL-001', 'GOAL-004', 'GOAL-005'], 'governs'],
+    ['PRIN-002', ['GOAL-006', 'GOAL-001', 'GOAL-003'], 'governs'],
+    ['PRIN-003', ['GOAL-005', 'GOAL-008'], 'governs'],
+    ['PRIN-004', ['GOAL-005', 'GOAL-009'], 'governs'],
+    ['PRIN-005', ['GOAL-007', 'GOAL-009'], 'governs'],
+    ['PRIN-006', ['GOAL-001', 'GOAL-003', 'GOAL-009'], 'governs'],
+    ['PRIN-007', ['GOAL-005', 'GOAL-009'], 'governs'],
+    ['PRIN-008', ['GOAL-006', 'GOAL-004'], 'governs'],
+    ['PRIN-009', ['GOAL-001', 'GOAL-002', 'GOAL-008'], 'governs'],
+    ['PRIN-010', ['GOAL-001', 'GOAL-009', 'GOAL-007'], 'governs'],
+  ];
+
+  for (const [prin, goals, relType] of principleToGoal) {
+    for (const goal of goals) {
+      if (c[prin] && c[goal]) rels.push([c[prin], c[goal], relType, `${prin} governs ${goal} [seed]`]);
+    }
+  }
+
+  // === KB Section references ===
+  // Map architecture elements to KB framework sections for cross-reference
+  const kbLinks = [
+    ['GOAL-001', 'pyramid_of_prosperity', 'references'],
+    ['GOAL-001', 'property_interventions', 'references'],
+    ['GOAL-002', 'property_interventions', 'references'],
+    ['GOAL-003', 'property_interventions', 'references'],
+    ['GOAL-004', 'four_human_offerings', 'references'],
+    ['GOAL-004', 'labor_decline_data', 'references'],
+    ['GOAL-005', 'pyramid_of_power', 'references'],
+    ['GOAL-007', 'manifesto_principles', 'references'],
+    ['GOAL-009', 'attractor_states', 'references'],
+    ['STRAT-001', 'six_part_series', 'references'],
+    ['STRAT-005', 'economic_agency_principles', 'references'],
+  ];
+
+  // Insert all relationships
+  let count = 0;
+  for (const [sourceId, targetId, relType, desc] of rels) {
+    await sql`
+      INSERT INTO element_relationships (source_id, target_id, relationship_type, description)
+      VALUES (${sourceId}, ${targetId}, ${relType}, ${desc})
+    `;
+    count++;
+  }
+
+  // Store KB links as metadata on the elements themselves
+  let kbCount = 0;
+  for (const [code, kbSection, relType] of kbLinks) {
+    if (!c[code]) continue;
+    await sql`
+      UPDATE architecture_elements 
+      SET metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('kb_section', ${kbSection})
+      WHERE id = ${c[code]}
+    `;
+    kbCount++;
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'Element relationships seeded',
+    relationships: count,
+    kb_links: kbCount,
+    breakdown: {
+      goal_to_strategy: goalToStrategy.reduce((s, g) => s + g[1].length, 0),
+      strategy_to_capability: stratToCapability.reduce((s, g) => s + g[1].length, 0),
+      principle_to_goal: principleToGoal.reduce((s, g) => s + g[1].length, 0)
+    }
+  });
+}
+
+async function seedProjectLinks(sql) {
+  // Build code→id map
+  const elements = await sql`SELECT id, code FROM architecture_elements`;
+  const c = {};
+  for (const e of elements) c[e.code] = e.id;
+
+  // Map projects to elements by title matching
+  const projectLinks = [
+    { titleMatch: 'GATO Framework', elements: ['GOAL-009', 'STRAT-001', 'PRIN-001'] },
+    { titleMatch: 'UBI Research', elements: ['GOAL-001', 'GOAL-006', 'STRAT-001'] },
+    { titleMatch: 'Automation Tax', elements: ['GOAL-003', 'STRAT-003', 'CAP-001'] },
+    { titleMatch: 'PLE Platform', elements: ['GOAL-007', 'STRAT-002', 'CAP-004', 'PRIN-005'] },
+    { titleMatch: 'Stakeholder Coalition', elements: ['GOAL-008', 'STRAT-006', 'CAP-008'] },
+    { titleMatch: 'Data Dividends', elements: ['GOAL-002', 'STRAT-005', 'CAP-007'] },
+  ];
+
+  let linked = 0;
+  for (const { titleMatch, elements: codes } of projectLinks) {
+    const ids = codes.map(code => c[code]).filter(Boolean);
+    if (ids.length === 0) continue;
+    const result = await sql`
+      UPDATE projects SET linked_elements = ${JSON.stringify(ids)}::jsonb
+      WHERE title ILIKE ${'%' + titleMatch + '%'}
+    `;
+    linked += result.count || 0;
+  }
+
+  return { projects_linked: linked };
 }
 
 async function seedAlignments(sql) {

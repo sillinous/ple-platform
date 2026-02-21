@@ -29,8 +29,10 @@ async function listElements(sql, params) {
   
   const elements = await sql`
     SELECT ae.*, u.display_name as created_by_name,
-           (SELECT COUNT(*) FROM element_relationships WHERE source_id = ae.id) as relationship_count,
-           (SELECT COUNT(*) FROM proposals WHERE element_id = ae.id) as proposal_count
+           (SELECT COUNT(*) FROM element_relationships WHERE source_id = ae.id OR target_id = ae.id) as relationship_count,
+           (SELECT COUNT(*) FROM proposals WHERE element_id = ae.id) as proposal_count,
+           (SELECT COUNT(*) FROM content_items WHERE element_id = ae.id) as content_count,
+           (SELECT COUNT(*) FROM discussions WHERE element_id = ae.id) as discussion_count
     FROM architecture_elements ae
     LEFT JOIN users u ON ae.created_by = u.id
     WHERE (${type}::text IS NULL OR ae.element_type = ${type})
@@ -76,16 +78,37 @@ async function getElement(sql, id) {
     SELECT id, title, status, proposal_type, created_at
     FROM proposals WHERE element_id = ${id} ORDER BY created_at DESC LIMIT 10
   `;
+
+  const content = await sql`
+    SELECT id, title, slug, content_type, status, published_at
+    FROM content_items WHERE element_id = ${id} ORDER BY published_at DESC NULLS LAST LIMIT 10
+  `;
+
+  const discussions = await sql`
+    SELECT id, title, discussion_type, status, created_at
+    FROM discussions WHERE element_id = ${id} ORDER BY created_at DESC LIMIT 10
+  `;
   
+  const el = formatElement(elements[0]);
+
   return jsonResponse({
-    element: formatElement(elements[0]),
+    element: el,
     relationships: relationships.map(r => ({
       id: r.id, type: r.relationship_type,
       target: { id: r.target_id, title: r.target_title, code: r.target_code, elementType: r.target_type }
     })),
-    proposals: proposals.map(p => ({
-      id: p.id, title: p.title, status: p.status, type: p.proposal_type, createdAt: p.created_at
-    }))
+    alignments: {
+      proposals: proposals.map(p => ({
+        id: p.id, title: p.title, status: p.status, type: p.proposal_type, createdAt: p.created_at
+      })),
+      content: content.map(c => ({
+        id: c.id, title: c.title, slug: c.slug, type: c.content_type, status: c.status
+      })),
+      discussions: discussions.map(d => ({
+        id: d.id, title: d.title, type: d.discussion_type, status: d.status
+      }))
+    },
+    kb_section: el.metadata?.kb_section || null
   });
 }
 
@@ -104,6 +127,8 @@ function formatElement(el) {
     metadata: el.metadata || {},
     relationshipCount: parseInt(el.relationship_count || 0),
     proposalCount: parseInt(el.proposal_count || 0),
+    contentCount: parseInt(el.content_count || 0),
+    discussionCount: parseInt(el.discussion_count || 0),
     createdAt: el.created_at, updatedAt: el.updated_at
   };
 }
