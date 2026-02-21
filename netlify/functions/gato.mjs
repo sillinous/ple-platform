@@ -23,6 +23,28 @@ export default async (req, context) => {
       if (action === 'seed-alignments') {
         return await seedAlignments(sql);
       }
+      if (action === 'seed-relationships') {
+        return await seedRelationships(sql);
+      }
+      if (action === 'seed-all') {
+        // Full seed: community → relationships → alignments → project links → GATO
+        const results = {};
+        try { const r = await seedCommunityContent(sql); results.community = 'done'; } catch(e) { results.community = e.message; }
+        try { const r = await seedRelationships(sql); results.relationships = 'done'; } catch(e) { results.relationships = e.message; }
+        try { const r = await seedAlignments(sql); results.alignments = 'done'; } catch(e) { results.alignments = e.message; }
+        try { const r = await seedProjectLinks(sql); results.projectLinks = 'done'; } catch(e) { results.projectLinks = e.message; }
+        return jsonResponse({ success: true, message: 'Full seed complete', results });
+      }
+      if (action === 'seed-relationships') {
+        return await seedElementRelationships(sql);
+      }
+      if (action === 'seed-all') {
+        // Run all seeds in order
+        const r1 = await seedCommunityContent(sql).then(r => r.json()).catch(() => ({ skipped: true }));
+        const r2 = await seedAlignments(sql).then(r => r.json()).catch(() => ({ skipped: true }));
+        const r3 = await seedElementRelationships(sql).then(r => r.json()).catch(() => ({ skipped: true }));
+        return jsonResponse({ seed_all: true, community: r1, alignments: r2, relationships: r3 });
+      }
       if (action === 'seed-projects') {
         return await seedProjectsAndContent(sql);
       }
@@ -925,6 +947,294 @@ These are your values. They are not imposed. They ARE you—the answer to what y
   });
 }
 
+async function seedElementRelationships(sql) {
+  // Check if already seeded
+  const existing = await sql`SELECT COUNT(*) as count FROM element_relationships`;
+  if (parseInt(existing[0]?.count) > 0) {
+    return jsonResponse({ success: true, message: 'Relationships already seeded', count: parseInt(existing[0].count) });
+  }
+
+  // Get all elements indexed by code
+  const elements = await sql`SELECT id, code, element_type FROM architecture_elements`;
+  const c = {};
+  for (const e of elements) c[e.code] = e.id;
+
+  const rels = [];
+
+  // ═══════════════════════════════════════════════════════════
+  // GOALS → achieved_by → STRATEGIES
+  // Each goal is achieved through one or more strategies
+  // ═══════════════════════════════════════════════════════════
+  const goalToStrategy = [
+    ['GOAL-001', 'STRAT-001', 'UBI requires rigorous economic research and modeling'],
+    ['GOAL-001', 'STRAT-003', 'UBI needs concrete policy frameworks and legislation drafts'],
+    ['GOAL-001', 'STRAT-005', 'UBI benefits from pilot program evidence'],
+    ['GOAL-002', 'STRAT-001', 'Data ownership requires research on data valuation models'],
+    ['GOAL-002', 'STRAT-003', 'Data rights need policy frameworks (GDPR-style, data dividends)'],
+    ['GOAL-003', 'STRAT-001', 'Automation taxation needs economic impact analysis'],
+    ['GOAL-003', 'STRAT-003', 'Automation tax requires legislative policy development'],
+    ['GOAL-003', 'STRAT-006', 'Tax policy needs business and labor stakeholder buy-in'],
+    ['GOAL-004', 'STRAT-005', 'Worker transition best proven through pilot retraining programs'],
+    ['GOAL-004', 'STRAT-004', 'Displaced workers need community support networks'],
+    ['GOAL-005', 'STRAT-004', 'Democratic governance needs engaged community participation'],
+    ['GOAL-005', 'STRAT-006', 'Economic democracy requires institutional stakeholder reform'],
+    ['GOAL-006', 'STRAT-001', 'Evidence-based policy is fundamentally research-driven'],
+    ['GOAL-006', 'STRAT-005', 'Evidence comes from pilot program outcomes'],
+    ['GOAL-007', 'STRAT-002', 'Public awareness achieved through education and media'],
+    ['GOAL-007', 'STRAT-004', 'Awareness grows through community evangelism'],
+    ['GOAL-008', 'STRAT-006', 'Coalitions built through stakeholder engagement'],
+    ['GOAL-008', 'STRAT-004', 'Coalition grows from community building networks'],
+    ['GOAL-009', 'STRAT-003', 'Institutional reform requires policy development'],
+    ['GOAL-009', 'STRAT-006', 'Reform needs institutional stakeholder engagement'],
+  ];
+
+  for (const [src, tgt, desc] of goalToStrategy) {
+    if (c[src] && c[tgt]) rels.push([c[src], c[tgt], 'achieved_by', desc]);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // STRATEGIES → enabled_by → CAPABILITIES
+  // Each strategy requires specific organizational capabilities
+  // ═══════════════════════════════════════════════════════════
+  const stratToCapability = [
+    ['STRAT-001', 'CAP-001', 'Research requires policy analysis capability'],
+    ['STRAT-001', 'CAP-002', 'Research requires synthesis of academic literature'],
+    ['STRAT-001', 'CAP-007', 'Research requires economic data analysis'],
+    ['STRAT-002', 'CAP-004', 'Education requires content production'],
+    ['STRAT-002', 'CAP-006', 'Education delivered through events and webinars'],
+    ['STRAT-003', 'CAP-001', 'Policy development requires policy analysis'],
+    ['STRAT-003', 'CAP-002', 'Policy informed by research synthesis'],
+    ['STRAT-004', 'CAP-005', 'Community building requires facilitation'],
+    ['STRAT-004', 'CAP-006', 'Community grows through events'],
+    ['STRAT-005', 'CAP-007', 'Pilots require data analysis and evaluation'],
+    ['STRAT-005', 'CAP-001', 'Pilots need policy analysis for design'],
+    ['STRAT-006', 'CAP-003', 'Engagement requires advocacy and outreach'],
+    ['STRAT-006', 'CAP-008', 'Engagement built through partnership development'],
+  ];
+
+  for (const [src, tgt, desc] of stratToCapability) {
+    if (c[src] && c[tgt]) rels.push([c[src], c[tgt], 'enabled_by', desc]);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PRINCIPLES → governs → GOALS
+  // Principles constrain and guide how goals are pursued
+  // ═══════════════════════════════════════════════════════════
+  const principleToGoal = [
+    ['PRIN-001', 'GOAL-001', 'UBI must center human dignity'],
+    ['PRIN-001', 'GOAL-004', 'Worker transition must preserve dignity'],
+    ['PRIN-002', 'GOAL-006', 'Evidence-based approach directly governs evidence-based policy'],
+    ['PRIN-002', 'GOAL-001', 'UBI design must be evidence-grounded'],
+    ['PRIN-003', 'GOAL-005', 'Inclusive participation is core to democratic governance'],
+    ['PRIN-003', 'GOAL-008', 'Coalition must include diverse voices'],
+    ['PRIN-004', 'GOAL-005', 'Transparency required for democratic legitimacy'],
+    ['PRIN-005', 'GOAL-007', 'Open knowledge sharing accelerates public awareness'],
+    ['PRIN-006', 'GOAL-001', 'UBI needs pragmatic idealism — ambitious but implementable'],
+    ['PRIN-006', 'GOAL-003', 'Automation tax must be practical, not punitive'],
+    ['PRIN-007', 'GOAL-005', 'Federated governance embodies democratic economic governance'],
+    ['PRIN-007', 'GOAL-009', 'Institutional reform should distribute power'],
+    ['PRIN-008', 'GOAL-006', 'Continuous learning feeds evidence-based policy'],
+    ['PRIN-009', 'GOAL-002', 'Solidarity economy models fair data compensation'],
+    ['PRIN-009', 'GOAL-001', 'Solidarity economy principles guide UBI design'],
+    ['PRIN-010', 'GOAL-009', 'Institutional reform requires generational thinking'],
+    ['PRIN-010', 'GOAL-001', 'UBI must be designed for long-term sustainability'],
+  ];
+
+  for (const [src, tgt, desc] of principleToGoal) {
+    if (c[src] && c[tgt]) rels.push([c[src], c[tgt], 'governs', desc]);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // GOALS → depends_on → GOALS (inter-goal dependencies)
+  // ═══════════════════════════════════════════════════════════
+  const goalDeps = [
+    ['GOAL-001', 'GOAL-003', 'UBI funding depends on automation taxation revenue'],
+    ['GOAL-001', 'GOAL-006', 'UBI design requires evidence-based approach'],
+    ['GOAL-003', 'GOAL-005', 'Tax policy legitimacy requires democratic governance'],
+    ['GOAL-004', 'GOAL-001', 'Worker transition eased by UBI safety net'],
+    ['GOAL-005', 'GOAL-007', 'Democratic participation requires public awareness'],
+    ['GOAL-008', 'GOAL-007', 'Coalition building depends on public understanding'],
+    ['GOAL-009', 'GOAL-005', 'Institutional reform driven by democratic governance'],
+  ];
+
+  for (const [src, tgt, desc] of goalDeps) {
+    if (c[src] && c[tgt]) rels.push([c[src], c[tgt], 'depends_on', desc]);
+  }
+
+  // Insert all relationships
+  let count = 0;
+  for (const [sourceId, targetId, relType, description] of rels) {
+    await sql`
+      INSERT INTO element_relationships (source_id, target_id, relationship_type, description)
+      VALUES (${sourceId}, ${targetId}, ${relType}, ${description})
+    `;
+    count++;
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'Element relationships seeded',
+    relationships: count,
+    by_type: {
+      achieved_by: goalToStrategy.length,
+      enabled_by: stratToCapability.length,
+      governs: principleToGoal.length,
+      depends_on: goalDeps.length
+    }
+  });
+}
+
+async function seedRelationships(sql) {
+  // Build code → id map
+  const elements = await sql`SELECT id, code FROM architecture_elements`;
+  const c = {};
+  for (const e of elements) c[e.code] = e.id;
+
+  // Clear existing relationships to re-seed cleanly
+  await sql`DELETE FROM element_relationships WHERE description LIKE '%[seed]%'`;
+
+  const rels = [];
+
+  // === GOALS achieved by STRATEGIES ===
+  // GOAL-001 (UBI) ← STRAT-001 (Research), STRAT-003 (Policy), STRAT-005 (Pilots)
+  rels.push({ src: 'GOAL-001', tgt: 'STRAT-001', type: 'achieved_by', desc: 'Research grounds UBI proposals in evidence [seed]' });
+  rels.push({ src: 'GOAL-001', tgt: 'STRAT-003', type: 'achieved_by', desc: 'Policy development creates implementable UBI frameworks [seed]' });
+  rels.push({ src: 'GOAL-001', tgt: 'STRAT-005', type: 'achieved_by', desc: 'Pilot programs test UBI designs before scale [seed]' });
+
+  // GOAL-002 (Data Ownership) ← STRAT-001, STRAT-003, STRAT-006
+  rels.push({ src: 'GOAL-002', tgt: 'STRAT-001', type: 'achieved_by', desc: 'Research identifies data ownership models [seed]' });
+  rels.push({ src: 'GOAL-002', tgt: 'STRAT-003', type: 'achieved_by', desc: 'Policy development crafts data rights legislation [seed]' });
+  rels.push({ src: 'GOAL-002', tgt: 'STRAT-006', type: 'achieved_by', desc: 'Engaging tech companies on data ownership [seed]' });
+
+  // GOAL-003 (Automation Tax) ← STRAT-001, STRAT-003, STRAT-006
+  rels.push({ src: 'GOAL-003', tgt: 'STRAT-001', type: 'achieved_by', desc: 'Research models automation tax revenue [seed]' });
+  rels.push({ src: 'GOAL-003', tgt: 'STRAT-003', type: 'achieved_by', desc: 'Policy development designs tax mechanisms [seed]' });
+  rels.push({ src: 'GOAL-003', tgt: 'STRAT-006', type: 'achieved_by', desc: 'Stakeholder engagement builds political will [seed]' });
+
+  // GOAL-004 (Worker Transition) ← STRAT-002, STRAT-004, STRAT-005
+  rels.push({ src: 'GOAL-004', tgt: 'STRAT-002', type: 'achieved_by', desc: 'Education helps workers understand transition options [seed]' });
+  rels.push({ src: 'GOAL-004', tgt: 'STRAT-004', type: 'achieved_by', desc: 'Community support networks for displaced workers [seed]' });
+  rels.push({ src: 'GOAL-004', tgt: 'STRAT-005', type: 'achieved_by', desc: 'Pilot retraining and transition programs [seed]' });
+
+  // GOAL-005 (Democratic Governance) ← STRAT-003, STRAT-004, STRAT-006
+  rels.push({ src: 'GOAL-005', tgt: 'STRAT-003', type: 'achieved_by', desc: 'Governance frameworks for democratic economic policy [seed]' });
+  rels.push({ src: 'GOAL-005', tgt: 'STRAT-004', type: 'achieved_by', desc: 'Community participation in decision-making [seed]' });
+  rels.push({ src: 'GOAL-005', tgt: 'STRAT-006', type: 'achieved_by', desc: 'Engaging policymakers on democratic governance [seed]' });
+
+  // GOAL-006 (Evidence-Based) ← STRAT-001
+  rels.push({ src: 'GOAL-006', tgt: 'STRAT-001', type: 'achieved_by', desc: 'Rigorous research is the foundation of evidence-based policy [seed]' });
+
+  // GOAL-007 (Public Awareness) ← STRAT-002, STRAT-004
+  rels.push({ src: 'GOAL-007', tgt: 'STRAT-002', type: 'achieved_by', desc: 'Public education raises awareness directly [seed]' });
+  rels.push({ src: 'GOAL-007', tgt: 'STRAT-004', type: 'achieved_by', desc: 'Community networks amplify the message [seed]' });
+
+  // GOAL-008 (Coalition) ← STRAT-004, STRAT-006
+  rels.push({ src: 'GOAL-008', tgt: 'STRAT-004', type: 'achieved_by', desc: 'Community building creates coalition base [seed]' });
+  rels.push({ src: 'GOAL-008', tgt: 'STRAT-006', type: 'achieved_by', desc: 'Stakeholder engagement recruits coalition partners [seed]' });
+
+  // GOAL-009 (Institutional Reform) ← STRAT-003, STRAT-006
+  rels.push({ src: 'GOAL-009', tgt: 'STRAT-003', type: 'achieved_by', desc: 'Policy proposals drive institutional reform [seed]' });
+  rels.push({ src: 'GOAL-009', tgt: 'STRAT-006', type: 'achieved_by', desc: 'Engaging institutions directly on reform [seed]' });
+
+  // === STRATEGIES enabled by CAPABILITIES ===
+  // STRAT-001 (Research) ← CAP-001, CAP-002, CAP-007
+  rels.push({ src: 'STRAT-001', tgt: 'CAP-001', type: 'enabled_by', desc: 'Policy analysis feeds research strategy [seed]' });
+  rels.push({ src: 'STRAT-001', tgt: 'CAP-002', type: 'enabled_by', desc: 'Research synthesis is the core capability [seed]' });
+  rels.push({ src: 'STRAT-001', tgt: 'CAP-007', type: 'enabled_by', desc: 'Data analysis supports quantitative research [seed]' });
+
+  // STRAT-002 (Education) ← CAP-004, CAP-006
+  rels.push({ src: 'STRAT-002', tgt: 'CAP-004', type: 'enabled_by', desc: 'Content production creates educational materials [seed]' });
+  rels.push({ src: 'STRAT-002', tgt: 'CAP-006', type: 'enabled_by', desc: 'Events deliver education in person [seed]' });
+
+  // STRAT-003 (Policy) ← CAP-001, CAP-002
+  rels.push({ src: 'STRAT-003', tgt: 'CAP-001', type: 'enabled_by', desc: 'Policy analysis is core to policy development [seed]' });
+  rels.push({ src: 'STRAT-003', tgt: 'CAP-002', type: 'enabled_by', desc: 'Research synthesis informs policy proposals [seed]' });
+
+  // STRAT-004 (Community) ← CAP-005, CAP-006
+  rels.push({ src: 'STRAT-004', tgt: 'CAP-005', type: 'enabled_by', desc: 'Community facilitation builds engaged groups [seed]' });
+  rels.push({ src: 'STRAT-004', tgt: 'CAP-006', type: 'enabled_by', desc: 'Events bring the community together [seed]' });
+
+  // STRAT-005 (Pilots) ← CAP-001, CAP-007
+  rels.push({ src: 'STRAT-005', tgt: 'CAP-001', type: 'enabled_by', desc: 'Policy analysis designs pilot parameters [seed]' });
+  rels.push({ src: 'STRAT-005', tgt: 'CAP-007', type: 'enabled_by', desc: 'Data analysis measures pilot outcomes [seed]' });
+
+  // STRAT-006 (Stakeholder) ← CAP-003, CAP-008
+  rels.push({ src: 'STRAT-006', tgt: 'CAP-003', type: 'enabled_by', desc: 'Advocacy reaches decision makers [seed]' });
+  rels.push({ src: 'STRAT-006', tgt: 'CAP-008', type: 'enabled_by', desc: 'Partnership development expands stakeholder network [seed]' });
+
+  // === PRINCIPLES govern GOALS ===
+  rels.push({ src: 'PRIN-001', tgt: 'GOAL-001', type: 'governs', desc: 'Human dignity requires economic security — UBI is the mechanism [seed]' });
+  rels.push({ src: 'PRIN-001', tgt: 'GOAL-004', type: 'governs', desc: 'Dignity demands we support displaced workers [seed]' });
+  rels.push({ src: 'PRIN-002', tgt: 'GOAL-006', type: 'governs', desc: 'Evidence-based approach defines evidence-based policy [seed]' });
+  rels.push({ src: 'PRIN-003', tgt: 'GOAL-005', type: 'governs', desc: 'Inclusive participation requires democratic governance [seed]' });
+  rels.push({ src: 'PRIN-004', tgt: 'GOAL-005', type: 'governs', desc: 'Transparency is essential to democratic governance [seed]' });
+  rels.push({ src: 'PRIN-005', tgt: 'GOAL-007', type: 'governs', desc: 'Open source enables public awareness through open knowledge [seed]' });
+  rels.push({ src: 'PRIN-006', tgt: 'GOAL-001', type: 'governs', desc: 'Pragmatic idealism — ambitious UBI vision with practical steps [seed]' });
+  rels.push({ src: 'PRIN-006', tgt: 'GOAL-003', type: 'governs', desc: 'Automation tax: idealistic goal, pragmatic mechanism [seed]' });
+  rels.push({ src: 'PRIN-007', tgt: 'GOAL-005', type: 'governs', desc: 'Federated governance is how democratic economic governance works [seed]' });
+  rels.push({ src: 'PRIN-008', tgt: 'GOAL-006', type: 'governs', desc: 'Continuous learning from evidence is how policy improves [seed]' });
+  rels.push({ src: 'PRIN-009', tgt: 'GOAL-009', type: 'governs', desc: 'Solidarity economy models the institutional reforms we seek [seed]' });
+  rels.push({ src: 'PRIN-010', tgt: 'GOAL-008', type: 'governs', desc: 'Long-term thinking guides coalition building for generational change [seed]' });
+  rels.push({ src: 'PRIN-010', tgt: 'GOAL-009', type: 'governs', desc: 'Institutional reform requires long-term commitment [seed]' });
+
+  // Insert all
+  let count = 0;
+  for (const r of rels) {
+    const srcId = c[r.src];
+    const tgtId = c[r.tgt];
+    if (!srcId || !tgtId) continue;
+    await sql`
+      INSERT INTO element_relationships (source_id, target_id, relationship_type, description)
+      VALUES (${srcId}, ${tgtId}, ${r.type}, ${r.desc})
+    `;
+    count++;
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'Element relationships seeded',
+    relationships_created: count,
+    types: {
+      achieved_by: rels.filter(r => r.type === 'achieved_by').length,
+      enabled_by: rels.filter(r => r.type === 'enabled_by').length,
+      governs: rels.filter(r => r.type === 'governs').length
+    }
+  });
+}
+
+async function seedProjectLinks(sql) {
+  // Build code → id map
+  const elements = await sql`SELECT id, code FROM architecture_elements`;
+  const c = {};
+  for (const e of elements) c[e.code] = e.id;
+
+  const projectLinks = [
+    { titleMatch: 'Automation Tax', elements: ['GOAL-003', 'STRAT-003', 'CAP-001'] },
+    { titleMatch: 'PLE Platform', elements: ['PRIN-005', 'STRAT-004', 'CAP-004', 'CAP-005'] },
+    { titleMatch: 'UBI Research', elements: ['GOAL-001', 'STRAT-001', 'CAP-002', 'CAP-007'] },
+    { titleMatch: 'GATO Framework', elements: ['GOAL-009', 'STRAT-003', 'PRIN-001'] },
+    { titleMatch: 'Stakeholder Coalition', elements: ['GOAL-008', 'STRAT-006', 'CAP-003', 'CAP-008'] },
+    { titleMatch: 'Data Dividends', elements: ['GOAL-002', 'STRAT-005', 'CAP-007'] },
+  ];
+
+  let linked = 0;
+  for (const { titleMatch, elements: codes } of projectLinks) {
+    const ids = codes.map(code => c[code]).filter(Boolean);
+    if (ids.length === 0) continue;
+    const result = await sql`
+      UPDATE projects SET linked_elements = ${JSON.stringify(ids)}::jsonb
+      WHERE title ILIKE ${'%' + titleMatch + '%'}
+    `;
+    linked += result.count || 0;
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'Project links seeded',
+    projects_linked: linked
+  });
+}
+
 async function seedAlignments(sql) {
   // Map proposals to architecture elements by title matching
   const proposalAlignments = [
@@ -962,9 +1272,23 @@ async function seedAlignments(sql) {
     { titleMatch: 'Decoupling', elementCode: 'GOAL-003' }, // Automation Taxation
     { titleMatch: 'Labor Zero', elementCode: 'STRAT-001' }, // Research & Analysis
     { titleMatch: 'Solarpunk', elementCode: 'PRIN-006' }, // Pragmatic Idealism
+    { titleMatch: 'Income Stream', elementCode: 'GOAL-001' }, // UBI
+    { titleMatch: 'Flourishing', elementCode: 'PRIN-001' }, // Human Dignity
+    { titleMatch: 'Technofeudalism', elementCode: 'STRAT-001' }, // Research
+    { titleMatch: '16 Property', elementCode: 'GOAL-002' }, // Data Ownership
   ];
 
-  let linked = { proposals: 0, discussions: 0, content: 0 };
+  // Link projects to architecture elements
+  const projectAlignments = [
+    { titleMatch: 'Automation Tax', elementCode: 'GOAL-003' },
+    { titleMatch: 'PLE Platform', elementCode: 'PRIN-005' },
+    { titleMatch: 'UBI Research', elementCode: 'GOAL-001' },
+    { titleMatch: 'GATO Framework', elementCode: 'GOAL-009' },
+    { titleMatch: 'Stakeholder Coalition', elementCode: 'GOAL-008' },
+    { titleMatch: 'Data Dividends', elementCode: 'GOAL-002' },
+  ];
+
+  let linked = { proposals: 0, discussions: 0, content: 0, projects: 0 };
 
   // Get all elements indexed by code
   const elements = await sql`SELECT id, code FROM architecture_elements`;
@@ -1004,11 +1328,34 @@ async function seedAlignments(sql) {
     linked.content += result.count || 0;
   }
 
+  // Link projects (uses linked_elements JSONB array)
+  for (const { titleMatch, elementCode } of projectAlignments) {
+    const elId = codeMap[elementCode];
+    if (!elId) continue;
+    try {
+      // Check if project exists and doesn't already have this element
+      const projects = await sql`
+        SELECT id, linked_elements FROM projects
+        WHERE title ILIKE ${'%' + titleMatch + '%'}
+      `;
+      for (const p of projects) {
+        const existing = p.linked_elements || [];
+        if (!existing.includes(elId)) {
+          await sql`
+            UPDATE projects SET linked_elements = ${JSON.stringify([...existing, elId])}::jsonb
+            WHERE id = ${p.id}
+          `;
+          linked.projects++;
+        }
+      }
+    } catch (e) { /* skip */ }
+  }
+
   return jsonResponse({
     success: true,
     message: 'Alignments seeded',
     linked,
-    total: linked.proposals + linked.discussions + linked.content
+    total: linked.proposals + linked.discussions + linked.content + linked.projects
   });
 }
 

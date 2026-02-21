@@ -7,7 +7,8 @@ const TOOLS = [
   { name: 'query_knowledge_base', description: 'Query the PLE knowledge base for framework elements, concepts, examples, and statistics.', inputSchema: { type: 'object', properties: { topic: { type: 'string', description: 'Topic: framework, pyramid_of_prosperity, pyramid_of_power, four_human_offerings, attractor_states, property_interventions, economic_agency, manifesto, concepts, examples, statistics, sources, all' }, query: { type: 'string', description: 'Optional filter query' } }, required: ['topic'] } },
   { name: 'get_content', description: 'Retrieve published PLE articles. Filter by slug, tag, or search.', inputSchema: { type: 'object', properties: { slug: { type: 'string' }, tag: { type: 'string' }, search: { type: 'string' }, limit: { type: 'number' } } } },
   { name: 'get_proposals', description: 'Retrieve PLE policy proposals with vote counts and status.', inputSchema: { type: 'object', properties: { status: { type: 'string', enum: ['draft','open','voting','approved','implemented'] }, limit: { type: 'number' } } } },
-  { name: 'get_architecture', description: 'Retrieve GATO alignment architecture elements.', inputSchema: { type: 'object', properties: { type: { type: 'string', description: 'Element type: attractor, imperative, dimension, relationship' } } } },
+  { name: 'get_architecture', description: 'Retrieve GATO alignment architecture elements. Includes goals, strategies, capabilities, principles.', inputSchema: { type: 'object', properties: { type: { type: 'string', description: 'Filter: goal, strategy, capability, principle' }, code: { type: 'string', description: 'Get specific element by code (e.g. GOAL-001)' } } } },
+  { name: 'get_alignment', description: 'Get architecture alignment for a specific element — shows linked proposals, content, discussions, and projects. Also available as summary view.', inputSchema: { type: 'object', properties: { element: { type: 'string', description: 'Element code (e.g. GOAL-001) or ID' }, summary: { type: 'boolean', description: 'If true, returns all elements with alignment counts' } } } },
   { name: 'search_platform', description: 'Full-text search across all PLE content, proposals, discussions, and KB.', inputSchema: { type: 'object', properties: { query: { type: 'string' }, scope: { type: 'string', enum: ['content','proposals','discussions','kb','all'] } }, required: ['query'] } }
 ];
 
@@ -35,6 +36,7 @@ export default async function handler(req) {
       case 'get_content': result = await getContent(args); break;
       case 'get_proposals': result = await getProposals(args); break;
       case 'get_architecture': result = await getArch(args); break;
+      case 'get_alignment': result = await getAlignment(args); break;
       case 'search_platform': result = await searchAll(kb, args); break;
       default: return jn(400, { error: `Unknown tool: ${toolName}`, available: TOOLS.map(t => t.name) });
     }
@@ -83,11 +85,54 @@ async function getProposals({ status, limit = 10 }) {
   } catch (e) { return { error: e.message }; }
 }
 
-async function getArch({ type }) {
+async function getArch({ type, code }) {
   try {
     const sql = await getDb();
-    if (type) return { items: await sql`SELECT id,type,code,title,description,status,metadata FROM architecture_elements WHERE type=${type} ORDER BY code` };
-    return { items: await sql`SELECT id,type,code,title,description,status,metadata FROM architecture_elements ORDER BY type,code` };
+    if (code) {
+      const el = await sql`SELECT * FROM architecture_elements WHERE code = ${code.toUpperCase()}`;
+      if (el.length === 0) return { error: 'Element not found' };
+      const rels = await sql`
+        SELECT er.relationship_type, ae.code, ae.title, ae.element_type, er.description
+        FROM element_relationships er
+        JOIN architecture_elements ae ON ae.id = CASE WHEN er.source_id = ${el[0].id} THEN er.target_id ELSE er.source_id END
+        WHERE er.source_id = ${el[0].id} OR er.target_id = ${el[0].id}
+      `;
+      return { element: el[0], relationships: rels };
+    }
+    if (type) return { items: await sql`SELECT id,element_type as type,code,title,description,status FROM architecture_elements WHERE element_type=${type} ORDER BY code` };
+    return { items: await sql`SELECT id,element_type as type,code,title,description,status FROM architecture_elements ORDER BY element_type,code` };
+  } catch (e) { return { error: e.message }; }
+}
+
+async function getAlignment({ element, summary }) {
+  try {
+    const sql = await getDb();
+    if (summary) {
+      const elements = await sql`
+        SELECT ae.id, ae.code, ae.title, ae.element_type,
+          (SELECT COUNT(*) FROM proposals p WHERE p.element_id = ae.id) as proposals,
+          (SELECT COUNT(*) FROM content_items ci WHERE ci.element_id = ae.id) as content,
+          (SELECT COUNT(*) FROM discussions d WHERE d.element_id = ae.id) as discussions,
+          (SELECT COUNT(*) FROM element_relationships er WHERE er.source_id = ae.id OR er.target_id = ae.id) as relationships
+        FROM architecture_elements ae ORDER BY ae.element_type, ae.code
+      `;
+      return { elements: elements.map(e => ({
+        code: e.code, title: e.title, type: e.element_type,
+        proposals: +e.proposals, content: +e.content, discussions: +e.discussions, relationships: +e.relationships,
+        total: +e.proposals + +e.content + +e.discussions
+      }))};
+    }
+    if (!element) return { error: 'Provide element code/id or summary=true' };
+    const el = await sql`SELECT * FROM architecture_elements WHERE code = ${element.toUpperCase()} OR id::text = ${element}`;
+    if (el.length === 0) return { error: 'Element not found' };
+    const id = el[0].id;
+    const [proposals, content, discussions, rels] = await Promise.all([
+      sql`SELECT id, title, status FROM proposals WHERE element_id = ${id}`,
+      sql`SELECT id, title, status, slug FROM content_items WHERE element_id = ${id}`,
+      sql`SELECT id, title, status FROM discussions WHERE element_id = ${id}`,
+      sql`SELECT er.relationship_type, ae.code, ae.title FROM element_relationships er JOIN architecture_elements ae ON ae.id = CASE WHEN er.source_id = ${id} THEN er.target_id ELSE er.source_id END WHERE er.source_id = ${id} OR er.target_id = ${id}`
+    ]);
+    return { element: { code: el[0].code, title: el[0].title, type: el[0].element_type, description: el[0].description }, proposals, content, discussions, relationships: rels };
   } catch (e) { return { error: e.message }; }
 }
 
