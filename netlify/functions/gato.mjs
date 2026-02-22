@@ -1285,14 +1285,14 @@ async function seedEngagement(sql) {
     // Insert for votes
     for (let v = 0; v < pattern.forVotes; v++) {
       const voterId = crypto.randomUUID();
-      await sql`INSERT INTO votes (id, proposal_id, user_id, vote) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'for')
+      await sql`INSERT INTO votes (id, proposal_id, user_id, vote_type) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'for')
         ON CONFLICT DO NOTHING`;
       votes++;
     }
     // Insert against votes
     for (let v = 0; v < pattern.against; v++) {
       const voterId = crypto.randomUUID();
-      await sql`INSERT INTO votes (id, proposal_id, user_id, vote) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'against')
+      await sql`INSERT INTO votes (id, proposal_id, user_id, vote_type) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'against')
         ON CONFLICT DO NOTHING`;
       votes++;
     }
