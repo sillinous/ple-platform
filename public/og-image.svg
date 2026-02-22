@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1B4D3E"/>
+      <stop offset="100%" style="stop-color:#0F2F26"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="100" y="220" font-family="Georgia, serif" font-size="80" font-weight="700" fill="white">L/0</text>
+  <text x="100" y="320" font-family="Georgia, serif" font-size="48" font-weight="600" fill="white">Post-Labor Economics</text>
+  <text x="100" y="380" font-family="Arial, sans-serif" font-size="28" fill="#F4A261">Prosperity Beyond Work</text>
+  <text x="100" y="440" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.6)">Building frameworks for a world where human dignity</text>
+  <text x="100" y="470" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.6)">and economic security exist independent of labor.</text>
+  <rect x="100" y="530" width="80" height="4" rx="2" fill="#F4A261"/>
+  <text x="195" y="538" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.4)">postlaboreconomics.netlify.app</text>
+</svg>

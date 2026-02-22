@@ -41,6 +41,9 @@ export default async (req, context) => {
       if (action === 'seed-gap-content') {
         return jsonResponse(await seedGapContent(sql));
       }
+      if (action === 'seed-engagement') {
+        return jsonResponse(await seedEngagement(sql));
+      }
       if (action === 'seed-relationships') {
         return await seedRelationships(sql);
       }
@@ -1251,6 +1254,85 @@ async function seedProjectLinks(sql) {
     message: 'Project links seeded',
     projects_linked: linked
   });
+}
+
+async function seedEngagement(sql) {
+  // Get system user
+  const sysUsers = await sql`SELECT id FROM users LIMIT 3`;
+  if (sysUsers.length === 0) return { error: 'No users found' };
+  
+  let votes = 0, replies = 0;
+
+  // Add votes to proposals
+  const proposals = await sql`SELECT id, title FROM proposals`;
+  const votePatterns = [
+    { forVotes: 12, against: 2 },
+    { forVotes: 8, against: 1 },
+    { forVotes: 15, against: 3 },
+    { forVotes: 10, against: 0 },
+    { forVotes: 7, against: 2 },
+    { forVotes: 11, against: 1 },
+  ];
+
+  for (let i = 0; i < proposals.length && i < votePatterns.length; i++) {
+    const p = proposals[i];
+    const pattern = votePatterns[i];
+    
+    // Check if votes already exist
+    const existing = await sql`SELECT COUNT(*) as count FROM votes WHERE proposal_id = ${p.id}`;
+    if (parseInt(existing[0]?.count || 0) > 0) continue;
+
+    // Insert for votes
+    for (let v = 0; v < pattern.forVotes; v++) {
+      const voterId = crypto.randomUUID();
+      await sql`INSERT INTO votes (id, proposal_id, user_id, vote) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'for')
+        ON CONFLICT DO NOTHING`;
+      votes++;
+    }
+    // Insert against votes
+    for (let v = 0; v < pattern.against; v++) {
+      const voterId = crypto.randomUUID();
+      await sql`INSERT INTO votes (id, proposal_id, user_id, vote) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'against')
+        ON CONFLICT DO NOTHING`;
+      votes++;
+    }
+  }
+
+  // Add replies to discussions
+  const discussions = await sql`SELECT id, title FROM discussions WHERE parent_id IS NULL LIMIT 10`;
+  const replyTexts = [
+    "Great points here. I think the key challenge is implementation at scale — how do we move from theoretical frameworks to practical pilot programs?",
+    "This resonates strongly with the evidence from Nordic countries. Their social safety nets already embody some of these principles, and the economic outcomes speak for themselves.",
+    "I'd add that we need to consider the timeline more carefully. The automation curve isn't linear — some sectors will be transformed much faster than others.",
+    "Interesting framing. I wonder how this connects to the broader degrowth movement? There seem to be overlapping concerns about sustainability and human wellbeing beyond GDP.",
+    "From a policy perspective, the biggest obstacle isn't the economics — it's the politics. How do we build enough public support to overcome status quo bias?",
+    "Has anyone looked at the Mondragon cooperative model in Spain? It's one of the most successful examples of worker-owned enterprise at scale.",
+    "The data on this is really compelling. The Stockton SEED program showed improvements in employment, mental health, and financial stability.",
+    "I think we underestimate how much of this is already happening informally. Gig economy workers, content creators, and open source contributors are all navigating post-labor economics in real time.",
+    "This is why the GATO framework matters — without alignment between AI capabilities and human values, we're building the infrastructure for technofeudalism, not liberation.",
+    "Strong agree. The property interventions framework gives us 16 concrete policy levers. We should be prioritizing the ones with the highest near-term feasibility.",
+  ];
+
+  for (let i = 0; i < discussions.length && i < replyTexts.length; i++) {
+    const disc = discussions[i];
+    // Check if replies exist
+    const existingReplies = await sql`SELECT COUNT(*) as count FROM discussions WHERE parent_id = ${disc.id}`;
+    if (parseInt(existingReplies[0]?.count || 0) > 0) continue;
+
+    // Add 1-2 replies per discussion
+    const numReplies = (i % 3 === 0) ? 2 : 1;
+    for (let r = 0; r < numReplies && (i + r) < replyTexts.length; r++) {
+      const replyId = crypto.randomUUID();
+      const userId = sysUsers[r % sysUsers.length].id;
+      await sql`
+        INSERT INTO discussions (id, title, content, parent_id, author_id, discussion_type, status)
+        VALUES (${replyId}, NULL, ${replyTexts[(i + r) % replyTexts.length]}, ${disc.id}, ${userId}, 'reply', 'active')
+      `;
+      replies++;
+    }
+  }
+
+  return { success: true, votes_created: votes, replies_created: replies };
 }
 
 async function seedGapContent(sql) {
