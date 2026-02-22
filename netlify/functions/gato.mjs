@@ -1279,20 +1279,23 @@ async function seedEngagement(sql) {
     const pattern = votePatterns[i];
     
     // Check if votes already exist
-    const existing = await sql`SELECT COUNT(*) as count FROM votes WHERE proposal_id = ${p.id}`;
+    const existing = await sql`SELECT COUNT(*) as count FROM votes WHERE proposal_id = ${p.id} AND vote_type IN ('approve','reject')`;
     if (parseInt(existing[0]?.count || 0) > 0) continue;
+
+    // Clean up any incorrect vote types
+    await sql`DELETE FROM votes WHERE proposal_id = ${p.id} AND vote_type NOT IN ('approve','reject')`;
 
     // Insert for votes
     for (let v = 0; v < pattern.forVotes; v++) {
       const voterId = crypto.randomUUID();
-      await sql`INSERT INTO votes (id, proposal_id, user_id, vote_type) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'for')
+      await sql`INSERT INTO votes (id, proposal_id, user_id, vote_type) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'approve')
         ON CONFLICT DO NOTHING`;
       votes++;
     }
     // Insert against votes
     for (let v = 0; v < pattern.against; v++) {
       const voterId = crypto.randomUUID();
-      await sql`INSERT INTO votes (id, proposal_id, user_id, vote_type) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'against')
+      await sql`INSERT INTO votes (id, proposal_id, user_id, vote_type) VALUES (${crypto.randomUUID()}, ${p.id}, ${voterId}, 'reject')
         ON CONFLICT DO NOTHING`;
       votes++;
     }
