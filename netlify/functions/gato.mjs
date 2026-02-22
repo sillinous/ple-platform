@@ -1360,7 +1360,7 @@ async function seedEngagement(sql) {
 
 async function seedActivity(sql) {
   // Check if meaningful activities exist
-  const existing = await sql`SELECT COUNT(*) as count FROM activities WHERE action NOT IN ('user_login','user_registered','auto_ingest_run')`;
+  const existing = await sql`SELECT COUNT(*) as count FROM activity_log WHERE action NOT IN ('user_login','user_registered','auto_ingest_run')`;
   if (parseInt(existing[0]?.count || 0) > 10) return { message: 'Activities already seeded', count: parseInt(existing[0].count) };
 
   const users = await sql`SELECT id, display_name FROM users ORDER BY created_at ASC LIMIT 3`;
@@ -1379,7 +1379,7 @@ async function seedActivity(sql) {
   for (let i = 0; i < content.length; i++) {
     const c = content[i];
     const u = users[i % users.length];
-    await sql`INSERT INTO activities (id, user_id, action, entity_type, entity_id, details, created_at)
+    await sql`INSERT INTO activity_log (id, user_id, action, entity_type, entity_id, details, created_at)
       VALUES (${crypto.randomUUID()}, ${u.id}, 'content_published', 'content', ${c.id}, 
         ${JSON.stringify({title: c.title, user_name: u.display_name})}::jsonb, ${ago(14 - i)})
       ON CONFLICT DO NOTHING`;
@@ -1390,7 +1390,7 @@ async function seedActivity(sql) {
   for (let i = 0; i < proposals.length; i++) {
     const p = proposals[i];
     const u = users[i % users.length];
-    await sql`INSERT INTO activities (id, user_id, action, entity_type, entity_id, details, created_at)
+    await sql`INSERT INTO activity_log (id, user_id, action, entity_type, entity_id, details, created_at)
       VALUES (${crypto.randomUUID()}, ${u.id}, 'proposal_created', 'proposal', ${p.id},
         ${JSON.stringify({title: p.title, user_name: u.display_name})}::jsonb, ${ago(10 - i)})
       ON CONFLICT DO NOTHING`;
@@ -1401,7 +1401,7 @@ async function seedActivity(sql) {
   for (let i = 0; i < Math.min(discussions.length, 8); i++) {
     const d = discussions[i];
     const u = users[i % users.length];
-    await sql`INSERT INTO activities (id, user_id, action, entity_type, entity_id, details, created_at)
+    await sql`INSERT INTO activity_log (id, user_id, action, entity_type, entity_id, details, created_at)
       VALUES (${crypto.randomUUID()}, ${u.id}, 'discussion_started', 'discussion', ${d.id},
         ${JSON.stringify({title: d.title, user_name: u.display_name})}::jsonb, ${ago(7 - i)})
       ON CONFLICT DO NOTHING`;
@@ -1412,7 +1412,7 @@ async function seedActivity(sql) {
   for (let i = 0; i < projects.length; i++) {
     const p = projects[i];
     const u = users[i % users.length];
-    await sql`INSERT INTO activities (id, user_id, action, entity_type, entity_id, details, created_at)
+    await sql`INSERT INTO activity_log (id, user_id, action, entity_type, entity_id, details, created_at)
       VALUES (${crypto.randomUUID()}, ${u.id}, 'project_created', 'project', ${p.id},
         ${JSON.stringify({title: p.title, user_name: u.display_name})}::jsonb, ${ago(12 - i)})
       ON CONFLICT DO NOTHING`;
