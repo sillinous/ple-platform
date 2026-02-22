@@ -1257,9 +1257,26 @@ async function seedProjectLinks(sql) {
 }
 
 async function seedEngagement(sql) {
-  // Get system user
-  const sysUsers = await sql`SELECT id FROM users LIMIT 3`;
+  // Get system users
+  const sysUsers = await sql`SELECT id, display_name FROM users ORDER BY created_at ASC LIMIT 3`;
   if (sysUsers.length === 0) return { error: 'No users found' };
+
+  // Assign authors to orphan proposals/discussions
+  let attributed = 0;
+  const mainUser = sysUsers.find(u => u.display_name === 'Test User') || sysUsers[0];
+  const platformUser = sysUsers.find(u => u.display_name?.includes('Platform')) || sysUsers[0];
+
+  // Attribute proposals to mainUser
+  const orphanProposals = await sql`UPDATE proposals SET author_id = ${mainUser.id} WHERE author_id IS NULL RETURNING id`;
+  attributed += orphanProposals.length;
+
+  // Attribute discussions to alternating users  
+  const orphanDiscussions = await sql`SELECT id FROM discussions WHERE author_id IS NULL AND parent_id IS NULL`;
+  for (let i = 0; i < orphanDiscussions.length; i++) {
+    const userId = sysUsers[i % sysUsers.length].id;
+    await sql`UPDATE discussions SET author_id = ${userId} WHERE id = ${orphanDiscussions[i].id}`;
+    attributed++;
+  }
   
   let votes = 0, replies = 0;
 
@@ -1335,7 +1352,7 @@ async function seedEngagement(sql) {
     }
   }
 
-  return { success: true, votes_created: votes, replies_created: replies };
+  return { success: true, votes_created: votes, replies_created: replies, authors_attributed: attributed };
 }
 
 async function seedGapContent(sql) {

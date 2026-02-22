@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page Not Found | Post-Labor Economics</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
   <link rel="icon" type="image/svg+xml" href="/ple-logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,14 @@
     a.primary:hover{background:#163f33;}
     a.ghost{border:1px solid #e5e2dd;color:#333;}
     a.ghost:hover{border-color:#1B4D3E;color:#1B4D3E;}
+    .header{background:#1B4D3E;padding:0.75rem 1.5rem;position:sticky;top:0;z-index:100;}
+    .header-container{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;}
+    .nav-menu{display:flex;gap:0.75rem;align-items:center;}
+    .nav-link{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;padding:0.3rem 0.5rem;border-radius:6px;transition:color 0.15s;}
+    .nav-link:hover{color:white;}
+    @media(max-width:768px){.nav-menu{display:none;}.nav-menu.open{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:#1B4D3E;padding:1rem;}}
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;}
+    @media(max-width:768px){.nav-toggle{display:block;}}
   </style>
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://postlaboreconomics.netlify.app/og-image.svg">
@@ -32,7 +41,21 @@
   <meta name="twitter:image" content="https://postlaboreconomics.netlify.app/og-image.svg">
 </head>
 <body>
-  <a href="/" class="logo"><span class="logo-symbol">L/0</span><span class="logo-text">Post-Labor Economics</span></a>
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="logo" style="color:white;margin:0"><span class="logo-symbol" style="color:white">L/0</span><span class="logo-text" style="color:white">Post-Labor Economics</span></a>
+      <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-menu').classList.toggle('open')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <nav class="nav-menu">
+        <a href="/content" class="nav-link">Content</a>
+        <a href="/projects" class="nav-link">Projects</a>
+        <a href="/proposals" class="nav-link">Proposals</a>
+        <a href="/discussions" class="nav-link">Discussions</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/search" class="nav-link" title="Search"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></a>
+      </nav>
+    </div>
+  </header>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem">
   <div class="code">404</div>
   <h1>Page not found</h1>
   <p>The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
@@ -42,6 +65,7 @@
     <a href="/content" class="btn ghost">Browse Content</a>
   </div>
   <div id="suggestions" style="margin-top:3rem;text-align:left;max-width:400px;width:100%;"></div>
+  </div>
   <script>
     fetch('/api/content?status=published&limit=4').then(r=>r.json()).then(d=>{
       const items=d.content||[];if(!items.length)return;
