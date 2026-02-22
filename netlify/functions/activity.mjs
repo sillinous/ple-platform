@@ -102,7 +102,12 @@ function formatActivityDescription(activity) {
     'updated': `${userName} updated a working group`,
     'joined': `${userName} joined ${details.group_name || 'a working group'}`,
     'left': `${userName} left a working group`,
-    'added_member': `${userName} added a member to a working group`
+    'added_member': `${userName} added a member to a working group`,
+    'content_published': `${userName} published${quoted || ' new content'}`,
+    'discussion_started': `${userName} started a discussion${quoted}`,
+    'proposal_created': `${userName} submitted a proposal${quoted}`,
+    'proposal_voted': `${userName} voted on a proposal${quoted}`,
+    'auto_ingest_run': `Auto-ingest discovered new content`
   };
   
   return descriptions[activity.action] || `${userName} performed an action`;
